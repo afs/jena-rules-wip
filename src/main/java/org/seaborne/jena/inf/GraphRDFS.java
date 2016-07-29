@@ -112,7 +112,6 @@ public class GraphRDFS extends GraphWrapper {
             }
 
             if ( isANY(predicate) ) {
-                //          throw new NotImplemented("ANY predicate") ;
                 if ( isTerm(subject) ) {
                     if ( isTerm(object) )
                         return find_X_ANY_T(subject, object) ;
@@ -126,6 +125,7 @@ public class GraphRDFS extends GraphWrapper {
                 }
             }
             
+            // find_??_term_??
             return find_subproperty(subject, predicate, object) ; 
         }
 
@@ -137,7 +137,7 @@ public class GraphRDFS extends GraphWrapper {
                 return sourceFind(subject, predicate, object) ;
 
             // Hard work, not scalable.
-            //Don't forget predicate itself!
+            // Don't forget predicate itself!
             // XXX Rewrite
             Stream<Triple> triples = sourceFind(subject, predicate, object) ;
 
