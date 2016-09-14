@@ -27,9 +27,8 @@ import org.apache.jena.query.* ;
 import org.apache.jena.rdf.model.Model ;
 import org.apache.jena.rdf.model.ModelFactory ;
 
-/** Core of datastructures needed for RDFS.
+/** Core datastructures needed for RDFS.
  *  To be general, this is in X space (e.g. Node, NodeId). 
- *  
  */
 public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
     public final Graph vocabGraph ;
@@ -41,7 +40,7 @@ public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
     private final Map<X, Set<X>> superClassesInc      = new HashMap<>() ;
     private final Map<X, Set<X>> subClasses           = new HashMap<>() ;
     private final Map<X, Set<X>> subClassesInc        = new HashMap<>() ;
-    private final Set<X> classes                         = new HashSet<>() ;
+    private final Set<X> classes                      = new HashSet<>() ;
 
     private final Map<X, Set<X>> superPropertiesInc   = new HashMap<>() ;
     private final Map<X, Set<X>> superProperties      = new HashMap<>() ;
@@ -67,17 +66,18 @@ public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
          "PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>") ;
 
     
-    public BaseInfSetupRDFS(Graph vocab) {
-        this(vocab, false) ;
-    }
+//    protected BaseInfSetupRDFS(Graph vocab) {
+//        this(vocab, false) ;
+//    }
 
-    public BaseInfSetupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
+    protected BaseInfSetupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
         this(ModelFactory.createModelForGraph(vocab), incDerivedDataRDFS) ;
     }
-    public BaseInfSetupRDFS(Model vocab) {
-        this(vocab, false) ;
-    }
     
+//    protected BaseInfSetupRDFS(Model vocab) {
+//        this(vocab, false) ;
+//    }
+//    
     public BaseInfSetupRDFS(Model vocab, boolean incDerivedDataRDFS) {
         includeDerivedDataRDFS$ = incDerivedDataRDFS ;
         vocabGraph = vocab.getGraph() ;

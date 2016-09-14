@@ -38,6 +38,9 @@ import org.apache.jena.util.iterator.ExtendedIterator ;
 import org.apache.jena.util.iterator.NullIterator ;
 import org.apache.jena.util.iterator.WrappedIterator ;
 
+/** RDFS graph over a plain base graph.
+ *  Precalculated RDFS.
+ */
 public class GraphRDFS extends GraphWrapper {
     private static Logger log = LoggerFactory.getLogger(GraphRDFS.class) ;
     

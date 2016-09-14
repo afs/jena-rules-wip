@@ -19,25 +19,35 @@ package org.seaborne.jena.inf ;
 
 import static org.seaborne.jena.inf.Lib8.toList ;
 
+import java.util.HashSet ;
 import java.util.List ;
+import java.util.Set ;
 import java.util.function.Predicate ;
 
 import org.apache.jena.graph.Node ;
 import org.apache.jena.graph.Triple ;
-import org.apache.jena.sparql.graph.NodeConst ;
+import org.apache.jena.vocabulary.RDF ;
 import org.apache.jena.vocabulary.RDFS ;
 
 public class InfGlobal {
-    public static final Node        rdfType                = NodeConst.nodeRDFType ;
-    public static final Node        rdfsRange              = RDFS.Nodes.range ;
-    public static final Node        rdfsDomain             = RDFS.Nodes.domain ;
-    public static final Node        rdfsSubClassOf         = RDFS.Nodes.subClassOf ;
-    public static final Node        rdfsSubPropertyOf      = RDFS.Nodes.subPropertyOf ;
+    public static final Node  rdfType            = RDF.Nodes.type ;   // NodeConst.nodeRDFType ;
+    public static final Node  rdfsRange          = RDFS.Nodes.range ;
+    public static final Node  rdfsDomain         = RDFS.Nodes.domain ;
+    public static final Node  rdfsSubClassOf     = RDFS.Nodes.subClassOf ;
+    public static final Node  rdfsSubPropertyOf  = RDFS.Nodes.subPropertyOf ;
 
-    private static Predicate<Triple> filterRDFS = 
-        triple -> triple.getPredicate().getNameSpace().equals(RDFS.getURI()) ;
-    private static Predicate<Triple> filterNotRDFS = 
-        triple -> ! triple.getPredicate().getNameSpace().equals(RDFS.getURI()) ;
+    private static Set<Node> vocabTerms = new HashSet<>() ;
+    static {
+        vocabTerms.add(rdfsRange) ;
+        vocabTerms.add(rdfsDomain) ;
+        vocabTerms.add(rdfsSubClassOf) ;
+        vocabTerms.add(rdfsSubPropertyOf) ;
+    }
+    
+    private static Predicate<Triple> filterRDFS =
+        triple -> vocabTerms.contains(triple.getPredicate()) ;
+        
+    private static Predicate<Triple> filterNotRDFS = filterRDFS.negate() ;
         
     public static List<Triple> removeRDFS(List<Triple> x) {
         return toList(x.stream().filter(filterNotRDFS)) ;

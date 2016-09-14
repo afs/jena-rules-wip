@@ -18,6 +18,15 @@
 package org.seaborne.jena.inf;
 
 public class DevNotesInf {
+    
+    /* See Description */
+    
+    // Use and test InfFactory.
+    
+    // TDB : need to store the InferenceSetupRDFS_TDB
+    // That is a lot of tables (8) so for now compile to in-memory.
+    // First hack: <Node> 
+    
     /*
      * http://jena.apache.org/documentation/inference/#OWLcoverage
      *   Micro

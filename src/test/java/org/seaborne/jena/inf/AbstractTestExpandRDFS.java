@@ -17,18 +17,18 @@
 
 package org.seaborne.jena.inf;
 
-import org.apache.jena.riot.RDFDataMgr ;
-import org.apache.jena.riot.system.StreamRDF ;
-import org.apache.jena.riot.system.StreamRDFLib ;
-import org.junit.BeforeClass ;
-import org.seaborne.jena.inf.InferenceProcessorStreamRDF ;
-import org.seaborne.jena.inf.InferenceSetupRDFS ;
 import org.apache.jena.graph.Factory ;
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.rdf.model.Model ;
+import org.apache.jena.riot.RDFDataMgr ;
+import org.apache.jena.riot.system.StreamOps ;
+import org.apache.jena.riot.system.StreamRDF ;
+import org.apache.jena.riot.system.StreamRDFLib ;
 
-/** Test of RDFS, with separate data and vocabulary, no RDFS in the deductions. */
-public class TestExpandRDFS extends AbstractTestRDFS {
+/** Test of RDFS.
+ *  Expand the inferences graph and then test.
+ */ 
+public abstract class AbstractTestExpandRDFS extends AbstractTestRDFS {
     static Model vocab ;
     static Model data ;
 
@@ -42,28 +42,40 @@ public class TestExpandRDFS extends AbstractTestRDFS {
     static final String DATA_FILE = DIR+"/rdfs-data.ttl" ;
     static final String VOCAB_FILE = DIR+"/rdfs-vocab.ttl" ;
     static final String RULES_FILE = DIR+"/rdfs-min.rules" ;
+    static boolean everything = true ;
     
-    @BeforeClass public static void setupClass() {
-        vocab = RDFDataMgr.loadModel(VOCAB_FILE) ;
-        data = RDFDataMgr.loadModel(DATA_FILE) ;
-        setup = new InferenceSetupRDFS(vocab) ;
+    public static void setup(boolean combined) {
+        everything = combined ;
+        if ( combined ) {
+            vocab = RDFDataMgr.loadModel(VOCAB_FILE) ;
+            data = RDFDataMgr.loadModel(DATA_FILE) ;
+            data.add(vocab) ;
+        } else {
+            // Seperate vocab and data.
+            vocab = RDFDataMgr.loadModel(VOCAB_FILE) ;
+            data = RDFDataMgr.loadModel(DATA_FILE) ;
+        }
         
         infGraph = createRulesGraph(data, vocab, RULES_FILE) ;
+        
+        setup = new InferenceSetupRDFS(vocab, combined) ;
 
         // Expansion Graph
         testGraphExpanded = Factory.createDefaultGraph() ;
         StreamRDF stream = StreamRDFLib.graph(testGraphExpanded) ;
+        // Apply inferences.
         stream = new InferenceProcessorStreamRDF(stream, setup) ;
-        RDFDataMgr.parse(stream, DATA_FILE) ;
+        
+        StreamOps.graphToStream(data.getGraph(), stream) ;
     }
-
+    
     @Override
-    protected Graph getReferenceGraph() {
+    final protected Graph getReferenceGraph() {
         return infGraph ;
     }
 
     @Override
-    protected Graph getTestGraph() {
+    final protected Graph getTestGraph() {
         return testGraphExpanded ;
     }
 
@@ -75,6 +87,11 @@ public class TestExpandRDFS extends AbstractTestRDFS {
     @Override
     protected String getTestLabel() {
         return "Expanded" ;
+    }
+
+    @Override
+    protected boolean removeVocabFromReferenceResults() {
+        return ! everything ;
     }
 }
 

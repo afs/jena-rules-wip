@@ -29,6 +29,14 @@ public class Lib8 {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, characteristics), false);
     }
     
+    public static <X> List<X> toList(Collection<X> collection) {
+        return collection.stream().collect(Collectors.toList()) ;
+    }
+    
+    public static <X> Set<X> toSet(Collection<X> collection) {
+        return collection.stream().collect(Collectors.toSet()) ;
+    }
+    
     public static <X> List<X> toList(Stream<X> stream) {
         return stream.collect(Collectors.toList()) ;
     }
@@ -36,7 +44,7 @@ public class Lib8 {
     public static <X> Set<X> toSet(Stream<X> stream) {
         return stream.collect(Collectors.toSet()) ;
     }
-    
+
     public static <X> X first(Stream<X> stream) {
         return stream.findFirst().orElse(null) ;
     }
@@ -67,11 +75,11 @@ public class Lib8 {
                 throw new IndexOutOfBoundsException("Negative index") ;
             if ( index == 0 )
                 return elt ;
-            
+            if ( tail == null )
+                return null ;
             if ( index >= tail.size() )
                 throw new IndexOutOfBoundsException("Index: "+index+", Size: "+size()) ;
-
-            return null ;
+            return tail.get(index-1) ;
         }
 
         @Override

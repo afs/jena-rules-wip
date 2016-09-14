@@ -17,15 +17,13 @@
 
 package org.seaborne.jena.inf;
 
-import org.junit.runner.RunWith ;
-import org.junit.runners.Suite ;
+import org.junit.BeforeClass ;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses( {
-    TestGraphSplitRDFS.class
-    , TestGraphCombinedRDFS.class
-    , TestExpandCombinedRDFS.class
-    , TestExpandSplitRDFS.class
-})
-
-public class TS_Inf { }
+/** Test of RDFS.
+ * Expanded graph, split vocab and data.
+ */ 
+public class TestExpandSplitRDFS extends AbstractTestExpandRDFS {
+    @BeforeClass public static void setupClass() {
+        setup(false) ;
+    }
+}

@@ -24,7 +24,7 @@ import org.apache.jena.tdb.store.DatasetGraphTDB ;
 import org.apache.jena.tdb.store.NodeId ;
 import org.apache.jena.tdb.store.nodetable.NodeTable ;
 
-/*8 RDFS setup in NodeId space */
+/** RDFS setup in NodeId space */
 public class InferenceSetupRDFS_TDB extends BaseInfSetupRDFS<NodeId>{
     private final DatasetGraphTDB dsgtdb ;
     private final NodeTable nodetable ;

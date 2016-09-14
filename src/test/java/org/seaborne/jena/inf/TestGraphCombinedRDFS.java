@@ -18,14 +18,28 @@
 package org.seaborne.jena.inf;
 
 import org.apache.jena.graph.Graph ;
-import org.seaborne.jena.inf.GraphRDFS ;
-import org.seaborne.jena.inf.InferenceSetupRDFS ;
 
-public class TestGraphRDFS extends AbstractTestGraphRDFS {
+/** Test of RDFS.
+ * <li> combined data and vocabulary,
+ * <li> test graph performs inference on find() 
+ */
+public class TestGraphCombinedRDFS extends AbstractTestGraphRDFS {
+    
+    @Override
+    protected Graph createGraphRDFS() {
+        return new GraphRDFS(setupInc, dataVocab.getGraph()) ;
+    }
+    
+    @Override
+    protected String getTestLabel() {
+        return "Combined GraphRDFS" ;
+    }
 
     @Override
-    protected Graph createGraphRDFS(InferenceSetupRDFS setup, Graph data) {
-        return new GraphRDFS(setup, data) ;
+    protected boolean removeVocabFromReferenceResults() {
+        return false ;
     }
+
 }
+
 

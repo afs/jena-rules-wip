@@ -17,60 +17,74 @@
 
 package org.seaborne.jena.inf;
 
-import org.apache.jena.riot.RDFDataMgr ;
-import org.junit.BeforeClass ;
-import org.seaborne.jena.inf.InferenceSetupRDFS ;
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.rdf.model.Model ;
+import org.apache.jena.rdf.model.ModelFactory ;
+import org.apache.jena.riot.RDFDataMgr ;
+import org.junit.BeforeClass ;
 
-/** Test of RDFS, with separate data and vocabulary, no RDFS in the deductions. */
+/** Test of RDFS, with separate data and vocabulary, no RDFS in the deductions.
+ * See TestCombinedRDFS.
+ */
 public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
     protected static Model vocab ;
+    // Data - no vocab */
     protected static Model data ;
+    // Data - with vocab */
+    protected static Model dataVocab ;
 
-    static InferenceSetupRDFS setup ;
-    // Jena graph to check results against.
+    protected static InferenceSetupRDFS setupExc ;
+    protected static InferenceSetupRDFS setupInc ;
+    
+    // The reference graph for this test.
     static Graph infGraph ;
     // The main test target
-    static Graph testGraphRDFS ;
+    Graph testGraphRDFS ;
     
     static final String DIR = "testing/Inf" ;
     static final String DATA_FILE = DIR+"/rdfs-data.ttl" ;
     static final String VOCAB_FILE = DIR+"/rdfs-vocab.ttl" ;
     //static final String RULES_FILE = DIR+"/rdfs-min-backwards.rules" ;
     static final String RULES_FILE = DIR+"/rdfs-min.rules" ;
+
+    // Out of control!
     
     @BeforeClass public static void setupClass() {
         vocab = RDFDataMgr.loadModel(VOCAB_FILE) ;
         data = RDFDataMgr.loadModel(DATA_FILE) ;
-        setup = new InferenceSetupRDFS(vocab) ;
+        dataVocab = ModelFactory.createDefaultModel() ;
+        RDFDataMgr.read(dataVocab, DATA_FILE) ;
+        RDFDataMgr.read(dataVocab, VOCAB_FILE) ;
         infGraph = createRulesGraph(data, vocab, RULES_FILE) ;
+        
+        // inc vocab / infer vocab -> 
+        // true -> Combined (inc vocab / infer vocab)
+        // false -> separate, no infer
+        
+        setupInc = new InferenceSetupRDFS(vocab, true) ;
+        setupExc = new InferenceSetupRDFS(vocab, false) ;
     }
     
     protected AbstractTestGraphRDFS() {
-        testGraphRDFS = createGraphRDFS(setup, data.getGraph()) ;
+        testGraphRDFS = createGraphRDFS() ;
     }
     
-    protected abstract Graph createGraphRDFS(InferenceSetupRDFS setup, Graph data) ; 
+    protected abstract Graph createGraphRDFS() ; 
 
     @Override
-    protected Graph getReferenceGraph() {
+    final protected Graph getTestGraph() {
+        return testGraphRDFS ;
+    }
+    
+    /** Return the graph that gives the right answers */ 
+    @Override
+    final protected Graph getReferenceGraph() {
         return infGraph ;
     }
 
     @Override
-    protected Graph getTestGraph() {
-        return testGraphRDFS ;
-    }
-
-    @Override
-    protected String getReferenceLabel() {
+    final protected String getReferenceLabel() {
         return "Inference" ;
-    }
-
-    @Override
-    protected String getTestLabel() {
-        return "GraphRDFS" ;
     }
 }
 

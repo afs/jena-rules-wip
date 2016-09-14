@@ -15,31 +15,30 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf ;
+package org.seaborne.jena.inf;
 
 import org.apache.jena.graph.Graph ;
-import org.apache.jena.graph.Node ;
-import org.apache.jena.rdf.model.Model ;
 
-/** RDFS setup in Node space */
-public class InferenceSetupRDFS extends BaseInfSetupRDFS<Node>{
-    public InferenceSetupRDFS(Graph vocab) {
-        super(vocab, false) ;
-    }
+/** Test of RDFS.
+ * <li> separate data and vocabulary,
+ * <li> test graph performs inference on find() 
+ */
 
-    public InferenceSetupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
-        super(vocab, incDerivedDataRDFS) ;
-    }
-    public InferenceSetupRDFS(Model vocab) {
-        this(vocab, false) ;
-    }
-    
-    public InferenceSetupRDFS(Model vocab, boolean incDerivedDataRDFS) {
-       super(vocab, incDerivedDataRDFS) ;
-    }
+public class TestGraphSplitRDFS extends AbstractTestGraphRDFS {
 
     @Override
-    protected Node fromNode(Node node) {
-        return node ;
+    protected Graph createGraphRDFS() {
+        return new GraphRDFS(setupExc, data.getGraph()) ;
+    }
+    
+    @Override
+    protected String getTestLabel() {
+        return "GraphRDFS" ;
+    }
+    
+    @Override
+    protected boolean removeVocabFromReferenceResults() {
+        return true ;
     }
 }
+
