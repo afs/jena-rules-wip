@@ -17,13 +17,40 @@
 
 package org.seaborne.jena.inf;
 
-import org.junit.BeforeClass ;
+import org.apache.jena.graph.Graph ;
+import org.apache.jena.riot.system.StreamOps ;
+import org.apache.jena.riot.system.StreamRDF ;
+import org.apache.jena.riot.system.StreamRDFLib ;
+import org.apache.jena.sparql.graph.GraphFactory ;
 
 /** Test of RDFS.
  * Expanded graph, split vocab and data.
  */ 
-public class TestExpandSplitRDFS extends AbstractTestExpandRDFS {
-    @BeforeClass public static void setupClass() {
-        setup(false) ;
+public class TestExpandSplitRDFS extends AbstractTestGraphRDFS {
+
+    private Graph testGraphExpanded ;
+
+    public TestExpandSplitRDFS() {
+        testGraphExpanded = GraphFactory.createDefaultGraph() ;
+        InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab, false) ;
+        StreamRDF stream = StreamRDFLib.graph(testGraphExpanded) ;
+        stream = new InferenceProcessorStreamRDF(stream, setup) ;
+        StreamOps.graphToStream(data, stream) ;
+    }
+    
+    @Override
+    protected boolean removeVocabFromReferenceResults() {
+        return true ;
+    }
+
+    @Override
+    protected Graph getTestGraph() {
+        return testGraphExpanded ;
+    }
+
+    @Override
+    protected String getTestLabel() {
+        return "Expaned, combined" ;
     }
 }
+
