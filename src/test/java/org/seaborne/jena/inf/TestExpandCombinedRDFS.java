@@ -23,15 +23,16 @@ import org.apache.jena.riot.system.StreamOps ;
 import org.apache.jena.riot.system.StreamRDF ;
 import org.apache.jena.riot.system.StreamRDFLib ;
 import org.apache.jena.sparql.graph.GraphFactory ;
+import org.junit.BeforeClass ;
 
 /** Test of RDFS.
  * Expanded graph, combined vocab and data.
  */ 
 public class TestExpandCombinedRDFS extends AbstractTestGraphRDFS {
 
-    private Graph testGraphExpanded ;
+    private static Graph testGraphExpanded ;
 
-    public TestExpandCombinedRDFS() {
+    @BeforeClass public static void setupHere() {
         Graph dataTest = GraphFactory.createDefaultGraph() ;
         testGraphExpanded = GraphFactory.createDefaultGraph() ;
         GraphUtil.addInto(dataTest, data) ;
@@ -41,6 +42,8 @@ public class TestExpandCombinedRDFS extends AbstractTestGraphRDFS {
         stream = new InferenceProcessorStreamRDF(stream, setup) ;
         StreamOps.graphToStream(dataTest, stream) ;
     }
+    
+    public TestExpandCombinedRDFS() {}
     
     @Override
     protected boolean removeVocabFromReferenceResults() {

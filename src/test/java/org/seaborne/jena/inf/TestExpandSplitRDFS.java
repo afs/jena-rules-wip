@@ -22,20 +22,24 @@ import org.apache.jena.riot.system.StreamOps ;
 import org.apache.jena.riot.system.StreamRDF ;
 import org.apache.jena.riot.system.StreamRDFLib ;
 import org.apache.jena.sparql.graph.GraphFactory ;
+import org.junit.BeforeClass ;
 
 /** Test of RDFS.
  * Expanded graph, split vocab and data.
  */ 
 public class TestExpandSplitRDFS extends AbstractTestGraphRDFS {
 
-    private Graph testGraphExpanded ;
+    private static Graph testGraphExpanded ;
 
-    public TestExpandSplitRDFS() {
+    @BeforeClass public static void setupHere() {
         testGraphExpanded = GraphFactory.createDefaultGraph() ;
         InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab, false) ;
         StreamRDF stream = StreamRDFLib.graph(testGraphExpanded) ;
         stream = new InferenceProcessorStreamRDF(stream, setup) ;
         StreamOps.graphToStream(data, stream) ;
+    }
+    
+    public TestExpandSplitRDFS() {
     }
     
     @Override

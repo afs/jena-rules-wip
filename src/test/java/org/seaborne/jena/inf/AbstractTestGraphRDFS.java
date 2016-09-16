@@ -27,7 +27,6 @@ import org.apache.jena.reasoner.rulesys.GenericRuleReasoner ;
 import org.apache.jena.reasoner.rulesys.Rule ;
 import org.apache.jena.riot.RDFDataMgr ;
 import org.apache.jena.util.FileUtils ;
-import org.junit.BeforeClass ;
 
 /** Test graphs that calculate on-demand */
 public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
@@ -40,7 +39,7 @@ public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
     protected static Graph vocab ;
     protected static Graph data ;
 
-    @BeforeClass public static void setupClass() {
+    static {
         vocab = RDFDataMgr.loadGraph(VOCAB_FILE) ;
         data = RDFDataMgr.loadGraph(DATA_FILE) ;
         infGraph = createRulesGraph(data, vocab, RULES_FILE) ;
