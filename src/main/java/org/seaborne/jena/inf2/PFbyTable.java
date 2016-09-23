@@ -20,8 +20,11 @@ package org.seaborne.jena.inf2;
 
 import java.util.Collection ;
 import java.util.Iterator ;
+import java.util.Map ;
 import java.util.Map.Entry ;
+import java.util.concurrent.ConcurrentHashMap ;
 
+import org.apache.jena.atlas.logging.Log ;
 import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap ;
 import org.apache.jena.ext.com.google.common.collect.Multimap ;
 import org.apache.jena.graph.Node ;
@@ -35,6 +38,7 @@ import org.apache.jena.sparql.engine.binding.BindingMap ;
 import org.apache.jena.sparql.engine.iterator.QueryIter ;
 import org.apache.jena.sparql.engine.iterator.QueryIterExtendByVar ;
 import org.apache.jena.sparql.pfunction.PFuncSimple ;
+import org.apache.jena.sparql.sse.SSE ;
 import org.apache.jena.sparql.util.IterLib ;
 
 /**
@@ -43,51 +47,62 @@ import org.apache.jena.sparql.util.IterLib ;
 public class PFbyTable extends PFuncSimple {
 
     // 2 way multihash table.
-    static Multimap<Node, Node> subj2obj = ArrayListMultimap.create() ;
-    static Multimap<Node, Node> obj2subj = ArrayListMultimap.create() ;
+    public static class Table {
+        Multimap<Node, Node> subj2obj = ArrayListMultimap.create() ;
+        Multimap<Node, Node> obj2subj = ArrayListMultimap.create() ;
+        public void add(Node node1, Node node2) {
+            subj2obj.put(node1, node2) ;
+            obj2subj.put(node2, node1) ;
+        }
+    }
+    static Map<Node, Table> tables = new ConcurrentHashMap<>() ;
+    static Table getTable(Node node) { return tables.get(node) ; }
+    static void addTable(Node node, Table table) { tables.put(node, table) ; }
+    
+    
     
     // Dev hack
-    public static void add(Node node1, Node node2) {
-        subj2obj.put(node1, node2) ;
-        obj2subj.put(node2, node1) ;
-    }
     
     public PFbyTable() {}
     
     @Override
     public QueryIterator execEvaluated(Binding binding, Node subject, Node predicate, Node object, ExecutionContext execCxt) {
-        
+        Table table = getTable(predicate) ;
+        if ( table == null ) {
+            Log.warn(this,  "No table for "+SSE.str(predicate));
+            return IterLib.noResults(execCxt) ;
+        }
         
         if ( subject.isVariable() ) {
             if ( object.isVariable() )
-                return execVarVar(binding, subject, predicate, object, execCxt) ;
+                return execVarVar(binding, table, subject, object, execCxt) ;
             else
-                return execVarTerm(binding, subject, predicate, object, execCxt) ;
+                return execVarTerm(binding, table, subject, object, execCxt) ;
         } else {
             if ( object.isVariable() )
-                return execTermVar(binding, subject, predicate, object, execCxt) ;
+                return execTermVar(binding, table, subject, object, execCxt) ;
             else
-                return execTermTerm(binding, subject, predicate, object, execCxt) ;
+                return execTermTerm(binding, table, subject, object, execCxt) ;
         }
     }
 
-    private QueryIterator execVarVar(Binding binding, Node subject, Node predicate, Node object, ExecutionContext execCxt) {
-        Iterator<Entry<Node,Node>> iter = subj2obj.entries().iterator() ;
+    private QueryIterator execVarVar(Binding binding, Table table, Node subject, Node object,ExecutionContext execCxt) {
+        Iterator<Entry<Node,Node>> iter = table.subj2obj.entries().iterator() ;
         return new QueryIterExtendByVar2(binding, Var.alloc(subject), Var.alloc(object), iter, execCxt) ;
     }
 
-    private QueryIterator execVarTerm(Binding binding, Node subject, Node predicate, Node object, ExecutionContext execCxt) {
-        Collection<Node> x = obj2subj.get(object) ;
+    private QueryIterator execVarTerm(Binding binding, Table table, Node subject, Node object,ExecutionContext execCxt) {
+        Collection<Node> x = table.obj2subj.get(object) ;
         return new QueryIterExtendByVar(binding, Var.alloc(subject), x.iterator(), execCxt) ;
     }
 
-    private QueryIterator execTermVar(Binding binding, Node subject, Node predicate, Node object, ExecutionContext execCxt) {
-        Collection<Node> x = subj2obj.get(subject) ;
+    private QueryIterator execTermVar(Binding binding, Table table, Node subject, Node object,ExecutionContext execCxt) {
+        Collection<Node> x = table.subj2obj.get(subject) ;
         return new QueryIterExtendByVar(binding, Var.alloc(object), x.iterator(), execCxt) ;
     }
 
-    private QueryIterator execTermTerm(Binding binding, Node subject, Node predicate, Node object, ExecutionContext execCxt) {
-        Collection<Node> x = subj2obj.get(subject) ;
+    private QueryIterator execTermTerm(Binding binding, Table table, Node subject, Node object,ExecutionContext execCxt) {
+        Collection<Node> x = table.subj2obj.get(subject) ;
         return x.contains(object) ? IterLib.result(binding, execCxt) : IterLib.noResults(execCxt) ;
     }
     

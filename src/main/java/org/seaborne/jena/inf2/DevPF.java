@@ -19,6 +19,7 @@
 package org.seaborne.jena.inf2;
 
 import org.apache.jena.atlas.lib.StrUtils ;
+import org.apache.jena.graph.NodeFactory ;
 import org.apache.jena.query.* ;
 import org.apache.jena.sparql.algebra.Algebra ;
 import org.apache.jena.sparql.algebra.Op ;
@@ -29,28 +30,39 @@ import org.apache.jena.sparql.util.QueryExecUtils ;
 import org.apache.jena.system.JenaSystem ;
 import org.apache.jena.vocabulary.RDF ;
 import org.apache.jena.vocabulary.RDFS ;
+import org.seaborne.jena.inf2.PFbyTable.Table ;
 
 public class DevPF {
     public static void main(String...argv) {
+        //Datalog : Single head clause
+        //  All variables in a negation in the body must also be positively mentioned in the body.
+        //  All variables in an artimetic relationship must be in the body as solveable sterms.
         
         // PropertyFunctionGenerator.buildPropertyFunctions
         //    magicProperty needs to be careful about rdf:rest! 
         
+        // Version without recursion
+        //   Recursion via SPARQL only over the base data.
+        
+        // T0 <- T1, T2, ...  SPATQL, restricted.
+        // T  <- SPARQL 
+        
         JenaSystem.init();
-        add(":s1", ":o1") ;
-        add(":s1", ":o2") ;
-        add(":s2", ":o1") ;
-        add(":s2", ":o2") ;
-        add(":s2", ":o3") ;
+        Table table = new PFbyTable.Table() ;
+        
+        add(table, ":s1", ":o1") ;
+        add(table, ":s1", ":o2") ;
+        add(table, ":s2", ":o1") ;
+        add(table, ":s2", ":o2") ;
+        add(table, ":s2", ":o3") ;
         
         Dataset ds = DatasetFactory.create() ;
         
         PropertyFunctionFactory pff = (uri)->new PFbyTable() ;
-        
         // rdf:rest is special to property functions!  
-        //PropertyFunctionRegistry.get().put(RDF.rest.getURI(), pff) ;
-        
-        PropertyFunctionRegistry.get().put(RDF.rest.getURI()+"*", PFbyTable.class) ;
+        String iri = "http://example/trans" ;
+        PFbyTable.addTable(NodeFactory.createURI(iri), table);
+        PropertyFunctionRegistry.get().put(iri, pff) ;
         
         String x = StrUtils.strjoinNL
             ("PREFIX : <http://example/>"
@@ -58,7 +70,7 @@ public class DevPF {
             ,"PREFIX rdfs: <"+RDFS.getURI()+">"
             //,"SELECT * { ?s ?p ?o . ?s rdfs:member :o1 . ?s rdf:rest :o1 }"
             //,"SELECT * { ?s rdfs:member :o1 }"
-            ,"SELECT * { { ?s rdf:rest\\* :o1 } UNION { :s2 rdf:rest\\* ?o }  UNION { ?X rdf:rest\\* ?Y } }"
+            ,"SELECT * { { ?s :trans :o1 } UNION { :s2 :trans ?o }  UNION { ?X :trans ?Y } }"
             ) ;
         Query query = QueryFactory.create(x) ;
         System.out.println(query); 
@@ -72,7 +84,7 @@ public class DevPF {
         QueryExecUtils.executeQuery(qExec);
     }
     
-    static void add(String s, String o) {
-        PFbyTable.add(SSE.parseNode(s), SSE.parseNode(o)) ;
+    static void add(Table table, String s, String o) {
+        table.add(SSE.parseNode(s), SSE.parseNode(o)) ;
     }
 }
