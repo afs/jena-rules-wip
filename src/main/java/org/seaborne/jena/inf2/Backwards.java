@@ -95,7 +95,6 @@ public class Backwards {
         rules.add(rule4) ;
         return rules ;
     }
-
     
     private static void print(Collection<Triple> acc) {
         acc.stream().map(SSE::str).forEach(System.out::println);
@@ -125,14 +124,21 @@ public class Backwards {
         BasicPattern pattern = BasicPattern.wrap(rule.getBody()) ;
         ExecutionContext execContext = new ExecutionContext(ARQ.getContext(), source, null, null) ; 
         // Create a chain of triple iterators.
-        QueryIterator chain = QueryIterSingleton.create(BindingFactory.root(), execContext) ; 
-        for (Triple triple : pattern)
-            chain = new QueryIterTriplePattern(chain, triple, execContext) ;
-        QueryIterator iter = chain ;
+        QueryIterator iter = match(source, pattern) ;
         iter.forEachRemaining(b->{
             Triple t = Substitute.substitute(rule.getHead(), b) ;
             if ( t.isConcrete() && ! source.contains(t) )
                 out.triple(t);
         }) ;
+    }
+    
+    /** Evaluate a BGP : encpsulate for a better/different version */  
+    private static QueryIterator match(Graph source, BasicPattern pattern) {
+        ExecutionContext execContext = new ExecutionContext(ARQ.getContext(), source, null, null) ; 
+        // Create a chain of triple iterators.
+        QueryIterator chain = QueryIterSingleton.create(BindingFactory.root(), execContext) ; 
+        for (Triple triple : pattern)
+            chain = new QueryIterTriplePattern(chain, triple, execContext) ;
+        return chain ;
     }
 }
