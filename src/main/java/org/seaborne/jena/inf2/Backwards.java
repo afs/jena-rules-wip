@@ -27,8 +27,8 @@ import org.apache.jena.graph.GraphUtil ;
 import org.apache.jena.graph.Triple ;
 import org.apache.jena.graph.compose.Union ;
 import org.apache.jena.query.ARQ ;
-import org.apache.jena.riot.Lang ;
 import org.apache.jena.riot.RDFDataMgr ;
+import org.apache.jena.riot.RDFFormat ;
 import org.apache.jena.sparql.core.BasicPattern ;
 import org.apache.jena.sparql.core.Substitute ;
 import org.apache.jena.sparql.engine.ExecutionContext ;
@@ -56,11 +56,18 @@ public class Backwards {
         List<Triple> acc = new ArrayList<>() ;
         eval(g, rules);
         
-        RDFDataMgr.write(System.out, g2, Lang.TTL) ;
+        RDFDataMgr.write(System.out, g2, RDFFormat.TURTLE_BLOCKS) ;
+    }
+    
+    private static List<Rule> rulesRDFS() {
+        List<Rule> rules = new ArrayList<>() ;
+        rules.addAll(rulesRDFS1()) ;
+        rules.addAll(rulesRDFS2()) ;
+        return rules ;
     }
     
     // Not transitive : R and D
-    private static List<Rule> rulesRDFS() {
+    private static List<Rule> rulesRDFS1() {
         List<Rule> rules = new ArrayList<>() ;
         // Gulp. This is horrendous. Need to determine that B1 needs eval on diffs, B2 is unchanging.
         // I.e. table clauses. Or maybe just a cache/trigger Or rule ordering.
@@ -70,6 +77,25 @@ public class Backwards {
         rules.add(rule1) ;
         return rules ;
     }
+    
+    // Transitive : SC and SP
+    private static List<Rule> rulesRDFS2() {
+        List<Rule> rules = new ArrayList<>() ;
+        // Gulp. This is horrendous. Need to determine that B1 needs eval on diffs, B2 is unchanging.
+        // I.e. table clauses. Or maybe just a cache/trigger Or rule ordering.
+        Rule rule1 = rule("(?s rdf:type ?T)", "(?s rdf:type ?TX )", "(?TX rdfs:subClassOf ?T)") ;
+        Rule rule2 = rule("(?t1 rdfs:subClassOf ?t2)", "(?t1 rdfs:subClassOf ?X)", "(?X rdfs:subClassOf ?t2)") ;
+
+        Rule rule3 = rule("(?s ?q ?o)", "(?s ?p ?o )", "(?p rdfs:subPropertyOf ?q)") ; 
+        Rule rule4 = rule("(?p1 rdfs:subPropertyOf ?p2)", "(?p1 rdfs:subPropertyOf ?X)", "(?X rdfs:subPropertyOf ?p2)") ;
+
+        rules.add(rule1) ;
+        rules.add(rule2) ;
+        rules.add(rule3) ;
+        rules.add(rule4) ;
+        return rules ;
+    }
+
     
     private static void print(Collection<Triple> acc) {
         acc.stream().map(SSE::str).forEach(System.out::println);
