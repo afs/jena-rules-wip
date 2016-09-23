@@ -59,30 +59,29 @@ public class Backwards {
         RDFDataMgr.write(System.out, g2, RDFFormat.TURTLE_BLOCKS) ;
     }
     
-    private static List<Rule> rulesRDFS() {
+    /*package*/ static List<Rule> rulesRDFS() {
         List<Rule> rules = new ArrayList<>() ;
-        rules.addAll(rulesRDFS1()) ;
-        rules.addAll(rulesRDFS2()) ;
+        rulesRDFS1(rules) ;
+        rulesRDFS2(rules) ;
+        rulesRDFS3(rules) ;
         return rules ;
     }
     
-    // Not transitive : R and D
-    private static List<Rule> rulesRDFS1() {
-        List<Rule> rules = new ArrayList<>() ;
+    // rdfs-min.rules : RDFS with no axioms, no rdf:Property.
+    
+    
+    // Range and Domain
+    /*package*/ static void rulesRDFS1(List<Rule> rules) {
         // Gulp. This is horrendous. Need to determine that B1 needs eval on diffs, B2 is unchanging.
         // I.e. table clauses. Or maybe just a cache/trigger Or rule ordering.
         Rule rule1 = rule("(?s rdf:type ?T)", "(?s ?p ?x)", "(?p rdfs:domain ?T)") ;
         Rule rule2 = rule("(?o rdf:type ?T)", "(?s ?p ?o)", "(?p rdfs:range  ?T)") ;
         rules.add(rule2) ;
         rules.add(rule1) ;
-        return rules ;
     }
     
-    // Transitive : SC and SP
-    private static List<Rule> rulesRDFS2() {
-        List<Rule> rules = new ArrayList<>() ;
-        // Gulp. This is horrendous. Need to determine that B1 needs eval on diffs, B2 is unchanging.
-        // I.e. table clauses. Or maybe just a cache/trigger Or rule ordering.
+    // SubClass and SubProperty
+    /*package*/ static void rulesRDFS2(List<Rule> rules) {
         Rule rule1 = rule("(?s rdf:type ?T)", "(?s rdf:type ?TX )", "(?TX rdfs:subClassOf ?T)") ;
         Rule rule2 = rule("(?t1 rdfs:subClassOf ?t2)", "(?t1 rdfs:subClassOf ?X)", "(?X rdfs:subClassOf ?t2)") ;
 
@@ -93,10 +92,23 @@ public class Backwards {
         rules.add(rule2) ;
         rules.add(rule3) ;
         rules.add(rule4) ;
-        return rules ;
     }
     
-    private static void print(Collection<Triple> acc) {
+    // Other
+    /*package*/ static void rulesRDFS3(List<Rule> rules) {
+        Rule rule1 = rule("(?X rdfs:subClassOf ?X)", "(?Y rdfs:subClassOf ?X )") ;
+        Rule rule2 = rule("(?X rdfs:subClassOf ?X)", "(?X rdfs:subClassOf ?Y )") ;
+        Rule rule3 = rule("(?X rdfs:subClassOf ?X)", "(?Y rdf:type ?X)") ;
+        rules.add(rule1) ;
+        rules.add(rule2) ;
+        rules.add(rule3) ;
+        Rule rule4 = rule("(?X rdfs:subPropertyOf ?X)", "(?Y rdfs:subPropertyOf ?X )") ;
+        Rule rule5 = rule("(?X rdfs:subPropertyOf ?X)", "(?X rdfs:subPropertyOf ?Y )") ;
+        rules.add(rule4) ;
+        rules.add(rule5) ;
+    }
+
+        private static void print(Collection<Triple> acc) {
         acc.stream().map(SSE::str).forEach(System.out::println);
     }
 
