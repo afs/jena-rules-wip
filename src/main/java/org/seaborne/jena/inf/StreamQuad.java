@@ -20,7 +20,7 @@ package org.seaborne.jena.inf;
 import org.apache.jena.sparql.core.Quad ;
 
 @FunctionalInterface
-interface StreamQuad {
+public interface StreamQuad {
     public void quad(Quad quad) ;
 }
 

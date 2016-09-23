@@ -20,7 +20,7 @@ package org.seaborne.jena.inf;
 import org.apache.jena.graph.Triple ;
 
 @FunctionalInterface
-interface StreamTriple {
+public interface StreamTriple {
     public void triple(Triple triple) ;
 }
 
