@@ -20,6 +20,7 @@ package org.seaborne.jena.inf ;
 import java.util.Set ;
 
 import org.apache.jena.graph.Node ;
+import org.apache.jena.graph.Triple ;
 import org.apache.jena.vocabulary.RDF ;
 import org.apache.jena.vocabulary.RDFS ;
 
@@ -49,9 +50,9 @@ public class InferenceEngineRDFS {
     static final Node rdfsRange         = RDFS.range.asNode() ;
 
     private final InferenceSetupRDFS setup ;
-    private final SinkTriple dest ;
+    private final StreamTriple dest ;
 
-    public InferenceEngineRDFS(InferenceSetupRDFS state, SinkTriple dest) {
+    public InferenceEngineRDFS(InferenceSetupRDFS state, StreamTriple dest) {
         this.setup = state ;
         this.dest = dest ;
     }
@@ -69,7 +70,7 @@ public class InferenceEngineRDFS {
      * (but that might be derived as well as being concrete). 
      */
     protected void derive(Node s, Node p, Node o) {
-        dest.receive(s, p, o) ;
+        dest.triple(Triple.create(s, p, o)) ;
     }
 
     // Rule extracts from Jena's RDFS rules etc/rdfs.rules

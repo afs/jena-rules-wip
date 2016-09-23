@@ -33,16 +33,13 @@ public class InferenceProcessorRDFS {
     private InferenceSetupRDFS setup ;
     private Collection<Triple> acc = null ;
     private final InferenceEngineRDFS engine ;
-    private SinkTriple sink ;
+    private StreamTriple sink ;
     
     // Add iterator cases
     
     public InferenceProcessorRDFS(InferenceSetupRDFS setup) {
         this.setup = setup ;
-        this.sink = new SinkTriple() {
-            @Override
-            public void receive(Node s, Node p, Node o) { acc.add(Triple.create(s, p, o)) ; } 
-        };
+        this.sink = acc::add ;
         this.engine = new InferenceEngineRDFS(setup, sink) ;
     }
 

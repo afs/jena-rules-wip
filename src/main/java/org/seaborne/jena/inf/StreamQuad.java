@@ -17,10 +17,10 @@
 
 package org.seaborne.jena.inf;
 
-import org.apache.jena.graph.Node ;
+import org.apache.jena.sparql.core.Quad ;
 
 @FunctionalInterface
-interface SinkTriple {
-    public void receive(Node s, Node p, Node o) ;
+interface StreamQuad {
+    public void quad(Quad quad) ;
 }
 
