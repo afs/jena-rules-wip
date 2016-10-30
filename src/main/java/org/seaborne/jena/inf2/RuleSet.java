@@ -28,17 +28,21 @@ import java.util.stream.Stream;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.sparql.sse.SSE;
 
 public class RuleSet {
     private final List<Rule> rules ;
     private final List<Rule> unvarRules;
     
     public RuleSet(List<Rule> rules) {
-        this.rules = rules ;
-        this.unvarRules = rules.stream().sequential()
-            .map(r -> unvar(r))
-            .collect(Collectors.toList());
+        this.rules = Collections.unmodifiableList(new ArrayList<>(rules));
+        this.unvarRules = Collections.unmodifiableList
+            (rules.stream().sequential()
+             .map(r -> unvar(r))
+             .collect(Collectors.toList()) );
+    }
+
+    public List<Rule> asList() {
+        return rules;
     }
     
     public Stream<Rule> stream() {
