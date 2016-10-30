@@ -40,8 +40,8 @@ public class GraphRDFS2 extends GraphWrapper {
         g = graph ; 
         g1 = GraphFactory.createDefaultGraph() ;
         g2 = new Union(g, g1) ;
-        List<Rule> rules = Backwards.rulesRDFS() ;
-        Backwards.eval(g2, rules);
+        List<Rule> rules = RuleMain.rulesRDFS() ;
+        Forwards.evalNaive(g2, rules);
     }
     
     @Override

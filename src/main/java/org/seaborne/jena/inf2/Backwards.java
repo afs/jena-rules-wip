@@ -18,139 +18,130 @@
 
 package org.seaborne.jena.inf2;
 
-import java.util.ArrayList ;
-import java.util.Collection ;
-import java.util.List ;
+import static java.util.stream.Collectors.toList ;
+
+import java.util.*;
+import java.util.function.BiFunction;
 
 import org.apache.jena.graph.Graph ;
-import org.apache.jena.graph.GraphUtil ;
+import org.apache.jena.graph.Node ;
 import org.apache.jena.graph.Triple ;
-import org.apache.jena.graph.compose.Union ;
-import org.apache.jena.query.ARQ ;
-import org.apache.jena.riot.RDFDataMgr ;
-import org.apache.jena.riot.RDFFormat ;
-import org.apache.jena.sparql.core.BasicPattern ;
-import org.apache.jena.sparql.core.Substitute ;
-import org.apache.jena.sparql.engine.ExecutionContext ;
-import org.apache.jena.sparql.engine.QueryIterator ;
-import org.apache.jena.sparql.engine.binding.BindingFactory ;
-import org.apache.jena.sparql.engine.iterator.QueryIterSingleton ;
-import org.apache.jena.sparql.engine.iterator.QueryIterTriplePattern ;
-import org.apache.jena.sparql.graph.GraphFactory ;
 import org.apache.jena.sparql.sse.SSE ;
-import org.seaborne.jena.inf.StreamTriple ;
 
 public class Backwards {
-    public static void main(String... argv) {
-        Graph g = RDFDataMgr.loadGraph("D.ttl") ;
-        Graph g1 = GraphFactory.createDefaultGraph() ;
-        Graph g2 = new Union(g, g1) ;
-            
-//        Rule rule1 = rule("(?s :pq ?o)", "(?s :p ?x)", "(?x :q ?o)") ;
-//        Rule rule2 = rule("(?s :PQ ?o)", "(?s :pq ?o)") ;
-//        List<Rule> rules = new ArrayList<>() ;
-//        rules.add(rule2) ;
-//        rules.add(rule1) ;
+    /** Evaluate to match a pattern */
+    public static void eval(Triple query, Graph source, RuleSet rules) {
+        List<Triple> heads = rules.getHeads();  
+    
+        Triple triple = query ;
+        System.out.println() ;
+        System.out.println("Query: "+SSE.str(triple)) ;
         
-        List<Rule> rules = rulesRDFS() ;
-        List<Triple> acc = new ArrayList<>() ;
-        eval(g, rules);
+        List<Triple> answers = new ArrayList<>() ;
         
-        RDFDataMgr.write(System.out, g2, RDFFormat.TURTLE_BLOCKS) ;
-    }
-    
-    /*package*/ static List<Rule> rulesRDFS() {
-        List<Rule> rules = new ArrayList<>() ;
-        rulesRDFS1(rules) ;
-        rulesRDFS2(rules) ;
-        rulesRDFS3(rules) ;
-        return rules ;
-    }
-    
-    // rdfs-min.rules : RDFS with no axioms, no rdf:Property.
-    
-    
-    // Range and Domain
-    /*package*/ static void rulesRDFS1(List<Rule> rules) {
-        // Gulp. This is horrendous. Need to determine that B1 needs eval on diffs, B2 is unchanging.
-        // I.e. table clauses. Or maybe just a cache/trigger Or rule ordering.
-        Rule rule1 = rule("(?s rdf:type ?T)", "(?s ?p ?x)", "(?p rdfs:domain ?T)") ;
-        Rule rule2 = rule("(?o rdf:type ?T)", "(?s ?p ?o)", "(?p rdfs:range  ?T)") ;
-        rules.add(rule2) ;
-        rules.add(rule1) ;
-    }
-    
-    // SubClass and SubProperty
-    /*package*/ static void rulesRDFS2(List<Rule> rules) {
-        Rule rule1 = rule("(?s rdf:type ?T)", "(?s rdf:type ?TX )", "(?TX rdfs:subClassOf ?T)") ;
-        Rule rule2 = rule("(?t1 rdfs:subClassOf ?t2)", "(?t1 rdfs:subClassOf ?X)", "(?X rdfs:subClassOf ?t2)") ;
-
-        Rule rule3 = rule("(?s ?q ?o)", "(?s ?p ?o )", "(?p rdfs:subPropertyOf ?q)") ; 
-        Rule rule4 = rule("(?p1 rdfs:subPropertyOf ?p2)", "(?p1 rdfs:subPropertyOf ?X)", "(?X rdfs:subPropertyOf ?p2)") ;
-
-        rules.add(rule1) ;
-        rules.add(rule2) ;
-        rules.add(rule3) ;
-        rules.add(rule4) ;
-    }
-    
-    // Other
-    /*package*/ static void rulesRDFS3(List<Rule> rules) {
-        Rule rule1 = rule("(?X rdfs:subClassOf ?X)", "(?Y rdfs:subClassOf ?X )") ;
-        Rule rule2 = rule("(?X rdfs:subClassOf ?X)", "(?X rdfs:subClassOf ?Y )") ;
-        Rule rule3 = rule("(?X rdfs:subClassOf ?X)", "(?Y rdf:type ?X)") ;
-        rules.add(rule1) ;
-        rules.add(rule2) ;
-        rules.add(rule3) ;
-        Rule rule4 = rule("(?X rdfs:subPropertyOf ?X)", "(?Y rdfs:subPropertyOf ?X )") ;
-        Rule rule5 = rule("(?X rdfs:subPropertyOf ?X)", "(?X rdfs:subPropertyOf ?Y )") ;
-        rules.add(rule4) ;
-        rules.add(rule5) ;
-    }
-
-        private static void print(Collection<Triple> acc) {
-        acc.stream().map(SSE::str).forEach(System.out::println);
-    }
-
-    private static Rule rule(String _head, String..._body) {
-        Triple head = SSE.parseTriple(_head) ;
-        List<Triple> body = new ArrayList<>(_body.length) ;
-        for ( String x : _body ) {
-            body.add(SSE.parseTriple(x)) ;
-        }
-        return new Rule(head, body) ;
-    }
-
-    public static void eval(Graph source, List<Rule> rules) {
-        Graph acc = GraphFactory.createDefaultGraph() ;
-        while(true) {
-            acc.clear() ;
-            rules.forEach(r->eval1(source, acc::add, r)) ;
-            if ( acc.isEmpty() )
-                return ;
-            GraphUtil.addInto(source, acc);
-        }
-    }
-    
-    public static void eval1(Graph source, StreamTriple out, Rule rule) {
-        BasicPattern pattern = BasicPattern.wrap(rule.getBody()) ;
-        ExecutionContext execContext = new ExecutionContext(ARQ.getContext(), source, null, null) ; 
-        // Create a chain of triple iterators.
-        QueryIterator iter = match(source, pattern) ;
-        iter.forEachRemaining(b->{
-            Triple t = Substitute.substitute(rule.getHead(), b) ;
-            if ( t.isConcrete() && ! source.contains(t) )
-                out.triple(t);
+        
+        // Find rules.
+        List<Rule> matches = rules.stream().filter((r) -> matchHead(triple, r)).collect(toList()) ;
+        System.out.println() ;
+        if ( matches.isEmpty() )
+            System.out.println("<empty>") ; 
+        else
+            System.out.println(Rule.str(matches)) ;
+        
+        matches.forEach((m)-> { 
+            if ( checkForRecursion1(m, rules) )
+                System.out.println("R: "+m);
         }) ;
     }
     
-    /** Evaluate a BGP : encpsulate for a better/different version */  
-    private static QueryIterator match(Graph source, BasicPattern pattern) {
-        ExecutionContext execContext = new ExecutionContext(ARQ.getContext(), source, null, null) ; 
-        // Create a chain of triple iterators.
-        QueryIterator chain = QueryIterSingleton.create(BindingFactory.root(), execContext) ; 
-        for (Triple triple : pattern)
-            chain = new QueryIterTriplePattern(chain, triple, execContext) ;
-        return chain ;
+    // ---- Recursion (immediate)
+    // Does rule have a recursion?
+    // Does the rule body refer to another rule?
+    public static boolean checkForRecursion1(Rule m, RuleSet rules) {
+        //m.getBody().forEach(mb->checkForRecursion(mb, rules)) ;
+        return m.getBody().stream().anyMatch(mb->checkForRecursion1(mb, rules)) ;
+    }
+    
+    // Direct recursion only.
+    private static boolean checkForRecursion1(Triple clause,RuleSet rules) {
+        //rules.stream().filter((r)-> recursion(clause, r)) ;
+        return  rules.stream().anyMatch((r)-> recursive1(clause, r)) ;
+    }
+
+    private static boolean recursive1(Triple clause, Rule r) {
+        if ( allVars(clause) )
+            return false ;
+        if ( allVars(r.getHead()) )
+            return false ;
+        return match(clause, r.getHead()) ;
+    }
+
+    // --- Recursion (cyclic)
+    /** Return rules that form a recursion with this rule.
+     *
+     */ 
+    public static Collection<Rule> equivalenceSet(Rule rule, List<Rule> rules) {
+        return null ;
+//        
+//        Set<Rule> cycle = new HashSet<>() ;
+//        for ( Triple t : rule.getBody() ) {
+//            follow()
+//        }
+            
+    }
+
+
+    private static boolean matchUses(Triple clause, Triple ruleHead) {
+        if ( allVars(clause) )
+            // TEMP
+            return false ;
+        return match(clause, ruleHead) ;
+    }
+
+    private static boolean allVars(Triple triple) {
+        return isVar(triple.getSubject()) && isVar(triple.getPredicate()) && isVar(triple.getObject()) ;
+    }
+    private static boolean isVar(Node n) { return ! n.isConcrete() ; } 
+
+    /** Does triple match the head of the rule ?
+     * "match" means "can unify with" i.e. each slot where there are constants in each match up. 
+     */
+    private static boolean matchHead(Triple triple, Rule r) {
+        return match(triple, r.getHead()) ;
+    }
+    
+    /** Test whether one triple/clause matches another, where "match" means same concrete term or variable.
+     * @param triple1
+     * @param triple2
+     * @return boolean
+     */
+    public static boolean match(Triple triple1, Triple triple2) {
+        return match(triple1, triple2, predicateSameTermOrSomeVar) ;
+    }
+    
+    /**
+     * Test whether two {@link Node}s are the same concrete term or one is a variable (maybe both) . 
+     */
+    public static BiFunction<Node, Node, Boolean> predicateSameTermOrSomeVar = (node1, node2) -> 
+        (node1.isVariable() || node2.isVariable() || node1.equals(node2));
+
+     /**
+      * Test whether two {@link Node}s are the both variables or same concrete term.
+      * If one is a variable, and one not, return false. 
+      */
+    public static BiFunction<Node, Node, Boolean> predicateSameTermOrBothVars =  
+        (node1, node2)-> (node1.isVariable() && node2.isVariable()) || node1.equals(node2) ;
+     
+
+    private static boolean match(Triple triple1, Triple triple2, BiFunction<Node, Node, Boolean> condition) {
+        return 
+            match(triple1.getSubject(),   triple2.getSubject(),    condition) &&
+            match(triple1.getPredicate(), triple2.getPredicate(),  condition) &&
+            match(triple1.getObject(),    triple2.getObject(),     condition) ;            
+    }
+    
+    private static boolean match(Node node1, Node node2, BiFunction<Node, Node, Boolean> condition) {
+        Boolean b = condition.apply(node1, node2);
+        return b == Boolean.TRUE;
     }
 }

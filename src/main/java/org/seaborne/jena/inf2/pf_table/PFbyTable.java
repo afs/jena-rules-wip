@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf2;
+package org.seaborne.jena.inf2.pf_table;
 
 import java.util.Collection ;
 import java.util.Iterator ;

@@ -18,12 +18,10 @@
 
 package org.seaborne.jena.inf2;
 
-import java.util.ArrayList ;
-import java.util.Arrays ;
-import java.util.Collections ;
-import java.util.List ;
+import java.util.* ;
 
 import org.apache.jena.graph.Triple ;
+import org.apache.jena.sparql.sse.SSE ;
 
 public class Rule {
     private final Triple head ;
@@ -46,4 +44,29 @@ public class Rule {
     public List<Triple> getBody() {
         return body ;
     }
+    
+    @Override
+    public String toString() {
+        StringJoiner sj = new StringJoiner(", ") ;
+        body.stream().map(Rule::p).forEach(sj::add);
+        return String.format("%s <- %s", p(head), sj.toString()) ; 
+    }
+
+    private static String p(Triple triple) {
+        return SSE.str(triple).replaceAll("ANY", "_") ;
+    }
+    
+
+    public static String str(Rule rule) {
+        StringJoiner sj = new StringJoiner(", ") ;
+        rule.getBody().stream().map(Rule::p).forEach(sj::add);
+        return String.format("%-30s <- %s", p(rule.getHead()), sj.toString()) ; 
+    }
+
+    public static String str(List<Rule> rules) {
+        StringJoiner sj = new StringJoiner(",\n  ", "[ ", "\n]") ;
+        rules.forEach((r)->sj.add(str(r))) ;
+        return sj.toString() ; 
+    }
+
 }

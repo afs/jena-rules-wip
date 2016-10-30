@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf2;
+package org.seaborne.jena.inf2.pf_table;
 
 import org.apache.jena.atlas.lib.StrUtils ;
 import org.apache.jena.graph.NodeFactory ;
@@ -30,23 +30,11 @@ import org.apache.jena.sparql.util.QueryExecUtils ;
 import org.apache.jena.system.JenaSystem ;
 import org.apache.jena.vocabulary.RDF ;
 import org.apache.jena.vocabulary.RDFS ;
-import org.seaborne.jena.inf2.PFbyTable.Table ;
+import org.seaborne.jena.inf2.pf_table.PFbyTable.Table ;
 
 public class DevPF {
+    // Table-backed property function.
     public static void main(String...argv) {
-        //Datalog : Single head clause
-        //  All variables in a negation in the body must also be positively mentioned in the body.
-        //  All variables in an artimetic relationship must be in the body as solveable sterms.
-        
-        // PropertyFunctionGenerator.buildPropertyFunctions
-        //    magicProperty needs to be careful about rdf:rest! 
-        
-        // Version without recursion
-        //   Recursion via SPARQL only over the base data.
-        
-        // T0 <- T1, T2, ...  SPATQL, restricted.
-        // T  <- SPARQL 
-        
         JenaSystem.init();
         Table table = new PFbyTable.Table() ;
         
