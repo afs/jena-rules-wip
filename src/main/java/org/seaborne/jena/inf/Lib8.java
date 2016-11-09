@@ -24,7 +24,8 @@ import java.util.stream.StreamSupport ;
 
 public class Lib8 {
     /** Iterator to Stream */ 
-    public static <T> Stream<T> stream(Iterator<? extends T> iterator) {
+    public static <T> Stream<T> stream(Iterator<T> iterator) {
+        //return Iter.asStream(iterator);
         int characteristics = Spliterator.ORDERED | Spliterator.IMMUTABLE;
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, characteristics), false);
     }
