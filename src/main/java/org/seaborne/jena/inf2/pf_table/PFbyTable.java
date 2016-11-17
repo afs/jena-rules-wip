@@ -59,8 +59,6 @@ public class PFbyTable extends PFuncSimple {
     static Table getTable(Node node) { return tables.get(node) ; }
     static void addTable(Node node, Table table) { tables.put(node, table) ; }
     
-    
-    
     // Dev hack
     
     public PFbyTable() {}
