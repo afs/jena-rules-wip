@@ -17,7 +17,7 @@
 
 package org.seaborne.jena.inf ;
 
-import static org.seaborne.jena.inf.Lib8.toList ;
+import static org.seaborne.jena.migrate.Lib8.toList;
 
 import java.util.HashSet ;
 import java.util.List ;

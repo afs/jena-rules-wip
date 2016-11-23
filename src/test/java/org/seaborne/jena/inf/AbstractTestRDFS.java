@@ -42,6 +42,7 @@ import org.apache.jena.reasoner.rulesys.Rule ;
 import org.apache.jena.util.FileUtils ;
 import org.junit.Assert ;
 import org.junit.Test ;
+import org.seaborne.jena.migrate.Lib8;
 
 /** Testing based on a graph under test ({@link #getTestGraph()}) and a reference graph
  * ({@link #getReferenceGraph()}) that is assumed to return the correct answers.

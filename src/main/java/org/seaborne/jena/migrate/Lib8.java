@@ -15,7 +15,7 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf;
+package org.seaborne.jena.migrate;
 
 import java.util.* ;
 import java.util.stream.Collectors ;
@@ -69,6 +69,45 @@ public class Lib8 {
             this.elt = elt ;
             this.tail = tail ;
         }
+        
+        static class IteratorPrepend<X> implements Iterator<X> {
+
+            private boolean firstYielded;
+            private X elt;
+            private Iterator<X> tail;
+
+            public IteratorPrepend(X elt, Iterator<X> tail) {
+                this.elt = elt ;
+                this.tail = tail ;
+                firstYielded = false ;
+            }
+            
+            @Override
+            public boolean hasNext() {
+                if ( firstYielded )
+                    return tail.hasNext();
+                return true;
+            }
+
+            @Override
+            public X next() {
+                if ( firstYielded )
+                    return tail.next();
+                firstYielded = true;
+                return elt;
+            }
+        }
+        
+        @Override
+        public Iterator<T> iterator() {
+            return new IteratorPrepend<>(elt, tail.iterator());
+        }
+        
+//        @Override
+//        public ListIterator<T> listIterator() {
+//            return new Iterator1<>(elt, tail.iterator());
+//        }
+
         
         @Override
         public T get(int index) {

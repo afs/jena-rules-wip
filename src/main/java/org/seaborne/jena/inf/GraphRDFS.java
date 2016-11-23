@@ -21,7 +21,7 @@ import static org.seaborne.jena.inf.InfGlobal.rdfType ;
 import static org.seaborne.jena.inf.InfGlobal.rdfsDomain ;
 import static org.seaborne.jena.inf.InfGlobal.rdfsRange ;
 import static org.seaborne.jena.inf.InfGlobal.rdfsSubClassOf ;
-import static org.seaborne.jena.inf.Lib8.stream ;
+import static org.seaborne.jena.migrate.Lib8.stream;
 
 import java.util.* ;
 import java.util.stream.Stream ;
