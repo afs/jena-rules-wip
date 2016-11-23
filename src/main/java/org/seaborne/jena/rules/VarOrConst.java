@@ -19,5 +19,5 @@
 package org.seaborne.jena.rules;
 
 public class VarOrConst<X> {
-
+    
 }

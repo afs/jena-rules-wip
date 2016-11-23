@@ -18,20 +18,56 @@
 
 package org.seaborne.jena.rules;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class Rule<X> {
-    private  Rel<X> head ;
-    private  List<Rel<X>> body ;
+public class Rule {
+    private  Rel head ;
+    private  List<Rel> body ;
 
     @SafeVarargs
-    public Rule(String name, Rel<X> head, boolean dfoo, Rel<X>...body) {
+    public Rule(Rel head, Rel...body) {
         this.head = head;
         //List.of in java9
-        List<Rel<X>> b = new ArrayList<>(body.length);
-        for ( Rel<X> r : body)
-            b.add(r);
-        this.body = b;
+        this.body = Collections.unmodifiableList(Arrays.asList(body)) ;
+    }
+
+    public Rule(Rel head, List<Rel>body) {
+        this.head = head;
+        //List.of in java9
+        this.body = new ArrayList<>(body);
+    }
+
+    public Rel getHead() {
+        return head ;
+    }
+
+    public List<Rel> getBody() {
+        return body ;
+    }
+    
+    //Cache strings.?
+    
+    @Override
+    public String toString() {
+        StringJoiner sj = new StringJoiner(", ") ;
+        body.stream().map(Rule::p).forEach(sj::add);
+        return String.format("%s <- %s", p(head), sj.toString()) ; 
+    }
+
+    private static String p(Rel rel) {
+        return rel.toString();
+    }
+    
+
+    public static String str(Rule rule) {
+        StringJoiner sj = new StringJoiner(", ") ;
+        rule.getBody().stream().map(Rule::p).forEach(sj::add);
+        return String.format("%-30s <- %s", p(rule.getHead()), sj.toString()) ; 
+    }
+
+    public static String str(List<Rule> rules) {
+        StringJoiner sj = new StringJoiner(",\n  ", "[ ", "\n]") ;
+        rules.forEach((r)->sj.add(str(r))) ;
+        return sj.toString() ; 
     }
 }

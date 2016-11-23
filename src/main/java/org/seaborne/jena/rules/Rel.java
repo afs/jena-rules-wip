@@ -18,6 +18,65 @@
 
 package org.seaborne.jena.rules;
 
-public class Rel<X> {
+import java.util.StringJoiner;
 
+import org.apache.jena.atlas.lib.tuple.Tuple;
+import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.sse.SSE;
+
+/** Strictly : a "Literal" but that is confusing for RDF */
+public class Rel  {
+    private final String name;
+    private final Tuple<Node> tuple;
+
+    public Rel(String name, Tuple<Node> tuple) {
+        this.name = name;
+        this.tuple = tuple; 
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Tuple<Node> getTuple() {
+        return tuple;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((tuple == null) ? 0 : tuple.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if ( this == obj )
+            return true;
+        if ( obj == null )
+            return false;
+        if ( getClass() != obj.getClass() )
+            return false;
+        Rel other = (Rel)obj;
+        if ( name == null ) {
+            if ( other.name != null )
+                return false;
+        } else if ( !name.equals(other.name) )
+            return false;
+        if ( tuple == null ) {
+            if ( other.tuple != null )
+                return false;
+        } else if ( !tuple.equals(other.tuple) )
+            return false;
+        return true;
+    }
+    
+    @Override
+    public String toString() {
+        StringJoiner sj = new StringJoiner(", ", name+"(", ")");
+        tuple.forEach(n->sj.add(SSE.str(n)));
+        return sj.toString();
+    }
 }
