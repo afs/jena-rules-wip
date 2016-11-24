@@ -86,9 +86,9 @@ public class RuleParser {
                 throw new RuleParseException("No token when looking for '('") ;
             token = tok.next();
             if ( token.getType() != TokenType.LPAREN)
-                throw new RuleParseException("Parse error: Expected left bracket: got: "+token) ;
+                throw new RuleParseException("Parse error: Expected LPAREN: got: "+token) ;
         }
-            
+        
         boolean first = true;
         List<Node> terms = new ArrayList<>();
         while(tok.hasNext()) {
@@ -96,7 +96,6 @@ public class RuleParser {
                 skipComma(tok);
             else
                 first = false ;
-            
             Token token = tok.next();
             if ( token.getType() == TokenType.RPAREN )
                 break;
@@ -125,7 +124,7 @@ public class RuleParser {
         // rel{0,1} <- rel{0,} ...
         if ( ! x.contains("<-") )
             throw new RuleParseException("Parse error: No rule arrow");
-            // Fast path the split.
+        // Not great.
         String[] z = x.split("<-",2);
         z[0] = z[0].trim();
         Rel head = null;
