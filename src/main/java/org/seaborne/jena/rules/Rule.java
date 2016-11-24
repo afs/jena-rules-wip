@@ -64,9 +64,7 @@ public class Rule {
             sb.append(" ");
         }
         sb.append("<-");
-        if ( rule.getBody().isEmpty() )
-            sb.append(" .");
-        else {
+        if ( ! rule.getBody().isEmpty() ) {
             StringJoiner sj = new StringJoiner(", ") ;
             rule.getBody().stream().map(Rule::p).forEach(sj::add);
             sb.append(" ");

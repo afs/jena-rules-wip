@@ -35,26 +35,7 @@ import org.apache.jena.sparql.sse.SSE;
 public class RuleParser {
 
     // Replace with javacc sometime.
-    // How of make the end of rule? DOT?
     
-    public static void main(String...arg) {
-//        Rel rel = parseRel("name(:x, :p :o)") ;
-//        System.out.println(rel) ;
-        
-        String data[] = {
-            "name(:x, :p :o) <- name1(:x, :p ?Z), name2(?Z :p :o) (?Z :p :o) ."
-            ,"<- name1(:x, :p ?Z), name2(?Z :p :o) (?Z :p :o) ."
-            ,"name(:x, :p :o) <- ."
-        };
-        
-        for ( String d: data) {
-            System.out.println(">> "+d);
-            Rule rule = parseRule(d) ;
-            System.out.println("<< "+rule);
-            System.out.println();
-        }
-    }
-
     private static PrefixMap pmap = PrefixMapFactory.create(SSE.getPrefixMapRead());
     
     public static Rel parseRel(String x) {
