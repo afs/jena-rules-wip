@@ -49,9 +49,7 @@ public class Rule {
     
     @Override
     public String toString() {
-        StringJoiner sj = new StringJoiner(", ") ;
-        body.stream().map(Rule::p).forEach(sj::add);
-        return String.format("%s <- %s", p(head), sj.toString()) ; 
+        return str(this); 
     }
 
     private static String p(Rel rel) {
@@ -60,9 +58,22 @@ public class Rule {
     
 
     public static String str(Rule rule) {
-        StringJoiner sj = new StringJoiner(", ") ;
-        rule.getBody().stream().map(Rule::p).forEach(sj::add);
-        return String.format("%-30s <- %s", p(rule.getHead()), sj.toString()) ; 
+        StringBuilder sb = new StringBuilder();
+        if ( rule.getHead() != null ) {
+            sb.append(p(rule.getHead()));
+            sb.append(" ");
+        }
+        sb.append("<-");
+        if ( rule.getBody().isEmpty() )
+            sb.append(" .");
+        else {
+            StringJoiner sj = new StringJoiner(", ") ;
+            rule.getBody().stream().map(Rule::p).forEach(sj::add);
+            sb.append(" ");
+            sb.append(sj.toString());
+        }
+        sb.append(" .");
+        return sb.toString();
     }
 
     public static String str(List<Rule> rules) {
