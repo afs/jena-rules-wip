@@ -42,6 +42,10 @@ public class Rel  {
         return tuple;
     }
 
+    public int len() {
+        return tuple.len();
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;

@@ -49,6 +49,10 @@ public class RuleSet {
         return stream().map(r -> r.getHead()).collect(toList()) ;
     }
 
+    public List<String> getHeadNames() {
+        return stream().map(r -> r.getHead().getName()).collect(toList()) ;
+    }
+
     /** Intensional rules = occurs in the head of a rule.
      * Returns a set of Triples with "canonical relations": ANY for variables.
      */
@@ -132,7 +136,7 @@ public class RuleSet {
 
     @Override
     public String toString() {
-        StringJoiner sj = new StringJoiner(", ") ;
+        StringJoiner sj = new StringJoiner("\n") ;
         rules.stream().map(Rule::toString).forEach(sj::add);
         return sj.toString();
     }

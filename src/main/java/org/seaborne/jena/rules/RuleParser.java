@@ -80,13 +80,23 @@ public class RuleParser {
             Token token = tok.next();
             if ( token.getType() == TokenType.RPAREN )
                 break;
-            Node n = token.asNode(pmap);
+            Node n = tokenToNode(token);
             if ( n == null )
                 throw new RuleParseException("Parse error: Expected node token, got: "+token);
             terms.add(n);
         }
         Tuple<Node> tuple = TupleFactory.create(terms);
         return new Rel(relName, tuple);
+    }
+    
+    private static Node tokenToNode(Token token) {
+        if ( token.getType() == TokenType.UNDERSCORE )
+            return Node.ANY;
+        return token.asNode(pmap);
+//        Node n = token.asNode(pmap);
+//        if ( n == null )
+//            throw new RuleParseException("Parse error: Expected node token, got: "+token);
+//        return n;
     }
     
     private static void skipComma(Tokenizer tok) {

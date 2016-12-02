@@ -16,27 +16,32 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package org.seaborne.jena.rules.naive;
 
-public class DevRules {
+import java.util.HashMap;
 
-    public static void main(String... args) {
-// Rel rel = parseRel("name(:x, :p :o)") ;
-// System.out.println(rel) ;
+import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.core.Var;
 
-        String data[] = {"name(:x, :p :o) <- name1(:x, :p ?Z), name2(?Z :p :o) (?Z :p :o) .",
-                         "<- name1(:x, :p ?Z), name2(?Z :p :o) (?Z :p :o) .",
-                         "name(:x, :p :o) <- ."};
-
-        for ( String d : data ) {
-            System.out.println(">> " + d);
-            Rule rule = RuleParser.parseRule(d);
-            System.out.println("<< " + rule);
-            System.out.println();
-        }
-        System.out.println();
-        RuleSet rs = DefRules.rulesRDFS();
-        String s = rs.toMultilineString();
-        System.out.println(s);
-    }
+public class Solution extends HashMap<Var, Node>{
+    public Solution() { super();}
+    
+//    Map<Var, Entry> map = new HashMap<>();
+//    public class Entry {
+//        public Var var;
+//        public Node value;
+//    }
+//
+//    /** Test whether a variable is bound to some object */
+//    public boolean contains(Var var) ;
+//
+//    /** Return the object bound to a variable, or null */
+//    public Node get(Var var) ;
+//    
+//    /** Number of (var, value) pairs. */
+//    public int size() ;
+//
+//    /** Is this an empty binding?  No variables. */
+//    public boolean isEmpty() ;
 }
+
