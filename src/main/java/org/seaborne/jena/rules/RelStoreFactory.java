@@ -18,6 +18,7 @@
 
 package org.seaborne.jena.rules;
 
+import org.seaborne.jena.rules.impl.RelStore2;
 import org.seaborne.jena.rules.impl.RelStoreSimple;
 
 public class RelStoreFactory {
@@ -32,6 +33,7 @@ public class RelStoreFactory {
         return new RelStoreSimple();
     }
 
+    /** Merge two {@link RelStore}s into one. */ 
     public static RelStore combine(RelStore data, RelStore acc) {
         //XXX Do better!
         RelStore rs = createMem();
@@ -40,5 +42,8 @@ public class RelStoreFactory {
         return rs;
     }
     
+    public static RelStore union(RelStore rs1, RelStore rs2) {
+        return new RelStore2(rs1, rs2);
+    }
 }
 

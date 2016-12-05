@@ -18,6 +18,5 @@
 
 package org.seaborne.jena.rules;
 
-public class VarOrConst<X> {
-    
+public class RuleSets extends DefRules {
 }

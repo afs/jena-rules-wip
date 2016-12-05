@@ -62,10 +62,9 @@ public class RuleEngineNaive {
         
         while(true) {
             RelStore rs = RelStoreFactory.createMem();
-            Solution solution = new Solution();
-            Iterator<Solution> iter = Iter.singleton(solution);
             rules.asList().forEach(rule->{
-                eval(generation, rs, iter, rule);
+                //System.out.println("==== "+rule);
+                evalOne(generation, rs, rule);
             });
             // Changes?
             if ( rs.isEmpty() ) {
@@ -84,24 +83,6 @@ public class RuleEngineNaive {
                 work.put(relName, RelStoreFactory.createMem());
         });
         return work;
-    }
-    
-//    private static void evalTop(RelStore data, Rule rule) {
-//        // Input
-//        Solution solution = new Solution();
-//        Iterator<Solution> iter = Iter.singleton(solution);
-//        RelStore acc = RelStoreFactory.createMem();
-//        eval(data, acc, iter, rule);
-//    }
-    
-    private static void eval(RelStore data, RelStore acc, Iterator<Solution> iter, Rule rule) {
-        //System.out.println("Rule:"+rule);
-        iter.forEachRemaining(soln->{
-            //System.out.println("   "+soln);
-            Rule rule2 = substitute(soln, rule);
-            //System.out.println("   "+rule2);
-            evalOne(data, acc, rule2);
-        }) ;
     }
     
     private static void evalOne(RelStore data, RelStore acc, Rule rule) {
@@ -129,7 +110,7 @@ public class RuleEngineNaive {
         Stream<Solution> foo = Iter.asStream(chain);
         Stream<Solution> bar = foo.flatMap(soln->{
             Rel rel2 = substitute(soln, rel);
-            Iterator<Solution> chain2 = eval(data, rel2);
+            Iterator<Solution> chain2 = eval(data, soln, rel2);
             //chain2 = Iter.debug(chain2);
             return Iter.asStream(chain2);
         });
@@ -137,24 +118,27 @@ public class RuleEngineNaive {
     }
 
     private static void emit(RelStore acc, Rel fact, RelStore data) {
-        if ( ! data.contains(fact) ) {
+        if ( !fact.isConcrete() )
+            System.out.println("Not concrete: "+fact);
+        
+        if ( ! data.contains(fact) && !acc.contains(fact) ) {
             System.out.println("Emit:   "+fact);
             acc.add(fact);
         } //else System.out.println("Repeat: "+fact);
     }
 
-    private static Iterator<Solution> eval(RelStore data, Rel rel) {
+    private static Iterator<Solution> eval(RelStore data, Solution input, Rel rel) {
         Iterator<Rel> iter = data.find(rel);
-        Iterator<Solution> iter2 = solutions(rel, iter);
+        Iterator<Solution> iter2 = solutions(rel, input, iter);
         return iter2;
     }
 
-    private static Iterator<Solution> solutions(Rel rel, Iterator<Rel> iter) {
-        return Iter.iter(iter).map((r)->solutions(rel, r)).removeNulls();
+    private static Iterator<Solution> solutions(Rel rel, Solution input, Iterator<Rel> iter) {
+        return Iter.iter(iter).map((r)->solutions(rel, input, r)).removeNulls();
     }
 
-    private static Solution solutions(Rel rel, Rel match) {
-        Solution soln = new Solution();
+    private static Solution solutions(Rel rel, Solution input, Rel match) {
+        Solution soln = new Solution(input);
         int N = rel.getTuple().len();
         for(int i = 0 ; i < N ;i++ ) {
             Node x = rel.getTuple().get(i);

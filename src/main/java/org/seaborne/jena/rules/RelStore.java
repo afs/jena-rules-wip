@@ -22,25 +22,38 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 
 public interface RelStore {
+    // Maybe RelStore -> Map of "Rels", all Rels of the same name
 
-    void add(Rel rel);
-    void add(RelStore data);
-
-    void delete(Rel rel);
-    void removeAll(Rel rel);
-
-    Iterator<Rel> find(Rel rel);
+    public default void setReadOnly() { setWritable(false); }
+    public void setWritable(boolean allowUpdate);
     
-    boolean matches(Rel rel);
+    public default boolean isReadonly() { return ! isUpdateable();} 
+    public boolean isUpdateable();
+    
+    public void add(Rel rel);
+    public void add(RelStore data);
+
+    public void delete(Rel rel);
+    public void removeAll(Rel rel);
+
+    public Iterator<Rel> find(Rel rel);
+    
+    /** Get all the Rels matching a name*/
+    public Stream<Rel> get(String relName);
+    
+    /** Does this RelStore have any rels of a given name? */ 
+    public boolean containRel(String relName);
+
+    public boolean matches(Rel rel);
 
     /* Contains exactly, no pattern matching */
-    boolean contains(Rel rel);
+    public boolean contains(Rel rel);
 
-    boolean isEmpty();
+    public boolean isEmpty();
 
-    long size();
+    public long size();
     
-    Stream<Rel> all();
+    public Stream<Rel> all();
 
 }
 

@@ -42,6 +42,15 @@ public class Rel  {
         return tuple;
     }
 
+    public boolean isConcrete() {
+        for ( int i = 0 ; i < tuple.len() ; i++) {
+            if ( ! tuple.get(i).isConcrete() )
+                return false ;
+        }
+        return true;
+    }
+
+
     public int len() {
         return tuple.len();
     }

@@ -18,31 +18,35 @@
 
 package org.seaborne.jena.rules.dev;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.text.html.HTMLDocument.RunElement;
-
 import org.seaborne.jena.rules.*;
 import org.seaborne.jena.rules.naive.RuleEngineNaive;
 
 public class DevRules {
     public static void main(String... args) {
-        String rulesStr[] = {
-            "name(:x, :r ?Z) <- name1(:x, :p ?Z)"
-            ,"name(:x, :q ?Z) <- name1(:x, :p ?Z)"
-            };
-        List<Rule> rules = new ArrayList<>();
-        for ( String d : rulesStr ) {
-            //System.out.println("> " + d);
-            Rule rule = RuleParser.parseRule(d);
-            //System.out.println("< " + rule);
-            rules.add(rule);
-        }
-
+//        String rulesStr[] = {
+//            "name(:x, :r ?Z) <- name1(:x, :p ?Z)"
+//            ,"name(:x, :q ?Z) <- name1(:x, :p ?Z)"
+//            };
+//        List<Rule> rules = new ArrayList<>();
+//        for ( String d : rulesStr ) {
+//            //System.out.println("> " + d);
+//            Rule rule = RuleParser.parseRule(d);
+//            //System.out.println("< " + rule);
+//            rules.add(rule);
+//        }
+//        RuleSet ruleSet = new RuleSet(rules);
+//
         // Tests : parsing : Rels
         RelStore data = RelStoreFactory.create();
-        String dataStr[] = {"name(:x :p 123)", "name1(:x :p 456)"};
+        //String dataStr[] = {"name(:x :p 123)", "name1(:x :p 456)"};
+        
+        String dataStr[] = {
+            "(:x :p 123)",
+            "(:p rdfs:domain :T)",
+            "(:T rdfs:subClassOf :T2)",
+            "(:T2 rdfs:subClassOf :T3)"
+        };
+        
         for ( String d : dataStr ) {
             //System.out.println(">> " + d);
             Rel rel = RuleParser.parseRel(d);
@@ -50,35 +54,17 @@ public class DevRules {
             //System.out.println();
             data.add(rel);
         }
+
+        
         
         System.out.println("Data:");
         System.out.print(data);
-        
-        RuleSet ruleSet = new RuleSet(rules);
+        System.out.println("Rules:");
+        RuleSet ruleSet = DefRules.rulesRDFSbasic();
         System.out.println(ruleSet);
         System.out.println();
         RuleEngineNaive engine = new RuleEngineNaive(data, ruleSet);
         RelStore rs2 = engine.exec();
         System.out.print(rs2);
-    }
-    
-    public static void mainParse(String... args) {
-        // Rel rel = parseRel("name(:x, :p :o)") ;
-        // System.out.println(rel) ;
-
-        String data[] = {"name(:x, :p :o) <- name1(:x, :p ?Z), name2(?Z :p :o) (?Z :p :o) .",
-                         "<- name1(:x, :p ?Z), name2(?Z :p :o) (?Z :p :o) .",
-                         "name(:x, :p :o) <- ."};
-
-        for ( String d : data ) {
-            System.out.println(">> " + d);
-            Rule rule = RuleParser.parseRule(d);
-            System.out.println("<< " + rule);
-            System.out.println();
-        }
-        System.out.println();
-        RuleSet rs = DefRules.rulesRDFS();
-        String s = rs.toMultilineString();
-        System.out.println(s);
     }
 }

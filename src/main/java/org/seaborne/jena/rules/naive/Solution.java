@@ -23,8 +23,12 @@ import java.util.HashMap;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 
+
 public class Solution extends HashMap<Var, Node>{
+    // XXX Needs work for efficiency.
     public Solution() { super();}
+    
+    public Solution(Solution solution) { super(solution);}
     
 //    Map<Var, Entry> map = new HashMap<>();
 //    public class Entry {

@@ -23,7 +23,7 @@ import java.util.List;
 
 public class DefRules {
     
-    public static RuleSet rulesRDFS() {
+    public static RuleSet rulesRDFSjenaMin() {
         List<Rule> rules = new ArrayList<>();
         String[] xs = {
             // Domain and range
@@ -51,4 +51,29 @@ public class DefRules {
         }
         return new RuleSet(rules);
     }
+    
+    public static RuleSet rulesRDFSbasic() {
+        List<Rule> rules = new ArrayList<>();
+        String[] xs = {
+            ""
+            // Domain and range
+            ,"(?s rdf:type ?T) <- (?s ?p ?x) (?p rdfs:domain ?T)"
+            ,"(?o rdf:type ?T) <- (?s ?p ?o) (?p rdfs:range  ?T)"
+            // SubClassOf
+            //,
+            ,"(?s rdf:type ?T) <- (?s rdf:type ?TX )(?TX rdfs:subClassOf ?T)"
+            ,"(?t1 rdfs:subClassOf ?t2) <- (?t1 rdfs:subClassOf ?X) (?X rdfs:subClassOf ?t2)"
+            // SubPropertyOf
+            ,"(?s ?q ?o) <- (?s ?p ?o ) (?p rdfs:subPropertyOf ?q)"
+            ,"(?p1 rdfs:subPropertyOf ?p2) <- (?p1 rdfs:subPropertyOf ?X) (?X rdfs:subPropertyOf ?p2)"
+        };
+        for(String x : xs ) {
+            if ( x == null || x.isEmpty() )
+                continue;
+            Rule r = RuleParser.parseRule(x);
+            rules.add(r);
+        }
+        return new RuleSet(rules);
+    }
+
 }
