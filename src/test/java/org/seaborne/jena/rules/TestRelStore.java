@@ -21,6 +21,8 @@ package org.seaborne.jena.rules;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.seaborne.jena.rules.impl.RelStoreSimple;
+import org.seaborne.jena.rules.parser.RuleParser;
+
 import static org.junit.Assert.*;
 
 public class TestRelStore {

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package org.seaborne.jena.rules.parser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +31,8 @@ import org.apache.jena.riot.tokens.TokenType;
 import org.apache.jena.riot.tokens.Tokenizer;
 import org.apache.jena.riot.tokens.TokenizerFactory;
 import org.apache.jena.sparql.sse.SSE;
+import org.seaborne.jena.rules.Rel;
+import org.seaborne.jena.rules.Rule;
 
 public class RuleParser {
 
@@ -112,16 +114,33 @@ public class RuleParser {
     }
     
     public static Rule parseRule(String x) {
+        // fact(,,,).
+        // head(...) <- body .
+        
         // rel{0,1} <- rel{0,} ...
-        if ( ! x.contains("<-") )
-            throw new RuleParseException("Parse error: No rule arrow");
-        // Not great.
+        if ( ! x.contains("<-") ) {
+            Tokenizer tok = TokenizerFactory.makeTokenizerString(x);
+            Rel rel = parseRel(tok);
+            if ( !tok.hasNext() )
+                throw new RuleParseException("Parse error: Expected DOT after fact.");
+            Token peekToken = tok.peek(); 
+            if ( peekToken == null || peekToken.getType() == TokenType.EOF )
+                throw new RuleParseException("Parse error: Unexpected end of fact.");
+            if ( peekToken == null || peekToken.getType() == TokenType.DOT )
+                tok.next();
+            if ( tok.hasNext() ) {
+                Token token2 = tok.next();
+                throw new RuleParseException("Parse error: Unexpected token after fact. "+token2);
+            }
+            return new Rule(rel);
+        }
+        // Not great but "<-" isn't a token.
         String[] z = x.split("<-",2);
         z[0] = z[0].trim();
-        Rel head = null;
-        if ( ! z[0].isEmpty() )
-            head = parseRel(z[0]);
+        if ( z[0].isEmpty() )
+            throw new RuleParseException("No head to rule");
         
+        Rel head = parseRel(z[0]);
         Tokenizer tok = TokenizerFactory.makeTokenizerString(z[1]);
         List<Rel> body = new ArrayList<>();
         boolean first = true;
@@ -145,5 +164,4 @@ public class RuleParser {
         
         return new Rule(head, body);
     }
-    
 }

@@ -18,9 +18,9 @@
 
 package org.seaborne.jena.rules;
 
-public class RuleParseException extends RuntimeException {
-    public RuleParseException()                          { super() ; }
-    public RuleParseException(String msg)                { super(msg) ; }
-    public RuleParseException(Throwable th)              { super(th) ; }
-    public RuleParseException(String msg, Throwable th)  { super(msg, th) ; }
+public class RuleException extends RuntimeException {
+    public RuleException()                          { super() ; }
+    public RuleException(String msg)                { super(msg) ; }
+    public RuleException(Throwable th)              { super(th) ; }
+    public RuleException(String msg, Throwable th)  { super(msg, th) ; }
 }

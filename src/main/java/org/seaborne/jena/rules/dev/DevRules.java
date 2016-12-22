@@ -20,8 +20,11 @@ package org.seaborne.jena.rules.dev;
 
 import org.seaborne.jena.rules.*;
 import org.seaborne.jena.rules.naive.RuleEngineNaive;
+import org.seaborne.jena.rules.parser.RuleParser;
 
 public class DevRules {
+    // https://github.com/threatgrid/naga -- forward only.
+    
     public static void main(String... args) {
 //        String rulesStr[] = {
 //            "name(:x, :r ?Z) <- name1(:x, :p ?Z)"

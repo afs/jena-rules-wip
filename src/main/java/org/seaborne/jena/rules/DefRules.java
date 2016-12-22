@@ -21,6 +21,9 @@ package org.seaborne.jena.rules;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.seaborne.jena.rules.parser.RuleParser;
+
+/* Rule sets */
 public class DefRules {
     
     public static RuleSet rulesRDFSjenaMin() {

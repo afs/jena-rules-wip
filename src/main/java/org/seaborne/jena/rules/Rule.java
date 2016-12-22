@@ -20,21 +20,63 @@ package org.seaborne.jena.rules;
 
 import java.util.*;
 
+import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.core.Var;
+
 public class Rule {
     private  Rel head ;
     private  List<Rel> body ;
 
-    @SafeVarargs
+    /** Create a Fact */
+    public Rule(Rel head) {
+       this.head = head;
+       this.body = null;
+       check();
+    }
+    
+    //@SafeVarargs
     public Rule(Rel head, Rel...body) {
         this.head = head;
         //List.of in java9
         this.body = Collections.unmodifiableList(Arrays.asList(body)) ;
+        check();
     }
 
     public Rule(Rel head, List<Rel>body) {
         this.head = head;
-        //List.of in java9
-        this.body = new ArrayList<>(body);
+        this.body = body==null ? null : new ArrayList<>(body);
+        check();
+    }
+
+    /** Check:
+     * <ul>
+     * <li>All variables in the head are mentioned in the body.
+     * </ul>
+     */
+    private void check() {
+        if ( head == null )
+            throw new RuleException("Null head");
+        if ( head == null )
+            return ;
+        Set<Var> vars = new HashSet<>();
+        if ( body != null ) {
+            for(Rel br : body ) {
+                accVars(vars, br);
+            }
+        }
+        for ( Node n : head.getTuple() ) {
+            if ( Var.isVar(n) ) {
+                if ( ! vars.contains(n) )
+                    throw new RuleException("Variable '"+n+"' in head but not in body"); 
+            }
+        }
+    }
+    
+    private void accVars(Collection<Var> acc, Rel rel) {
+        rel.getTuple().forEach(n->{
+            if ( Var.isVar(n) )
+                acc.add(Var.alloc(n)) ;
+        });
     }
 
     public Rel getHead() {
@@ -45,6 +87,16 @@ public class Rule {
         return body ;
     }
     
+    public boolean isFact() {
+        return body==null;
+    }
+    
+    public Rel getFact() {
+        if ( ! isFact() )
+            throw new RuleException("Not a fact: "+this);
+        return head;
+    }
+
     //Cache strings.?
     
     @Override

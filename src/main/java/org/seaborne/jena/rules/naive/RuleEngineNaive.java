@@ -102,7 +102,6 @@ public class RuleEngineNaive {
             Rel x = substitute(soln, rule.getHead());
             emit(acc, x, data);
         });
-        
     }
 
     private static Iterator<Solution> step(RelStore data, Rel rel, Iterator<Solution> chain) {
@@ -180,31 +179,6 @@ public class RuleEngineNaive {
         return values.getOrDefault(Var.alloc(node), node);
     }
 
-//    /** The Naive algorithm - loop until no change; don't let changes appear until the end of the round. */ 
-//    public static void evalNaive(Graph source, List<Rule> rules) {
-//        Graph acc = GraphFactory.createDefaultGraph() ;
-//        while(true) {
-//            acc.clear() ;
-//            rules.forEach(r->eval1(source, acc::add, r)) ;
-//            if ( acc.isEmpty() )
-//                return ;
-//            GraphUtil.addInto(source, acc);
-//        }
-//    }
-//    
-//    /** One round of rule evaluation */
-//    private static void eval1(Graph source, StreamTriple out, Rule rule) {
-//        BasicPattern pattern = BasicPattern.wrap(rule.getBody()) ;
-//        ExecutionContext execContext = new ExecutionContext(ARQ.getContext(), source, null, null) ; 
-//        // Create a chain of triple iterators.
-//        QueryIterator iter = match(source, pattern) ;
-//        iter.forEachRemaining(b->{
-//            Triple t = Substitute.substitute(rule.getHead(), b) ;
-//            if ( t.isConcrete() && ! source.contains(t) )
-//                out.triple(t);
-//        }) ;
-//    }
-    
     /** Evaluate a BGP : encapsulate for a better/different version */  
     private static QueryIterator match(Graph source, BasicPattern pattern) {
         ExecutionContext execContext = new ExecutionContext(ARQ.getContext(), source, null, null) ; 
