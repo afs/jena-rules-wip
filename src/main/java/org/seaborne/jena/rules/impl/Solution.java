@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules.naive;
+package org.seaborne.jena.rules.impl;
 
 import java.util.HashMap;
 

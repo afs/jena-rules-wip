@@ -16,11 +16,12 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules.naive;
+package org.seaborne.jena.rules.seminaive;
 
 import static java.util.stream.Collectors.toList;
 
 import java.util.*;
+import java.util.stream.Collectors ;
 import java.util.stream.Stream;
 
 import org.apache.jena.atlas.iterator.Iter;
@@ -40,15 +41,19 @@ import org.seaborne.jena.rules.*;
 import org.seaborne.jena.rules.impl.Solution;
 
 /**
- * The <a href="">naïve</a> algorithm, done very naively. Hopefully, so simple it is easy
- * to verify as correct and then use in tests to compare results with other engines.
+ * The <a href="">semi naïve</a> algorithm.
+ * 
+ * This alogorithm tracks changes durign each pass over the rules and determines
+ * whether on the next round, a rule needs to be attempted. If no rels of
+ * involved in the body of the rule are generated at stage N-1, there is no need
+ * to evaluate a rule on stage N.
  */
-public class RuleEngineNaive implements RuleEngine {
+public class RuleEngineSemiNaive implements RuleEngine {
     
     private final RelStore data; // RelStore.setReadOnly.
     private final RuleSet rules;
 
-    public RuleEngineNaive(RelStore data, RuleSet rules) {
+    public RuleEngineSemiNaive(RelStore data, RuleSet rules) {
         this.data = data;
         this.rules = rules;
     }
@@ -57,26 +62,73 @@ public class RuleEngineNaive implements RuleEngine {
     public RelStore exec() {
         RelStore  generation = RelStoreFactory.createMem();
         generation.add(data);
+        
         // What about variable arity?
         //--
-        // Algorithm
+        // Algorithm:
+        //    Execute once.
         
+//        {
+//            RelStore rs = RelStoreFactory.createMem();
+//            rules.asList().forEach(rule->{
+//                //System.out.println("==== "+rule);
+//                evalOne(generation, rs, rule);
+//            });
+//            // Changes?
+//            if ( rs.isEmpty() ) {
+//                // Diffs
+//                return generation;
+//            }
+//            generation.add(rs);
+//        }
+
+        RelStore rsLast = null ;
         int i = 0; 
         while(true) {
             i++;
-            System.out.printf("N: Round %d\n", i); 
-            RelStore rs = RelStoreFactory.createMem();
-            rules.asList().forEach(rule->{
-                System.out.println("==== "+rule);
-                evalOne(generation, rs, rule);
-            });
+            System.out.printf("S: Round %d\n", i); 
+            RelStore rsCurrent = RelStoreFactory.createMem();
+            for ( Rule rule : rules.asList() ) {
+                boolean needed = false;
+                if ( rsLast == null ) {
+                    needed = true ;
+                } else {
+                    
+                    // Var predicate.
+                    Set<Node> predicates = rsLast.get("").map(r->r.getTuple().get(1)).filter(p->!p.isVariable()).collect(Collectors.toSet());
+                    for ( Rel r : rule.getBody() ) {
+                        String name = r.getName();
+                        if ( name.isEmpty() ) {
+                            // RDF Predicate : the unnamed.
+                            // what about (?s ?p ?o) ?
+                            // For new triples of other parts are stable.
+                            Node n = r.getTuple().get(1);
+                            needed = predicates.contains(n);
+                        } else {
+                            needed = rsLast.containRel(r.getName());
+                        }
+                        // Special case evaluation of (_,_,_)
+                        if ( needed ) {
+                            break ;
+                        }
+                        //System.out.printf("Not needed: %s in %s\n",r, rule);
+                    }
+                }
+                if ( needed ) {
+                    System.out.println("==== "+rule);
+                    evalOne(generation, rsCurrent, rule);
+                } else {
+                    System.out.println("---- "+rule);
+                }
+            }
             // Changes?
-            if ( rs.isEmpty() ) {
+            if ( rsCurrent.isEmpty() ) {
                 // Diffs
                 return generation;
             }
-            generation.add(rs);
-        }
+            generation.add(rsCurrent);
+            rsLast = rsCurrent ;
+        }        
     }
     
     private Map<String,RelStore> slots() {

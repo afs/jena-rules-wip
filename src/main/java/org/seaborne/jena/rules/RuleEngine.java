@@ -18,12 +18,15 @@
 
 package org.seaborne.jena.rules;
 
-import java.util.stream.Stream;
-
-import org.apache.jena.sparql.engine.binding.Binding;
-
 public interface RuleEngine {
-    public Stream<Binding> solve(Rel query);
     
-    public Stream<Binding> infer(Rel query);
+    // Temp name for "do everything"
+    public RelStore exec();
+    
+    public default void update() {}; 
+    
+    
+//    public Stream<Binding> solve(Rel query);
+//    
+//    public Stream<Binding> infer(Rel query);
 }

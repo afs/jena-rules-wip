@@ -63,7 +63,6 @@ public class DefRules {
             ,"(?s rdf:type ?T) <- (?s ?p ?x) (?p rdfs:domain ?T)"
             ,"(?o rdf:type ?T) <- (?s ?p ?o) (?p rdfs:range  ?T)"
             // SubClassOf
-            //,
             ,"(?s rdf:type ?T) <- (?s rdf:type ?TX )(?TX rdfs:subClassOf ?T)"
             ,"(?t1 rdfs:subClassOf ?t2) <- (?t1 rdfs:subClassOf ?X) (?X rdfs:subClassOf ?t2)"
             // SubPropertyOf

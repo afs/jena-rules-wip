@@ -21,9 +21,15 @@ package org.seaborne.jena.rules.dev;
 import org.seaborne.jena.rules.*;
 import org.seaborne.jena.rules.naive.RuleEngineNaive;
 import org.seaborne.jena.rules.parser.RuleParser;
+import org.seaborne.jena.rules.seminaive.RuleEngineSemiNaive ;
 
 public class DevRules {
     // https://github.com/threatgrid/naga -- forward only.
+    // Paper exercise on RDFS
+    
+    // Special case (?s ?p ?o) - single scan + (?p rdfs:domain ?T) triggered for new material.
+    //   Invalidate on delete.
+    //   Invalidate on schema change.
     
     public static void main(String... args) {
 //        String rulesStr[] = {
@@ -66,8 +72,13 @@ public class DevRules {
         RuleSet ruleSet = DefRules.rulesRDFSbasic();
         System.out.println(ruleSet);
         System.out.println();
-        RuleEngineNaive engine = new RuleEngineNaive(data, ruleSet);
-        RelStore rs2 = engine.exec();
+        RuleEngine engine1 = new RuleEngineNaive(data, ruleSet);
+        RelStore rs2 = engine1.exec();
         System.out.print(rs2);
+        System.out.println("[] [] [] [] [] [] [] [] [] [] []");
+        RuleEngine engine2 = new RuleEngineSemiNaive(data, ruleSet);
+        RelStore rs3 = engine2.exec();
+        System.out.print(rs2);
+        
     }
 }
