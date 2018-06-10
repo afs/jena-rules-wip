@@ -1,0 +1,11 @@
+
+---
+language: java
+jdk:
+  - openjdk8
+
+notifications:
+  email:
+    # [always|never|change]
+    on_success: change
+    on_failure: change
