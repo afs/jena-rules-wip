@@ -39,7 +39,7 @@ public class InferenceProcessorRDFS {
     
     public InferenceProcessorRDFS(InferenceSetupRDFS setup) {
         this.setup = setup ;
-        this.sink = acc::add ;
+        this.sink = (t)->acc.add(t); // Not acc:add. - acc is null AM.
         this.engine = new InferenceEngineRDFS(setup, sink) ;
     }
 
