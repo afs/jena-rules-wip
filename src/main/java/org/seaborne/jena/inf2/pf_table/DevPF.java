@@ -27,7 +27,7 @@ import org.apache.jena.sparql.pfunction.PropertyFunctionFactory ;
 import org.apache.jena.sparql.pfunction.PropertyFunctionRegistry ;
 import org.apache.jena.sparql.sse.SSE ;
 import org.apache.jena.sparql.util.QueryExecUtils ;
-import org.apache.jena.system.JenaSystem ;
+import org.apache.jena.sys.JenaSystem ;
 import org.apache.jena.vocabulary.RDF ;
 import org.apache.jena.vocabulary.RDFS ;
 import org.seaborne.jena.inf2.pf_table.PFbyTable.Table ;
