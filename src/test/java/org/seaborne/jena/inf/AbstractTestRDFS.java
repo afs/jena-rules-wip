@@ -192,7 +192,7 @@ public abstract class AbstractTestRDFS extends BaseTest {
     
     static protected void print(PrintStream out, String leader, Collection<Triple> x) {
         if ( x.isEmpty() )
-            out.println(leader+"{}") ;
+            out.println(leader+"<empty>") ;
         else
             x.stream().forEach(triple -> {out.println(leader+triple) ; }) ;
     }

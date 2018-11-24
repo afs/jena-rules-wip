@@ -19,13 +19,19 @@ package org.seaborne.jena.inf;
 
 import java.util.Set ;
 
-/** Inference setup for RDFS over some space of 3-tuples of type T */ 
+import org.apache.jena.graph.Node;
+import org.apache.jena.tdb2.store.NodeId;
 
+/** 
+ * Inference setup for RDFS over some space of 3-tuples of type {@code <T>}.
+ * {@code <T>} maybe {@link Node} but it may be some storage idea of a RDF term, 
+ * such as TDB2's {@link NodeId}.
+ */ 
 public interface InfSetupRDFS<T> {
 
     /** All super-types of an element.  
      * Does not include the element unless there is a cycle of length >1.
-     * Rertuns an empty set of theer are no declared superclasses.
+     * Returns an empty set of there are no declared superclasses.
      */  
     public Set<T> getSuperClasses(T elt) ; 
     

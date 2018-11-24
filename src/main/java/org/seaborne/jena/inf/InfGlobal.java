@@ -15,41 +15,44 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf ;
+package org.seaborne.jena.inf;
 
 import static org.seaborne.jena.migrate.Lib8.toList;
 
-import java.util.HashSet ;
-import java.util.List ;
-import java.util.Set ;
-import java.util.function.Predicate ;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
-import org.apache.jena.graph.Node ;
-import org.apache.jena.graph.Triple ;
-import org.apache.jena.vocabulary.RDF ;
-import org.apache.jena.vocabulary.RDFS ;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 
+/**
+ * Constants relating to inference.
+ */
 public class InfGlobal {
-    public static final Node  rdfType            = RDF.Nodes.type ;   // NodeConst.nodeRDFType ;
-    public static final Node  rdfsRange          = RDFS.Nodes.range ;
-    public static final Node  rdfsDomain         = RDFS.Nodes.domain ;
-    public static final Node  rdfsSubClassOf     = RDFS.Nodes.subClassOf ;
-    public static final Node  rdfsSubPropertyOf  = RDFS.Nodes.subPropertyOf ;
+    public static final Node rdfType           = RDF.Nodes.type;
+    public static final Node rdfsRange         = RDFS.Nodes.range;
+    public static final Node rdfsDomain        = RDFS.Nodes.domain;
+    public static final Node rdfsSubClassOf    = RDFS.Nodes.subClassOf;
+    public static final Node rdfsSubPropertyOf = RDFS.Nodes.subPropertyOf;
 
-    private static Set<Node> vocabTerms = new HashSet<>() ;
+    private static Set<Node> vocabTerms        = new HashSet<>();
     static {
-        vocabTerms.add(rdfsRange) ;
-        vocabTerms.add(rdfsDomain) ;
-        vocabTerms.add(rdfsSubClassOf) ;
-        vocabTerms.add(rdfsSubPropertyOf) ;
+        vocabTerms.add(rdfsRange);
+        vocabTerms.add(rdfsDomain);
+        vocabTerms.add(rdfsSubClassOf);
+        vocabTerms.add(rdfsSubPropertyOf);
     }
-    
+
     private static Predicate<Triple> filterRDFS =
-        triple -> vocabTerms.contains(triple.getPredicate()) ;
-        
-    private static Predicate<Triple> filterNotRDFS = filterRDFS.negate() ;
-        
+        triple -> vocabTerms.contains(triple.getPredicate());
+
+    private static Predicate<Triple> filterNotRDFS = filterRDFS.negate();
+
     public static List<Triple> removeRDFS(List<Triple> x) {
-        return toList(x.stream().filter(filterNotRDFS)) ;
+        return toList(x.stream().filter(filterNotRDFS));
     }
 }

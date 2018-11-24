@@ -20,17 +20,19 @@ package org.seaborne.jena.inf ;
 import java.util.* ;
 
 import org.apache.jena.atlas.lib.StrUtils ;
-
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.graph.Node ;
 import org.apache.jena.query.* ;
-import org.apache.jena.rdf.model.Model ;
-import org.apache.jena.rdf.model.ModelFactory ;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.tdb2.store.NodeId;
 
-/** Core datastructures needed for RDFS.
- *  To be general, this is in X space (e.g. Node, NodeId). 
+/** 
+ * Core datastructures needed for RDFS.
+ * To be general, this is in {@code <X>} space (e.g. {@link Node}, {@link NodeId}). 
  */
-public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
+/*package*/ abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
     public final Graph vocabGraph ;
     
     // Variants for with and without the key in the value side.
@@ -71,16 +73,8 @@ public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
 //    }
 
     protected BaseInfSetupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
-        this(ModelFactory.createModelForGraph(vocab), incDerivedDataRDFS) ;
-    }
-    
-//    protected BaseInfSetupRDFS(Model vocab) {
-//        this(vocab, false) ;
-//    }
-//    
-    public BaseInfSetupRDFS(Model vocab, boolean incDerivedDataRDFS) {
         includeDerivedDataRDFS$ = incDerivedDataRDFS ;
-        vocabGraph = vocab.getGraph() ;
+        vocabGraph = vocab;
         
         // Find super classes - uses property paths
         exec("SELECT ?x ?y { ?x rdfs:subClassOf+ ?y }", vocab, superClasses, subClasses ) ;
@@ -124,14 +118,14 @@ public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
         map.entrySet().forEach(e -> e.getValue().add(e.getKey()) ) ;
     }
 
-    private void exec(String qs, Model model, Map<X, Set<X>> multimap1, Map<X, Set<X>> multimap2) {
+    private void exec(String qs, Graph graph, Map<X, Set<X>> multimap1, Map<X, Set<X>> multimap2) {
         Query query = QueryFactory.create(preamble + "\n" + qs, Syntax.syntaxARQ) ;
-        QueryExecution qexec = QueryExecutionFactory.create(query, model) ;
+        QueryExecution qexec = QueryExecutionFactory.create(query, DatasetGraphFactory.wrap(graph));
         ResultSet rs = qexec.execSelect() ;
         for ( ; rs.hasNext() ; ) {
-            QuerySolution soln = rs.next() ;
-            Node x = soln.get("x").asNode() ;
-            Node y = soln.get("y").asNode() ;
+            Binding soln = rs.nextBinding() ;
+            Node x = soln.get(Var.alloc("x")) ;
+            Node y = soln.get(Var.alloc("y")) ;
             X a = fromNode(x) ;
             X b = fromNode(y) ;
             put(multimap1, a, b) ;

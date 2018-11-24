@@ -15,12 +15,10 @@
  *  information regarding copyright ownership.
  */
 
+/**
+ * 
+ */
+
 package org.seaborne.jena.inf;
 
-import org.apache.jena.sparql.core.Quad ;
-
-@FunctionalInterface
-public interface StreamQuad {
-    public void quad(Quad quad) ;
-}
 

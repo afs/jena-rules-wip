@@ -15,23 +15,12 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf ;
+package org.seaborne.jena.inf;
 
-import org.apache.jena.graph.Graph ;
-import org.apache.jena.graph.Node ;
+import org.apache.jena.sparql.core.Quad ;
 
-/** RDFS setup in Node space */
-public class InferenceSetupRDFS extends BaseInfSetupRDFS<Node>{
-    public InferenceSetupRDFS(Graph vocab) {
-        super(vocab, false) ;
-    }
-
-    public InferenceSetupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
-        super(vocab, incDerivedDataRDFS) ;
-    }
-    
-    @Override
-    protected Node fromNode(Node node) {
-        return node ;
-    }
+@FunctionalInterface
+public interface StreamQuad_X {
+    public void quad(Quad quad) ;
 }
+

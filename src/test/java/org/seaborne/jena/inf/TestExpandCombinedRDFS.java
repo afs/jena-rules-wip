@@ -39,7 +39,7 @@ public class TestExpandCombinedRDFS extends AbstractTestGraphRDFS {
         GraphUtil.addInto(dataTest, vocab) ;
         InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab, true) ;
         StreamRDF stream = StreamRDFLib.graph(testGraphExpanded) ;
-        stream = new InferenceProcessorStreamRDF(stream, setup) ;
+        stream = new InferenceStreamRDF(stream, setup) ;
         StreamOps.graphToStream(dataTest, stream) ;
     }
     

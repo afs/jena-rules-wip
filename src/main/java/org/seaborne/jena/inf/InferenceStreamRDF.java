@@ -31,24 +31,33 @@ import org.apache.jena.sparql.core.Quad ;
  * output to the StreamRDF provided.
  * Stream output may include duplicates.
  */
-public class InferenceProcessorStreamRDF extends StreamRDFWrapper {
-    // Combine into InferenceProcessorRDFS?
+
+public class InferenceStreamRDF extends StreamRDFWrapper {
     private final InferenceSetupRDFS     rdfsSetup ;
     private final InferenceEngineRDFS    rdfs ;
     private boolean                      isTriple = true ;
     private Node                         g ;
 
-    public InferenceProcessorStreamRDF(final StreamRDF output, InferenceSetupRDFS rdfsSetup) {
+    public InferenceStreamRDF(final StreamRDF output, InferenceSetupRDFS rdfsSetup) {
         super(output) ;
         this.rdfsSetup = rdfsSetup ;
         this.rdfs = new InferenceEngineRDFS(rdfsSetup, null) {
             @Override
-            public void derive(Node s, Node p, Node o) {
+            public void output(Node s, Node p, Node o) {
                 if ( isTriple )
                     output.triple(Triple.create(s, p, o)) ;
                 else
                     output.quad(Quad.create(g, s, p, o)) ;
             }
+            
+            @Override
+            public void output(Triple triple) {
+                if ( isTriple )
+                    output.triple(triple) ;
+                else
+                    output.quad(Quad.create(g, triple)) ;
+            }
+
         } ;
     }
 

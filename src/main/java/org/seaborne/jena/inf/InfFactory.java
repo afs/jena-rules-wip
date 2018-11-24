@@ -22,11 +22,12 @@ import org.apache.jena.atlas.lib.NotImplemented ;
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.rdf.model.Model ;
 
+/** Factory for interference-related classes. */ 
 public class InfFactory {
     
     /** Split A-box and T-box */
     public static Graph graphRDFS(Graph data, Graph vocab) {
-        return graphRDFS(data, new InferenceSetupRDFS(vocab, false)) ;
+        return graphRDFS(data, new InferenceSetupRDFS(vocab, data==vocab)) ;
     }
 
     /** Data contains A-box and T-box */ 
@@ -34,6 +35,11 @@ public class InfFactory {
         return graphRDFS(data, new InferenceSetupRDFS(data, true)) ;
     }
 
+    /** Create an {@link InferenceSetupRDFS} */
+    public static InferenceSetupRDFS setupRDF(Graph vocab, boolean incDerivedDataRDFS) {
+        return new InferenceSetupRDFS(vocab, incDerivedDataRDFS);
+    }
+    
     // Modes of 
     //   combined A-box, T-box but hiding derived data
     //   split A-box, T-box but with derived RDFS from data
@@ -55,7 +61,7 @@ public class InfFactory {
     }
 
     public static StreamRDF inf(StreamRDF data, InferenceSetupRDFS setup) {
-        InferenceProcessorRDFS inf = new InferenceProcessorRDFS(setup) ;
+        //InferenceProcessorRDFS inf = new InferenceProcessorRDFS(setup) ;
         throw new NotImplemented() ;
         //return null ; // inf.process(null)
     }

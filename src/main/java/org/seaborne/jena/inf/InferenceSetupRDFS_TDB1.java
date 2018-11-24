@@ -19,35 +19,25 @@ package org.seaborne.jena.inf ;
 
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.graph.Node ;
-import org.apache.jena.rdf.model.Model ;
 import org.apache.jena.tdb.store.DatasetGraphTDB ;
 import org.apache.jena.tdb.store.NodeId ;
 import org.apache.jena.tdb.store.nodetable.NodeTable ;
 
 /** RDFS setup in NodeId space */
-public class InferenceSetupRDFS_TDB extends BaseInfSetupRDFS<NodeId>{
+public class InferenceSetupRDFS_TDB1 extends BaseInfSetupRDFS<NodeId>{
     private final DatasetGraphTDB dsgtdb ;
     private final NodeTable nodetable ;
 
-    public InferenceSetupRDFS_TDB(Graph vocab, DatasetGraphTDB dsgtdb) {
+    public InferenceSetupRDFS_TDB1(Graph vocab, DatasetGraphTDB dsgtdb) {
         this(vocab, dsgtdb, false) ;
     }
 
-    public InferenceSetupRDFS_TDB(Graph vocab, DatasetGraphTDB dsgtdb, boolean incDerivedDataRDFS) {
+    public InferenceSetupRDFS_TDB1(Graph vocab, DatasetGraphTDB dsgtdb, boolean incDerivedDataRDFS) {
         super(vocab, incDerivedDataRDFS) ;
         this.dsgtdb = dsgtdb ;
         this.nodetable = dsgtdb.getTripleTable().getNodeTupleTable().getNodeTable() ;
     }
-    public InferenceSetupRDFS_TDB(Model vocab, DatasetGraphTDB dsgtdb) {
-        this(vocab, dsgtdb, false) ;
-    }
     
-    public InferenceSetupRDFS_TDB(Model vocab, DatasetGraphTDB dsgtdb, boolean incDerivedDataRDFS) {
-       super(vocab, incDerivedDataRDFS) ;
-       this.dsgtdb = dsgtdb ;
-       this.nodetable = dsgtdb.getTripleTable().getNodeTupleTable().getNodeTable() ;
-    }
-
     @Override
     protected NodeId fromNode(Node node) {
         NodeId n = nodetable.getAllocateNodeId(node) ;

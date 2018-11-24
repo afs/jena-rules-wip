@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf;
+package org.seaborne.jena.inf.dev;
 
 public class Description {
     /*
@@ -26,7 +26,7 @@ public class Description {
      * 
      * InferenceEngineRDFS.process(s,p,o)
      *    apply an InferenceSetupRDFS
-     *    Output to SinkTriple 
+     *    Output to Consumer<Triple>
      * 
      * InferenceProcessorRDFS
      *   Various .process

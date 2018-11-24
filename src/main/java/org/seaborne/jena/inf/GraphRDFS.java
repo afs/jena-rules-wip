@@ -24,12 +24,10 @@ import static org.seaborne.jena.inf.InfGlobal.rdfsSubClassOf ;
 import static org.seaborne.jena.migrate.Lib8.stream;
 
 import java.util.* ;
+import java.util.function.Function;
 import java.util.stream.Stream ;
 
 import org.apache.jena.atlas.iterator.SingletonIterator ;
-import org.slf4j.Logger ;
-import org.slf4j.LoggerFactory ;
-
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.graph.Node ;
 import org.apache.jena.graph.Triple ;
@@ -37,6 +35,8 @@ import org.apache.jena.sparql.graph.GraphWrapper ;
 import org.apache.jena.util.iterator.ExtendedIterator ;
 import org.apache.jena.util.iterator.NullIterator ;
 import org.apache.jena.util.iterator.WrappedIterator ;
+import org.slf4j.Logger ;
+import org.slf4j.LoggerFactory ;
 
 /** RDFS graph over a plain base graph.
  *  Precalculated RDFS.
@@ -55,7 +55,7 @@ public class GraphRDFS extends GraphWrapper {
     
     @Override
     public ExtendedIterator<Triple> find(Triple m) {
-        return find(m.getMatchSubject(), m.getMatchPredicate(), m.getMatchObject()) ;
+        return find(m.getSubject(), m.getPredicate(), m.getObject()) ;
     }
 
     @Override
@@ -72,11 +72,11 @@ public class GraphRDFS extends GraphWrapper {
     static class Find3_Graph implements StreamGraph<Triple, Node> {
         private final Graph graph ;
         private final InferenceSetupRDFS setup ;
-        private final InferenceProcessorRDFS engine ;
+        //private final InferenceEngineRDFS engine ;
+        //private final Function<Triple, Stream<Triple>> engine;
 
         Find3_Graph(InferenceSetupRDFS setup, Graph graph) {
             this.setup = setup ;
-            this.engine = new InferenceProcessorRDFS(setup) ;
             this.graph = graph ;
         }
 
@@ -100,6 +100,7 @@ public class GraphRDFS extends GraphWrapper {
 
             // Subproperties of rdf:type
 
+            // ?? rdf:type ??
             if ( rdfType.equals(predicate) ) {
                 if ( isTerm(subject) ) {
                     if ( isTerm(object) )
@@ -114,10 +115,11 @@ public class GraphRDFS extends GraphWrapper {
                 }
             }
 
+            // ?? ANY ??
             if ( isANY(predicate) ) {
                 if ( isTerm(subject) ) {
                     if ( isTerm(object) )
-                        return find_X_ANY_T(subject, object) ;
+                        return find_X_ANY_Y(subject, object) ;
                     else
                         return find_X_ANY_ANY(subject) ;
                 } else {
@@ -128,7 +130,7 @@ public class GraphRDFS extends GraphWrapper {
                 }
             }
             
-            // find_??_term_??
+            // ?? term ??
             return find_subproperty(subject, predicate, object) ; 
         }
 
@@ -150,7 +152,6 @@ public class GraphRDFS extends GraphWrapper {
                 triples = Stream.concat(triples, stream) ;
             }
             return triples ;
-
         }
 
         private Iterator<Triple> singletonIterator(Node s, Node p, Node o) {
@@ -212,7 +213,7 @@ public class GraphRDFS extends GraphWrapper {
             return stream ;
         }
 
-        private Stream<Triple> find_X_ANY_T(Node subject, Node object) {
+        private Stream<Triple> find_X_ANY_Y(Node subject, Node object) {
             // Start at X.
             // (X ? ?) - inference - project "X ? T"
             // also (? ? X) if there is a range clause. 
@@ -226,7 +227,7 @@ public class GraphRDFS extends GraphWrapper {
 
         private Stream<Triple> find_X_ANY_ANY(Node subject) {
             // Can we do better?
-            return find_X_ANY_T(subject, Node.ANY) ;
+            return find_X_ANY_Y(subject, Node.ANY) ;
         }
 
         private Stream<Triple> find_ANY_ANY_T(Node object) {
@@ -279,12 +280,20 @@ public class GraphRDFS extends GraphWrapper {
             return stream ;
         }
         
+        // Work round the fact can't write "setup" directly into applyInf (
+        private final InferenceEngineRDFS engine(List<Triple> acc) {
+            return LibInf.engine(setup, acc);
+        }
+        
+        // Unlike LibInf.process, this is a fixed function create once when the class is instantiated.
+        private final Function<Triple, Stream<Triple>> applyInf = triple-> {
+            List<Triple> x = new ArrayList<>() ;
+            engine(x).process(triple) ;
+            return x.stream() ;
+        };
+        
         private Stream<Triple> inf(Stream<Triple> stream) {
-            return stream.flatMap(triple -> {
-                List<Triple> x = new ArrayList<>() ;
-                engine.process(x, triple) ;
-                return x.stream() ;
-            } ) ;
+            return stream.flatMap(applyInf::apply);
         }
 
         // XXX Rewrite ?? "Set" might mean this is best, as is materialization.
@@ -398,6 +407,4 @@ public class GraphRDFS extends GraphWrapper {
     private static boolean isTerm(Node node) {
         return ( node != null ) && ! Node.ANY.equals(node) ;
     }
-
 }
-

@@ -15,7 +15,7 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf;
+package org.seaborne.jena.inf.dev;
 
 import static org.apache.jena.sparql.sse.SSE.str ;
 
@@ -40,7 +40,8 @@ import org.apache.jena.tdb.TDBFactory ;
 import org.apache.jena.tdb.store.DatasetGraphTDB ;
 import org.apache.jena.tdb.transaction.DatasetGraphTransaction ;
 import org.apache.jena.util.FileUtils ;
-import org.apache.jena.util.iterator.ExtendedIterator ; 
+import org.apache.jena.util.iterator.ExtendedIterator ;
+import org.seaborne.jena.inf.*; 
 
 public class DevRDFS {
     static { LogCtl.setLog4j() ; }
@@ -117,10 +118,8 @@ public class DevRDFS {
 
         // TDB
         
-        InferenceSetupRDFS_TDB setup = new InferenceSetupRDFS_TDB(vocab, dsg, false) ;
+        InferenceSetupRDFS_TDB1 setup = new InferenceSetupRDFS_TDB1(vocab.getGraph(), dsg, false) ;
         //Graph graph = new GraphRDFS(setup, data.getGraph()) ;
-        
-        
     }
     
     public static void plain(String...argv) throws IOException {
@@ -138,7 +137,7 @@ public class DevRDFS {
         String rules = FileUtils.readWholeFileAsUTF8(RULES_FILE) ;
         rules = rules.replaceAll("#[^\\n]*", "") ;
 
-        InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab, false) ;
+        InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab.getGraph(), false) ;
         
         Reasoner reasoner = new GenericRuleReasoner(Rule.parseRules(rules));
         InfModel m = ModelFactory.createInfModel(reasoner, vocab, data);
@@ -161,26 +160,33 @@ public class DevRDFS {
         String VOCAB_FILE = "vocab.ttl" ;
         String RULES_FILE = DIR+"/rdfs-min.rules" ;
 
+        System.out.println("---- Schema");
         Model vocab = RDFDataMgr.loadModel(VOCAB_FILE) ;
+        RDFDataMgr.write(System.out, vocab, Lang.TTL);
+        
+        System.out.println("---- Data");
         Model data = RDFDataMgr.loadModel(DATA_FILE) ;
+        RDFDataMgr.write(System.out, data, Lang.TTL);
         
-        String rules = FileUtils.readWholeFileAsUTF8(RULES_FILE) ;
-        rules = rules.replaceAll("#[^\\n]*", "") ;
-
-        InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab, combined) ;
-        
-        Reasoner reasoner = new GenericRuleReasoner(Rule.parseRules(rules));
-        InfModel m = ModelFactory.createInfModel(reasoner, vocab, data);
+        // Jena rules RDFS 
+//        System.out.println("---- Rules");
+//        String rules = FileUtils.readWholeFileAsUTF8(RULES_FILE) ;
+//        System.out.print(rules);
+//        rules = rules.replaceAll("#[^\\n]*", "") ;
+//        System.out.println();
+//        Reasoner reasoner = new GenericRuleReasoner(Rule.parseRules(rules));
+//        InfModel m = ModelFactory.createInfModel(reasoner, vocab, data);
         
         // Expansion Graph
         Graph graphExpanded = Factory.createDefaultGraph() ;
+        
+        InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab.getGraph(), combined) ;
         StreamRDF stream = StreamRDFLib.graph(graphExpanded) ;
         // Apply inferences.
-        stream = new InferenceProcessorStreamRDF(stream, setup) ;
+        stream = new InferenceStreamRDF(stream, setup) ;
         sendToStream(data.getGraph(), stream) ;
         RDFDataMgr.write(System.out, graphExpanded, Lang.TTL) ;
     }
-    
 
     private static void sendToStream(Graph graph, StreamRDF stream) {
         graph.getPrefixMapping().getNsPrefixMap().forEach(stream::prefix) ;

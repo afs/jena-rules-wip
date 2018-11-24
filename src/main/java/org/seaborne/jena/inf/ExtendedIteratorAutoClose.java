@@ -24,6 +24,7 @@ import org.apache.jena.util.iterator.ExtendedIterator ;
 
 /** Provide autoclose to an ExtendedIterator */ 
 public class ExtendedIteratorAutoClose<T> implements Iterator<T> {
+    private boolean isClosed = false;
     private ExtendedIterator<T> underlying ;
 
     public ExtendedIteratorAutoClose(ExtendedIterator<T> underlying) {
@@ -34,14 +35,22 @@ public class ExtendedIteratorAutoClose<T> implements Iterator<T> {
     public boolean hasNext() {
         boolean b = underlying.hasNext() ;
         if ( !b )
-            underlying.close();
+            closeWrapped();
         return b ;
     }
 
     @Override
     public T next() {
         try { return underlying.next() ; }
-        catch (NoSuchElementException ex) { underlying.close() ; throw ex ; }
+        catch (NoSuchElementException ex) { closeWrapped() ; throw ex ; }
+    }
+    
+    private void closeWrapped() {
+        if ( isClosed )
+            return ;
+        isClosed = true;
+        underlying.close();
+        
     }
 }
 

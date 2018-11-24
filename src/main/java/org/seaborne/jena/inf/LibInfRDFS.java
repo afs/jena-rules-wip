@@ -26,73 +26,57 @@ import java.util.stream.Stream ;
 import org.apache.jena.graph.Node ;
 import org.apache.jena.graph.Triple ;
 
-/** An inference processor for RDFS.
- * Adds derived triples to an accumulator.
+/** 
+ * Apply an {@link InferenceEngineRDFS} to various ways triples are grouped together. 
  */
-public class InferenceProcessorRDFS {
-    private InferenceSetupRDFS setup ;
-    private Collection<Triple> acc = null ;
-    private final InferenceEngineRDFS engine ;
-    private StreamTriple sink ;
+public class LibInfRDFS {
+    // XXX Needed??
     
-    // Add iterator cases
-    
-    public InferenceProcessorRDFS(InferenceSetupRDFS setup) {
-        this.setup = setup ;
-        this.sink = (t)->acc.add(t); // Not acc:add. - acc is null AM.
-        this.engine = new InferenceEngineRDFS(setup, sink) ;
-    }
-
     /** Calculate the set of triples from processing an iterator of triples */
-    public Set<Triple> process(Stream<Triple> stream) {
+    public static Set<Triple> process(InferenceSetupRDFS setup, Stream<Triple> stream) {
         Set<Triple> acc = new HashSet<>() ;
-        process(acc, stream) ;
+        process(setup, acc, stream) ;
         return acc ;
     }
 
     /** Calculate the set of triples from processing an iterator of triples */
-    public void process(Collection<Triple> acc, Stream<Triple> stream) {
+    public static void process(InferenceSetupRDFS setup, Collection<Triple> acc, Stream<Triple> stream) {
         stream.forEach(triple ->
-            process(acc, triple.getSubject(), triple.getPredicate(), triple.getObject()) ) ;
+            process(setup, acc, triple.getSubject(), triple.getPredicate(), triple.getObject()) ) ;
     }
 
     /** Calculate the set of triples from processing an iterator of triples */
-    public Set<Triple> process(Iterator<Triple> iter) {
+    public static Set<Triple> process(InferenceSetupRDFS setup, Iterator<Triple> iter) {
         Set<Triple> acc = new HashSet<>() ;
-        process(acc, iter) ;
+        process(setup, acc, iter) ;
         return acc ;
     }
 
     /** Calculate the set of triples from processing an iterator of triples */
-    public void process(Collection<Triple> acc, Iterator<Triple> iter) {
+    public static void process(InferenceSetupRDFS setup, Collection<Triple> acc, Iterator<Triple> iter) {
         iter.forEachRemaining(triple ->
-            process(acc, triple.getSubject(), triple.getPredicate(), triple.getObject()) ) ;
+            process(setup, acc, triple.getSubject(), triple.getPredicate(), triple.getObject()) ) ;
     }
     
     /** Calculate the set of triples from processing a triple */
-    public Set<Triple> process(Triple t) {
-        return process(t.getSubject(), t.getPredicate(), t.getObject()) ;
+    public static Set<Triple> process(InferenceSetupRDFS setup, Triple t) {
+        return process(setup, t.getSubject(), t.getPredicate(), t.getObject()) ;
     }
     
     /** Calculate the set of triples from processing a triple */
-    public Set<Triple> process(Node s, Node p, Node o) {
+    public static Set<Triple> process(InferenceSetupRDFS setup, Node s, Node p, Node o) {
         Set<Triple> acc = new HashSet<>() ;
-        process(acc, s, p, o) ;
+        process(setup, acc, s, p, o) ;
         return acc ;
     }
 
     /** Accumulate the triples from processing triple t */
-    public void process(Collection<Triple> acc, Triple t) {
-        process(acc, t.getSubject(), t.getPredicate(), t.getObject()) ;
+    public static void process(InferenceSetupRDFS setup, Collection<Triple> acc, Triple t) {
+        process(setup, acc, t.getSubject(), t.getPredicate(), t.getObject()) ;
     }
     
     /** Accumulate the triples from processing triple t */
-    public void process(Collection<Triple> acc, Node s, Node p, Node o) {
-        // Threading!
-        acc.add(Triple.create(s,p,o)) ;
-        this.acc = acc ;
-        engine.process(s, p, o) ;
-        this.acc = null ;
+    public static void process(InferenceSetupRDFS setup, Collection<Triple> acc, Node s, Node p, Node o) {
+        LibInf.process(setup, acc, s, p, o);
     }
-
 }

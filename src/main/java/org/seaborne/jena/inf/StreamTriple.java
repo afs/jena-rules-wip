@@ -23,4 +23,3 @@ import org.apache.jena.graph.Triple ;
 public interface StreamTriple {
     public void triple(Triple triple) ;
 }
-

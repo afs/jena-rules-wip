@@ -35,7 +35,7 @@ public class TestExpandSplitRDFS extends AbstractTestGraphRDFS {
         testGraphExpanded = GraphFactory.createDefaultGraph() ;
         InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab, false) ;
         StreamRDF stream = StreamRDFLib.graph(testGraphExpanded) ;
-        stream = new InferenceProcessorStreamRDF(stream, setup) ;
+        stream = new InferenceStreamRDF(stream, setup) ;
         StreamOps.graphToStream(data, stream) ;
     }
     

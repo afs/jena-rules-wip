@@ -15,9 +15,20 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf;
+package org.seaborne.jena.inf.dev;
 
 public class DevNotesInf {
+    // InferenceEngineRDFS -> switch from "derive" to a function.
+    // Is the class naming logical? 
+    // StreamTriple, StreamQuad - remove?
+    //    StreamTriple - used in InferenceEngineRDFS, InferenceProcessorRDFS
+    
+    // Stream<T> version of InferenceEngineRDFS (flatMap)
+    // Or Iterator version.
+    //    Iter.flatMap(Function<X, Iterator<X>>)
+    
+    // Special transitive processor
+    
     
     /* See Description */
     
@@ -45,13 +56,13 @@ public class DevNotesInf {
         rdfs:subClassOf
         rdfs:subPropertyOf
         
-        owl:equivalentClass
+        owl:equivalentClass 
         owl:equivalentProperty
         
         owl:sameAs
         owl:inverseOf
         (no reflexive)
-        owl:TransitiveProperty 
+        owl:TransitiveProperty
         owl:SymmetricProperty
 
         owl:FunctionalProperty
