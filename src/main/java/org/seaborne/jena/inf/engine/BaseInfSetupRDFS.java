@@ -15,7 +15,7 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf ;
+package org.seaborne.jena.inf.engine ;
 
 import java.util.* ;
 

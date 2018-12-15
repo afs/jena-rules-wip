@@ -32,7 +32,7 @@ import org.apache.jena.sparql.engine.binding.BindingFactory ;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton ;
 import org.apache.jena.sparql.engine.iterator.QueryIterTriplePattern ;
 import org.apache.jena.sparql.graph.GraphFactory ;
-import org.seaborne.jena.inf.StreamTriple ;
+import org.seaborne.jena.inf.engine.StreamTriple;
 
 public class Forwards {
     

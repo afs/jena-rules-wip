@@ -43,9 +43,13 @@ import org.apache.jena.tdb2.DatabaseMgr;
 import org.apache.jena.util.FileUtils ;
 import org.apache.jena.util.iterator.ExtendedIterator ;
 import org.apache.jena.vocabulary.RDF;
-import org.seaborne.jena.inf.*;
-import org.seaborne.jena.inf.tdb.InferenceSetupRDFS_TDB1;
-import org.seaborne.jena.inf.tdb.InferenceSetupRDFS_TDB2; 
+import org.seaborne.jena.inf.GraphRDFS;
+import org.seaborne.jena.inf.InfFactory;
+import org.seaborne.jena.inf.InferenceSetupRDFS;
+import org.seaborne.jena.inf.InferenceStreamRDFS;
+import org.seaborne.jena.inf.engine.InfGlobal;
+import org.seaborne.jena.inf.tdb.InfSetupRDFS_TDB1;
+import org.seaborne.jena.inf.tdb.InfSetupRDFS_TDB2; 
 
 public class DevRDFS {
     static { LogCtl.setLog4j() ; }
@@ -123,7 +127,7 @@ public class DevRDFS {
 //        RDFDataMgr.write(System.out, data, Lang.TTL);
         System.out.println("----");
         
-        InferenceSetupRDFS setup = new InferenceSetupRDFS_Node(vocab.getGraph(), false) ;
+        InferenceSetupRDFS setup = InfFactory.setupRDF(vocab.getGraph(), false) ;
         Graph graph = new GraphRDFS(setup, data.getGraph()) ;
         
         Node n_a = SSE.parseNode(":a");
@@ -152,12 +156,12 @@ public class DevRDFS {
 
         // TDB1
         DatasetGraph dsg1 = TDBFactory.createDatasetGraph();
-        InferenceSetupRDFS_TDB1 setup1 = new InferenceSetupRDFS_TDB1(vocab.getGraph(), dsg1, false) ;
+        InfSetupRDFS_TDB1 setup1 = new InfSetupRDFS_TDB1(vocab.getGraph(), dsg1, false) ;
         //Graph graph = new GraphRDFS(setup1, data.getGraph()) ;
         // TDB2
         
         DatasetGraph dsg2 = DatabaseMgr.createDatasetGraph();
-        InferenceSetupRDFS_TDB2 setup2 = new InferenceSetupRDFS_TDB2(vocab.getGraph(), dsg2, false) ;
+        InfSetupRDFS_TDB2 setup2 = new InfSetupRDFS_TDB2(vocab.getGraph(), dsg2, false) ;
     }
     
     public static void plain(String...argv) throws IOException {
@@ -175,7 +179,7 @@ public class DevRDFS {
         String rules = FileUtils.readWholeFileAsUTF8(RULES_FILE) ;
         rules = rules.replaceAll("#[^\\n]*", "") ;
 
-        InferenceSetupRDFS setup = new InferenceSetupRDFS_Node(vocab.getGraph(), false) ;
+        InferenceSetupRDFS setup = InfFactory.setupRDF(vocab.getGraph(), false) ;
         
         Reasoner reasoner = new GenericRuleReasoner(Rule.parseRules(rules));
         InfModel m = ModelFactory.createInfModel(reasoner, vocab, data);
@@ -219,7 +223,7 @@ public class DevRDFS {
         // Expansion Graph
         Graph graphExpanded = Factory.createDefaultGraph() ;
         
-        InferenceSetupRDFS setup = new InferenceSetupRDFS_Node(vocab.getGraph(), combined) ;
+        InferenceSetupRDFS setup = InfFactory.setupRDF(vocab.getGraph(), combined) ;
         StreamRDF stream = StreamRDFLib.graph(graphExpanded) ;
         // Apply inferences.
         stream = new InferenceStreamRDFS(stream, setup) ;

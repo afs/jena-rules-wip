@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf;
+package org.seaborne.jena.inf.engine;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +25,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.jena.graph.Triple;
+import org.seaborne.jena.inf.InferenceSetupRDFS;
 
 public class LibInf {
 //    /** 

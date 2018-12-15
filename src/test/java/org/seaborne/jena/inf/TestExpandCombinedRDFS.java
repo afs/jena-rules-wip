@@ -37,7 +37,7 @@ public class TestExpandCombinedRDFS extends AbstractTestGraphRDFS {
         testGraphExpanded = GraphFactory.createDefaultGraph() ;
         GraphUtil.addInto(dataTest, data) ;
         GraphUtil.addInto(dataTest, vocab) ;
-        InferenceSetupRDFS setup = new InferenceSetupRDFS_Node(vocab, true) ;
+        InferenceSetupRDFS setup = InfFactory.setupRDF(vocab, true) ;
         StreamRDF stream = StreamRDFLib.graph(testGraphExpanded) ;
         stream = new InferenceStreamRDFS(stream, setup) ;
         StreamOps.graphToStream(dataTest, stream) ;

@@ -15,7 +15,7 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf;
+package org.seaborne.jena.inf.engine;
 
 import java.util.Objects;
 import java.util.Set;
@@ -25,6 +25,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.seaborne.jena.inf.InferenceSetupRDFS;
 
 /**
  * Apply a fixed set of inference rules to a triple.
@@ -38,13 +39,12 @@ import org.apache.jena.vocabulary.RDFS;
  * <li>rdfs:domain</li>
  * <li>rdfs:range</li>
  * </ul>
- * 
  * Usage: {@link #process(Node, Node, Node)}, which call an action ({@code Consumer<Triple>})
  */
 
 public class InferenceEngineRDFS {
-    // Needed?
-    // Library-isz?
+    // Core of streaming
+    // Needed? Library-isz?
     
     // TODO: Other RDFS+ 
     //   rdfs:member

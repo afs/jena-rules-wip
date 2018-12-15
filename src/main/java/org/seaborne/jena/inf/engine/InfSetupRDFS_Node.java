@@ -15,25 +15,23 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf ;
+package org.seaborne.jena.inf.engine ;
 
-import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Graph ;
 import org.apache.jena.graph.Node ;
 
 /** RDFS setup in Node space */
-public class InferenceSetupRDFS_Node extends BaseInfSetupRDFS<Node> implements InferenceSetupRDFS {
-
-    /** {@code incDerivedDataRDFS} cause the engine to look for RDFS relationships in the data
-     * as if TBox (rules) and ABox (ground data) are one unit.
-     * Set true if abox == tbox.
-     * Can choose false or true if abox != tbox.
-     */  
-    public InferenceSetupRDFS_Node(Graph vocab, boolean incDerivedDataRDFS) {
-        super(vocab, incDerivedDataRDFS);
+public class InfSetupRDFS_Node extends BaseInfSetupRDFS<Node> {
+    public InfSetupRDFS_Node(Graph vocab) {
+        super(vocab, false) ;
     }
 
+    public InfSetupRDFS_Node(Graph vocab, boolean incDerivedDataRDFS) {
+        super(vocab, incDerivedDataRDFS) ;
+    }
+    
     @Override
     protected Node fromNode(Node node) {
-        return node;
+        return node ;
     }
 }

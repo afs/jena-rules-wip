@@ -17,7 +17,7 @@
 
 package org.seaborne.jena.inf;
 
-import static org.seaborne.jena.inf.InfGlobal.rdfType ;
+import static org.seaborne.jena.inf.engine.InfGlobal.rdfType;
 
 import java.io.IOException ;
 import java.io.PrintStream ;
@@ -42,6 +42,7 @@ import org.apache.jena.reasoner.rulesys.Rule ;
 import org.apache.jena.util.FileUtils ;
 import org.junit.Assert ;
 import org.junit.Test ;
+import org.seaborne.jena.inf.engine.InfGlobal;
 import org.seaborne.jena.migrate.Lib8;
 
 /** Testing based on a graph under test ({@link #getTestGraph()}) and a reference graph

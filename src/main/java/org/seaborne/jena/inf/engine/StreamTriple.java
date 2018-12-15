@@ -15,23 +15,11 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf ;
+package org.seaborne.jena.inf.engine;
 
-import org.apache.jena.graph.Graph ;
-import org.apache.jena.graph.Node ;
+import org.apache.jena.graph.Triple ;
 
-/** RDFS setup in Node space */
-public class InfSetupRDFS_Node extends BaseInfSetupRDFS<Node> {
-    public InfSetupRDFS_Node(Graph vocab) {
-        super(vocab, false) ;
-    }
-
-    public InfSetupRDFS_Node(Graph vocab, boolean incDerivedDataRDFS) {
-        super(vocab, incDerivedDataRDFS) ;
-    }
-    
-    @Override
-    protected Node fromNode(Node node) {
-        return node ;
-    }
+@FunctionalInterface
+public interface StreamTriple {
+    public void triple(Triple triple) ;
 }

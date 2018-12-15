@@ -20,28 +20,27 @@ package org.seaborne.jena.inf.tdb ;
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.graph.Node ;
 import org.apache.jena.sparql.core.DatasetGraph;
-import org.apache.jena.tdb2.TDBException;
-import org.apache.jena.tdb2.store.DatasetGraphTDB ;
-import org.apache.jena.tdb2.store.NodeId ;
-import org.apache.jena.tdb2.store.nodetable.NodeTable ;
-import org.apache.jena.tdb2.sys.TDBInternal;
-import org.seaborne.jena.inf.BaseInfSetupRDFS;
+import org.apache.jena.tdb.TDBException;
+import org.apache.jena.tdb.store.DatasetGraphTDB ;
+import org.apache.jena.tdb.store.NodeId ;
+import org.apache.jena.tdb.store.nodetable.NodeTable ;
+import org.apache.jena.tdb.sys.TDBInternal;
+import org.seaborne.jena.inf.engine.BaseInfSetupRDFS;
 
-/** RDFS setup in NodeId space (TDB2) */
-public class InferenceSetupRDFS_TDB2 extends BaseInfSetupRDFS<NodeId>{
+/** RDFS setup in NodeId space (TDB1) */
+public class InfSetupRDFS_TDB1 extends BaseInfSetupRDFS<NodeId> {
     private final DatasetGraphTDB dsgtdb ;
     private final NodeTable nodetable ;
 
-    public InferenceSetupRDFS_TDB2(Graph vocab, DatasetGraph dsg) {
+    public InfSetupRDFS_TDB1(Graph vocab, DatasetGraph dsg) {
         this(vocab, dsg, false) ;
     }
 
-    public InferenceSetupRDFS_TDB2(Graph vocab, DatasetGraph dsg, boolean incDerivedDataRDFS) {
-        
+    public InfSetupRDFS_TDB1(Graph vocab, DatasetGraph dsg, boolean incDerivedDataRDFS) {
         super(vocab, incDerivedDataRDFS) ;
         this.dsgtdb =  TDBInternal.getDatasetGraphTDB(dsg);
         if ( dsgtdb == null )
-            throw new IllegalArgumentException("Not a TDB2 DatasetGraph");
+            throw new IllegalArgumentException("Not a TDB1 DatasetGraph");
         this.nodetable = dsgtdb.getTripleTable().getNodeTupleTable().getNodeTable() ;
     }
     

@@ -18,6 +18,14 @@
 package org.seaborne.jena.inf.dev;
 
 public class DevNotesInf {
+    // First - MVP - GraphRDFS working in Node space.
+    
+    // TODO: Other RDFS+ 
+    //   rdfs:member
+    //   list:member
+
+    
+    
 //    IF { body = BGP+paths+FILTER+BIND }
 //    THEN { BGP }
 //
@@ -37,6 +45,10 @@ public class DevNotesInf {
 //        sp:strictSubPropertyOf
 //
 
+    // Redesign built-into Node/engine
+    //   TDB cache is enough?
+    //   Need to split InfSetupRDFS<T> > InferenceSetupRDFS
+    //    so can have a converted from InfSetupRDFS<NodeId> to InferenceSetupRDFS
     
     // StreamTriple, StreamQuad - remove?
     //    StreamTriple - used in InferenceEngineRDFS, InferenceProcessorRDFS
