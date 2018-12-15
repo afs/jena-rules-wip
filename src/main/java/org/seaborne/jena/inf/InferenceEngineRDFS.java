@@ -19,6 +19,7 @@ package org.seaborne.jena.inf;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -43,6 +44,7 @@ import org.apache.jena.vocabulary.RDFS;
 
 public class InferenceEngineRDFS {
     // Needed?
+    // Library-isz?
     
     // TODO: Other RDFS+ 
     //   rdfs:member
@@ -61,14 +63,18 @@ public class InferenceEngineRDFS {
 
     public InferenceEngineRDFS(InferenceSetupRDFS state, StreamTriple delivery) {
         this.setup = Objects.requireNonNull(state);
-        this.delivery = delivery; // Maybe null if overriding "output" Objects.requireNonNull(delivery);
+        this.delivery = Objects.requireNonNull(delivery);
     }
 
+    /** Apply RDFS rules based on the triple, including output of the triple itself. */
     public void process(Triple triple) {
         // Output original.
         output(triple);
         infer(triple.getSubject(), triple.getPredicate(), triple.getObject());
     }
+    
+    public static void process(InferenceSetupRDFS state, Node s, Node p, Node o, Consumer<Triple> action) {}
+    public void process(Node s, Node p, Node o, Consumer<Triple> action) {}
     
     public void process(Node s, Node p, Node o) {
         // Output original.
@@ -76,6 +82,12 @@ public class InferenceEngineRDFS {
         infer(s, p, o);
     }
     
+    /** Apply RDFS rules based on the triple; do not include the triple itself. */
+    public void infer(Triple triple) {
+        infer(triple.getSubject(), triple.getPredicate(), triple.getObject());
+    }
+    
+    /** Apply RDFS rules based on the triple; do not include the triple itself. */
     public void infer(Node s, Node p, Node o) {
         // Inferred.
         subClass(s, p, o);
@@ -86,8 +98,7 @@ public class InferenceEngineRDFS {
         range(s, p, o);
     }
 
-    /** Any triple derived is sent to this method - does not include the trigger triple
-     */
+    /** Any triple derived is sent to this method. */
     private void derive(Node s, Node p, Node o) {
         output(s, p, o);
     }
@@ -106,7 +117,7 @@ public class InferenceEngineRDFS {
      * [rdfs8: (?a rdfs:subClassOf ?b), (?b rdfs:subClassOf ?c) -> (?a rdfs:subClassOf ?c)]
      * [rdfs9: (?x rdfs:subClassOf ?y), (?a rdf:type ?x) -> (?a rdf:type ?y)]
      */
-    final private void subClass(Node s, Node p, Node o) {
+    private void subClass(Node s, Node p, Node o) {
         if ( p.equals(rdfType) ) {
             Set<Node> x = setup.getSuperClasses(o);
             x.forEach(c -> derive(s, rdfType, c));

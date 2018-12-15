@@ -23,6 +23,7 @@ import java.io.IOException ;
 import java.util.Collection ;
 import java.util.List ;
 
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.logging.LogCtl ;
 import org.apache.jena.graph.* ;
 import org.apache.jena.rdf.model.InfModel ;
@@ -35,13 +36,16 @@ import org.apache.jena.riot.Lang ;
 import org.apache.jena.riot.RDFDataMgr ;
 import org.apache.jena.riot.system.StreamRDF ;
 import org.apache.jena.riot.system.StreamRDFLib ;
+import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.sse.SSE ;
 import org.apache.jena.tdb.TDBFactory ;
-import org.apache.jena.tdb.store.DatasetGraphTDB ;
-import org.apache.jena.tdb.transaction.DatasetGraphTransaction ;
+import org.apache.jena.tdb2.DatabaseMgr;
 import org.apache.jena.util.FileUtils ;
 import org.apache.jena.util.iterator.ExtendedIterator ;
-import org.seaborne.jena.inf.*; 
+import org.apache.jena.vocabulary.RDF;
+import org.seaborne.jena.inf.*;
+import org.seaborne.jena.inf.tdb.InferenceSetupRDFS_TDB1;
+import org.seaborne.jena.inf.tdb.InferenceSetupRDFS_TDB2; 
 
 public class DevRDFS {
     static { LogCtl.setLog4j() ; }
@@ -100,12 +104,42 @@ public class DevRDFS {
     static Graph g_rdfs3 ;
     
     public static void main(String...argv) throws IOException {
+        basic();
         //plain() ;
-        expand() ;
+        //expand() ;
     }
     
+
+    private static void basic() {
+        String DATA_FILE = "data.ttl" ;
+        String VOCAB_FILE = "vocab.ttl" ;
+        
+        System.out.println("---- Schema");
+        Model vocab = RDFDataMgr.loadModel(VOCAB_FILE) ;
+//        RDFDataMgr.write(System.out, vocab, Lang.TTL);
+        
+        System.out.println("---- Data");
+        Model data = RDFDataMgr.loadModel(DATA_FILE) ;
+//        RDFDataMgr.write(System.out, data, Lang.TTL);
+        System.out.println("----");
+        
+        InferenceSetupRDFS setup = new InferenceSetupRDFS_Node(vocab.getGraph(), false) ;
+        Graph graph = new GraphRDFS(setup, data.getGraph()) ;
+        
+        Node n_a = SSE.parseNode(":a");
+        Node n_T = SSE.parseNode(":T");
+        Node n_T2 = SSE.parseNode(":T2");
+        Node n_b = SSE.parseNode(":b");
+        
+        Iter.print(graph.find(n_a, RDF.Nodes.type, null));
+        System.out.println("--");
+        Iter.print(graph.find(null, RDF.Nodes.type, n_T2));
+        System.out.println("--");
+        Iter.print(graph.find(n_b, RDF.Nodes.type, null));
+        System.out.println("----");
+    }
+
     public static void mainTDB(String...argv) throws IOException {
-        DatasetGraphTDB dsg = ((DatasetGraphTransaction)TDBFactory.createDatasetGraph()).get() ;
         String DIR = "testing/Inf" ;
         String DATA_FILE = DIR+"/rdfs-data.ttl" ;
         String VOCAB_FILE = DIR+"/rdfs-vocab.ttl" ;
@@ -116,10 +150,14 @@ public class DevRDFS {
         String rules = FileUtils.readWholeFileAsUTF8(RULES_FILE) ;
         rules = rules.replaceAll("#[^\\n]*", "") ;
 
-        // TDB
+        // TDB1
+        DatasetGraph dsg1 = TDBFactory.createDatasetGraph();
+        InferenceSetupRDFS_TDB1 setup1 = new InferenceSetupRDFS_TDB1(vocab.getGraph(), dsg1, false) ;
+        //Graph graph = new GraphRDFS(setup1, data.getGraph()) ;
+        // TDB2
         
-        InferenceSetupRDFS_TDB1 setup = new InferenceSetupRDFS_TDB1(vocab.getGraph(), dsg, false) ;
-        //Graph graph = new GraphRDFS(setup, data.getGraph()) ;
+        DatasetGraph dsg2 = DatabaseMgr.createDatasetGraph();
+        InferenceSetupRDFS_TDB2 setup2 = new InferenceSetupRDFS_TDB2(vocab.getGraph(), dsg2, false) ;
     }
     
     public static void plain(String...argv) throws IOException {
@@ -137,7 +175,7 @@ public class DevRDFS {
         String rules = FileUtils.readWholeFileAsUTF8(RULES_FILE) ;
         rules = rules.replaceAll("#[^\\n]*", "") ;
 
-        InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab.getGraph(), false) ;
+        InferenceSetupRDFS setup = new InferenceSetupRDFS_Node(vocab.getGraph(), false) ;
         
         Reasoner reasoner = new GenericRuleReasoner(Rule.parseRules(rules));
         InfModel m = ModelFactory.createInfModel(reasoner, vocab, data);
@@ -177,13 +215,14 @@ public class DevRDFS {
 //        Reasoner reasoner = new GenericRuleReasoner(Rule.parseRules(rules));
 //        InfModel m = ModelFactory.createInfModel(reasoner, vocab, data);
         
+        System.out.println("---- Expansion");
         // Expansion Graph
         Graph graphExpanded = Factory.createDefaultGraph() ;
         
-        InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab.getGraph(), combined) ;
+        InferenceSetupRDFS setup = new InferenceSetupRDFS_Node(vocab.getGraph(), combined) ;
         StreamRDF stream = StreamRDFLib.graph(graphExpanded) ;
         // Apply inferences.
-        stream = new InferenceStreamRDF(stream, setup) ;
+        stream = new InferenceStreamRDFS(stream, setup) ;
         sendToStream(data.getGraph(), stream) ;
         RDFDataMgr.write(System.out, graphExpanded, Lang.TTL) ;
     }

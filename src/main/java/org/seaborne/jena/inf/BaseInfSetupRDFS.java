@@ -32,7 +32,7 @@ import org.apache.jena.tdb2.store.NodeId;
  * Core datastructures needed for RDFS.
  * To be general, this is in {@code <X>} space (e.g. {@link Node}, {@link NodeId}). 
  */
-/*package*/ abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
+public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
     public final Graph vocabGraph ;
     
     // Variants for with and without the key in the value side.
@@ -133,8 +133,8 @@ import org.apache.jena.tdb2.store.NodeId;
         }
     }
 
-    /** Go from Node space to X space
-     * for a node that is in the RDFS vocabulary.
+    /** Go from Node space to X space for a node that is in the RDFS vocabulary.
+     * This function is only passed Nodes that exist in the dataset.
      * Must not return null or "don't know". 
      * @param node
      * @return

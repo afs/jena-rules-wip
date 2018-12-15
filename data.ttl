@@ -8,6 +8,8 @@ PREFIX : <http://example/>
 
 :a rdf:type :T .
 
+:b :p 123 .
+
 ## :T rdfs:label "foo" .
 ## :T rdfs:subClassOf :TTT .
 ## 

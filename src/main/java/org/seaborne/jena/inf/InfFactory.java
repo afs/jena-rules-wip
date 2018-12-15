@@ -17,27 +17,26 @@
 
 package org.seaborne.jena.inf ;
 
-import org.apache.jena.riot.system.StreamRDF ;
-import org.apache.jena.atlas.lib.NotImplemented ;
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.rdf.model.Model ;
+import org.apache.jena.riot.system.StreamRDF ;
 
 /** Factory for interference-related classes. */ 
 public class InfFactory {
     
     /** Split A-box and T-box */
     public static Graph graphRDFS(Graph data, Graph vocab) {
-        return graphRDFS(data, new InferenceSetupRDFS(vocab, data==vocab)) ;
+        return graphRDFS(data, new InferenceSetupRDFS_Node(vocab, data==vocab)) ;
     }
 
     /** Data contains A-box and T-box */ 
     public static Graph graphRDFS(Graph data) {
-        return graphRDFS(data, new InferenceSetupRDFS(data, true)) ;
+        return graphRDFS(data, new InferenceSetupRDFS_Node(data, true)) ;
     }
 
     /** Create an {@link InferenceSetupRDFS} */
     public static InferenceSetupRDFS setupRDF(Graph vocab, boolean incDerivedDataRDFS) {
-        return new InferenceSetupRDFS(vocab, incDerivedDataRDFS);
+        return new InferenceSetupRDFS_Node(vocab, incDerivedDataRDFS);
     }
     
     // Modes of 
@@ -56,13 +55,12 @@ public class InfFactory {
 
     /** Stream expand data based on a separate vocabulary */ 
     public static StreamRDF inf(StreamRDF data, Graph vocab) {
-        InferenceSetupRDFS setup = new InferenceSetupRDFS(vocab) ;
+        InferenceSetupRDFS setup = new InferenceSetupRDFS_Node(vocab, false) ;
         return inf(data, setup) ;
     }
 
+    /** Expand a stream of RDF using RDFS */
     public static StreamRDF inf(StreamRDF data, InferenceSetupRDFS setup) {
-        //InferenceProcessorRDFS inf = new InferenceProcessorRDFS(setup) ;
-        throw new NotImplemented() ;
-        //return null ; // inf.process(null)
+        return new InferenceStreamRDFS(data, setup) ;
     }
 }

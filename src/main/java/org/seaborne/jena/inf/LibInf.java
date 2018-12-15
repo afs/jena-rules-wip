@@ -24,27 +24,26 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 
 public class LibInf {
-    /** 
-     * Accumulate the triples from processing a triple.
-     * Does not include the original triple (unless that is also inferred).
-     */
-    public static void process(InferenceSetupRDFS setup, Collection<Triple> acc, Triple triple) {
-        InferenceEngineRDFS engine = new InferenceEngineRDFS(setup, t->acc.add(t));
-        engine.process(triple) ;
-    }
-    
-    /** 
-     * Accumulate the triples from processing a triple.
-     * Does not include the original triple (unless that is also inferred).
-     */
-    public static void process(InferenceSetupRDFS setup, Collection<Triple> acc, Node s, Node p, Node o) {
-        InferenceEngineRDFS engine = new InferenceEngineRDFS(setup, t->acc.add(t));
-        engine.process(s, p, o) ;
-    }
+//    /** 
+//     * Accumulate the triples from processing a triple.
+//     * Does not include the original triple (unless that is also inferred).
+//     */
+//    public static void process(InferenceSetupRDFS setup, Collection<Triple> acc, Triple triple) {
+//        InferenceEngineRDFS engine = new InferenceEngineRDFS(setup, t->acc.add(t));
+//        engine.process(triple) ;
+//    }
+//    
+//    /** 
+//     * Accumulate the triples from processing a triple.
+//     * Does not include the original triple (unless that is also inferred).
+//     */
+//    public static void process(InferenceSetupRDFS setup, Collection<Triple> acc, Node s, Node p, Node o) {
+//        InferenceEngineRDFS engine = new InferenceEngineRDFS(setup, t->acc.add(t));
+//        engine.process(s, p, o) ;
+//    }
 
     /** create an {@link InferenceEngineRDFS} that accumulates into {@code acc}. */
     public static InferenceEngineRDFS engine(InferenceSetupRDFS setup, Collection<Triple> acc) {
@@ -54,7 +53,7 @@ public class LibInf {
     /** Create a function that maps a triple to a stream of triples (suitable for {@code Stream.flatMap}).
      *  Includes the original triple.
      */
-    private static Function<Triple, Stream<Triple>> applyInf(InferenceSetupRDFS setup) {
+    public static Function<Triple, Stream<Triple>> applyInf(InferenceSetupRDFS setup) {
         return triple-> {
             List<Triple> x = new ArrayList<>() ;
             engine(setup, x).process(triple) ;

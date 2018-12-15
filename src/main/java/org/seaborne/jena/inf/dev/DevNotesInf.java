@@ -18,8 +18,26 @@
 package org.seaborne.jena.inf.dev;
 
 public class DevNotesInf {
-    // InferenceEngineRDFS -> switch from "derive" to a function.
-    // Is the class naming logical? 
+//    IF { body = BGP+paths+FILTER+BIND }
+//    THEN { BGP }
+//
+//    Plain triples:
+//
+//    IF {} THEN { triple }
+//
+//    Stardog: multiple triples -> several one triple rule.
+//      To make backward chaining?
+//
+//    Special predicates
+//        sp:directType
+//        sp:directSubClassOf
+//        sp:strictSubClassOf
+//
+//        sp:directSubPropertyOf
+//        sp:strictSubPropertyOf
+//
+
+    
     // StreamTriple, StreamQuad - remove?
     //    StreamTriple - used in InferenceEngineRDFS, InferenceProcessorRDFS
     
@@ -28,7 +46,6 @@ public class DevNotesInf {
     //    Iter.flatMap(Function<X, Iterator<X>>)
     
     // Special transitive processor
-    
     
     /* See Description */
     
@@ -44,7 +61,7 @@ public class DevNotesInf {
      *   
      * rdfs:member, list:member
      * Remove rule rdfs5b ( P subPropertyOf P )
-     *  
+     * 
      * OWL 2 RL / OWL 2 QL.
      * http://www.w3.org/TR/owl2-profiles/#OWL_2_QL
      * http://www.w3.org/TR/owl2-profiles/#OWL_2_RL
