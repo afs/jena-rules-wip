@@ -45,9 +45,9 @@ import org.apache.jena.util.iterator.ExtendedIterator ;
 import org.apache.jena.vocabulary.RDF;
 import org.seaborne.jena.inf.GraphRDFS;
 import org.seaborne.jena.inf.InfFactory;
-import org.seaborne.jena.inf.InferenceSetupRDFS;
 import org.seaborne.jena.inf.InferenceStreamRDFS;
 import org.seaborne.jena.inf.engine.InfGlobal;
+import org.seaborne.jena.inf.engine.InferenceSetupRDFS;
 import org.seaborne.jena.inf.tdb.InfSetupRDFS_TDB1;
 import org.seaborne.jena.inf.tdb.InfSetupRDFS_TDB2; 
 
@@ -108,11 +108,10 @@ public class DevRDFS {
     static Graph g_rdfs3 ;
     
     public static void main(String...argv) throws IOException {
-        basic();
+        //basic();
         //plain() ;
-        //expand() ;
+        expand() ;
     }
-    
 
     private static void basic() {
         String DATA_FILE = "data.ttl" ;

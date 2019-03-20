@@ -25,7 +25,6 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.seaborne.jena.inf.InferenceSetupRDFS;
 
 /**
  * Apply a fixed set of inference rules to a triple.

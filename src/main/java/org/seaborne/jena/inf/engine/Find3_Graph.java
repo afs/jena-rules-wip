@@ -34,7 +34,6 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.util.iterator.NullIterator;
-import org.seaborne.jena.inf.InferenceSetupRDFS;
 
 public class Find3_Graph implements StreamGraph<Triple, Node> {
     private final Graph graph ;

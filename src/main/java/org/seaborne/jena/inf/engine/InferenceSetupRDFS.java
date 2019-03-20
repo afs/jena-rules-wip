@@ -15,10 +15,9 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf ;
+package org.seaborne.jena.inf.engine ;
 
 import org.apache.jena.graph.Node ;
-import org.seaborne.jena.inf.engine.InfSetupRDFS;
 
 /** RDFS setup in Node space */
 public interface InferenceSetupRDFS extends InfSetupRDFS<Node>{

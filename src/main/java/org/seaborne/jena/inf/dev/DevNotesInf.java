@@ -24,7 +24,7 @@ public class DevNotesInf {
     //   rdfs:member
     //   list:member
 
-    
+    // Second - translate into BGPs for X space execution?  Only is vocab and data in same TDB. Refinement laster.
     
 //    IF { body = BGP+paths+FILTER+BIND }
 //    THEN { BGP }

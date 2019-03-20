@@ -19,7 +19,6 @@ package org.seaborne.jena.inf.engine ;
 
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node ;
-import org.seaborne.jena.inf.InferenceSetupRDFS;
 
 /** RDFS setup in Node space */
 public class InferenceSetupRDFS_Node extends BaseInfSetupRDFS<Node> implements InferenceSetupRDFS {

@@ -24,6 +24,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Quad;
 import org.seaborne.jena.inf.engine.InferenceEngineRDFS;
+import org.seaborne.jena.inf.engine.InferenceSetupRDFS;
 import org.seaborne.jena.inf.engine.StreamTriple;
 
 /** StreamRDF that applies RDFS to the stream.

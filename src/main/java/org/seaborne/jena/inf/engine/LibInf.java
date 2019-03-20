@@ -25,7 +25,6 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.apache.jena.graph.Triple;
-import org.seaborne.jena.inf.InferenceSetupRDFS;
 
 public class LibInf {
 //    /** 

@@ -18,32 +18,17 @@
 
 package org.seaborne.jena.inf.engine;
 
-import static org.seaborne.jena.inf.engine.InfGlobal.rdfType;
-import static org.seaborne.jena.inf.engine.InfGlobal.rdfsDomain;
-import static org.seaborne.jena.inf.engine.InfGlobal.rdfsRange;
-import static org.seaborne.jena.inf.engine.InfGlobal.rdfsSubClassOf;
-import static org.seaborne.jena.migrate.Lib8.stream;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import org.apache.jena.atlas.iterator.SingletonIterator;
 import org.apache.jena.atlas.lib.tuple.Tuple;
-import org.apache.jena.atlas.lib.tuple.TupleFactory;
-import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.Node;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.util.iterator.ExtendedIterator;
-import org.apache.jena.util.iterator.NullIterator;
-import org.seaborne.jena.inf.*;
 
-/** Generalised */
+/** WIP - Generalised */
 public abstract class Find3_X<T,X> implements StreamGraph<Tuple<X>, X> {
-}
+
 
 // THINK
-
+// Attempt to refactor to work in X space.
+//   Issues: All the constants in X terms -> add to setup. (Missing from data -> not in X space?)
+// InferenceEngineRDFS isin Node space.
+//
 //    private final StreamGraph<Tuple<X>, X> graph ;
 //    private final InfSetupRDFS<X> setup ;
 //    //private final InferenceEngineRDFS engine ;
@@ -388,4 +373,4 @@ public abstract class Find3_X<T,X> implements StreamGraph<Tuple<X>, X> {
 //    private static <X> boolean isTerm(X node) {
 //        return ( node != null );
 //    }
-//}
+}

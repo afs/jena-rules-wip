@@ -20,6 +20,7 @@ package org.seaborne.jena.inf ;
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.rdf.model.Model ;
 import org.apache.jena.riot.system.StreamRDF ;
+import org.seaborne.jena.inf.engine.InferenceSetupRDFS;
 import org.seaborne.jena.inf.engine.InferenceSetupRDFS_Node;
 
 /** Factory for interference-related classes. */ 

@@ -26,6 +26,7 @@ import org.apache.jena.sparql.graph.GraphWrapper ;
 import org.apache.jena.util.iterator.ExtendedIterator ;
 import org.apache.jena.util.iterator.WrappedIterator ;
 import org.seaborne.jena.inf.engine.Find3_Graph;
+import org.seaborne.jena.inf.engine.InferenceSetupRDFS;
 import org.slf4j.Logger ;
 import org.slf4j.LoggerFactory ;
 
@@ -42,7 +43,7 @@ public class GraphRDFS extends GraphWrapper {
         this(setup, graph, new Find3_Graph(setup, graph));
     }
     
-    public GraphRDFS(InferenceSetupRDFS setup, Graph graph, Find3_Graph fGraph) {
+    private GraphRDFS(InferenceSetupRDFS setup, Graph graph, Find3_Graph fGraph) {
         super(graph) ;
         this.setup = setup ;
         this.fGraph = fGraph;

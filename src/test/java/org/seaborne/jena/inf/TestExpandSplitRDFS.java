@@ -23,6 +23,7 @@ import org.apache.jena.riot.system.StreamRDF ;
 import org.apache.jena.riot.system.StreamRDFLib ;
 import org.apache.jena.sparql.graph.GraphFactory ;
 import org.junit.BeforeClass ;
+import org.seaborne.jena.inf.engine.InferenceSetupRDFS;
 
 /** Test of RDFS.
  * Expanded graph, split vocab and data.
