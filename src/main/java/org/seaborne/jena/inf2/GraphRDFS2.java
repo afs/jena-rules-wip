@@ -44,7 +44,6 @@ public class GraphRDFS2 extends GraphWrapper {
         g2 = new Union(g1, g);
         List<Rule> rules = Rules.rulesRDFS().asList();
         Forwards.evalNaive(graph, rules);
-
     }
 
     @Override

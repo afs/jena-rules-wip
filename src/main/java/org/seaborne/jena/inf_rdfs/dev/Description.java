@@ -16,37 +16,31 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf2;
+package org.seaborne.jena.inf_rdfs.dev;
 
-import org.apache.jena.graph.Graph ;
-import org.apache.jena.graph.GraphUtil ;
-import org.apache.jena.sparql.graph.GraphFactory ;
-import org.seaborne.jena.inf_rdfs.AbstractTestGraphRDFS;
-
-public class TestEngine2 extends AbstractTestGraphRDFS {
-
-    private GraphRDFS2 testGraph ;
-
-    public TestEngine2(){
-        Graph g = GraphFactory.createDefaultGraph() ;
-        GraphUtil.addInto(g, data) ;
-        GraphUtil.addInto(g, vocab) ;
-        testGraph = new GraphRDFS2(g) ;
-    }
+public class Description {
     
-    @Override
-    protected boolean removeVocabFromReferenceResults() {
-        return false ;
-    }
-
-    @Override
-    protected Graph getTestGraph() {
-        return testGraph ;
-    }
-
-    @Override
-    protected String getTestLabel() {
-        return "Naive" ;
-    }
-
+    // PAckage "inf" - RDFS and a bit. One data triple inference. 
+    
+    /*
+     * InfSetupRDFS > BaseInfSetupRDFS<X> : compiled datastructures.
+     *   InferenceSetupRDFS : X = Node
+     *   InferenceSetupRDFS_TDB : X = NodeId
+     * 
+     * InferenceEngineRDFS.process(s,p,o)
+     *    apply an InferenceSetupRDFS
+     *    Output to Consumer<Triple>
+     * 
+     * InferenceProcessorRDFS
+     *   Various .process
+     *   
+     * InfFactory
+     *   statics
+     *   
+     * InfGlobal
+     *   Misc constants and library code.
+     *   
+     * GraphRDFS
+     *    RDF graph, precompiled and separate RDFS description (A-box)
+     */
 }

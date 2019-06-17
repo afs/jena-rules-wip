@@ -16,37 +16,8 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf2;
+package org.seaborne.jena.inf_transitive;
 
-import org.apache.jena.graph.Graph ;
-import org.apache.jena.graph.GraphUtil ;
-import org.apache.jena.sparql.graph.GraphFactory ;
-import org.seaborne.jena.inf_rdfs.AbstractTestGraphRDFS;
-
-public class TestEngine2 extends AbstractTestGraphRDFS {
-
-    private GraphRDFS2 testGraph ;
-
-    public TestEngine2(){
-        Graph g = GraphFactory.createDefaultGraph() ;
-        GraphUtil.addInto(g, data) ;
-        GraphUtil.addInto(g, vocab) ;
-        testGraph = new GraphRDFS2(g) ;
-    }
-    
-    @Override
-    protected boolean removeVocabFromReferenceResults() {
-        return false ;
-    }
-
-    @Override
-    protected Graph getTestGraph() {
-        return testGraph ;
-    }
-
-    @Override
-    protected String getTestLabel() {
-        return "Naive" ;
-    }
-
+public class Here {
+    // Transitive
 }

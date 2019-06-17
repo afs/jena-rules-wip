@@ -16,27 +16,22 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf2;
+package org.seaborne.jena.inf_rdfs;
 
 import org.apache.jena.graph.Graph ;
-import org.apache.jena.graph.GraphUtil ;
-import org.apache.jena.sparql.graph.GraphFactory ;
-import org.seaborne.jena.inf_rdfs.AbstractTestGraphRDFS;
+import org.seaborne.jena.inf_rdfs.InfFactory;
 
-public class TestEngine2 extends AbstractTestGraphRDFS {
+public class TestGraphSplitRDFS extends AbstractTestGraphRDFS {
 
-    private GraphRDFS2 testGraph ;
-
-    public TestEngine2(){
-        Graph g = GraphFactory.createDefaultGraph() ;
-        GraphUtil.addInto(g, data) ;
-        GraphUtil.addInto(g, vocab) ;
-        testGraph = new GraphRDFS2(g) ;
-    }
+    private Graph testGraph = null;
     
+    public TestGraphSplitRDFS(){
+        testGraph = InfFactory.graphRDFS(data, vocab) ;
+    }
+        
     @Override
     protected boolean removeVocabFromReferenceResults() {
-        return false ;
+        return true ;
     }
 
     @Override
@@ -46,7 +41,7 @@ public class TestEngine2 extends AbstractTestGraphRDFS {
 
     @Override
     protected String getTestLabel() {
-        return "Naive" ;
+        return "Split data,vocab" ;
     }
 
 }

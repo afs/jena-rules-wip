@@ -25,6 +25,7 @@ import org.apache.jena.graph.GraphUtil;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.graph.GraphFactory;
 
+/** Naive algorithm - repeatedly iterate until no change */ 
 public class RuleEngineNaive implements RuleEngine {
     private final Graph graph;
     

@@ -20,6 +20,7 @@ package org.seaborne.jena.inf2;
 
 import java.util.List ;
 
+import org.apache.jena.atlas.lib.NotImplemented;
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.graph.GraphUtil ;
 import org.apache.jena.graph.Triple ;
@@ -32,7 +33,7 @@ import org.apache.jena.sparql.engine.binding.BindingFactory ;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton ;
 import org.apache.jena.sparql.engine.iterator.QueryIterTriplePattern ;
 import org.apache.jena.sparql.graph.GraphFactory ;
-import org.seaborne.jena.inf.engine.StreamTriple;
+import org.seaborne.jena.inf_rdfs.engine.StreamTriple;
 
 public class Forwards {
     
@@ -46,6 +47,14 @@ public class Forwards {
                 return ;
             GraphUtil.addInto(source, acc);
         }
+    }
+
+    /**
+     * The semi-naive algorithm. Track which rules fire and might cause other rules
+     * to need re-evaluating.
+     */
+    public static void evalSemiNaive(Graph source, List<Rule> rules) {
+        throw new NotImplemented();
     }
     
     /** One round of rule evaluation */
