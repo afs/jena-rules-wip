@@ -26,7 +26,7 @@ import org.apache.jena.atlas.iterator.Iter;
 import org.seaborne.jena.rules.Rel;
 import org.seaborne.jena.rules.RelStore;
 
-/** A Relstore of 2 RelStores - assumed to be disjoint.
+/** A RelStore of 2 RelStores - assumed to be disjoint.
  *  Additions go to the first/left store.
  */
 public class RelStore2 implements RelStore {
@@ -39,7 +39,7 @@ public class RelStore2 implements RelStore {
         this.store1 = store1 ;
         this.store2 = store2 ;
     }
-    
+
     @Override
     public void setWritable(boolean allowUpdate) {
         store1.setWritable(allowUpdate);
@@ -58,8 +58,8 @@ public class RelStore2 implements RelStore {
             return ;
         store1.add(rel);
     }
-    
-    
+
+
     @Override
     public void add(RelStore data) {
         data.all().forEach(this::add);
@@ -70,11 +70,11 @@ public class RelStore2 implements RelStore {
         store1.delete(rel);
         store2.delete(rel);
     }
-    
-    
+
+
     @Override
     public void removeAll(Rel rel) {
-        List<Rel> x = Iter.toList(find(rel)); 
+        List<Rel> x = Iter.toList(find(rel));
         x.forEach((r)->delete(r));
     }
 
@@ -84,7 +84,7 @@ public class RelStore2 implements RelStore {
         Iterator<Rel> x2 = store2.find(rel);
         return Iter.concat(x1,  x2);
     }
-    
+
     @Override
     public boolean matches(Rel rel) {
         return store1.matches(rel) || store2.matches(rel);
@@ -105,7 +105,7 @@ public class RelStore2 implements RelStore {
     public long size() {
         return store1.size() + store2.size();
     }
-    
+
     @Override
     public Stream<Rel> all() {
         return Stream.concat(store1.all(), store2.all());
@@ -120,5 +120,5 @@ public class RelStore2 implements RelStore {
     public boolean containRel(String relName) {
         return store1.containRel(relName) || store2.containRel(relName);
     }
-}    
+}
 

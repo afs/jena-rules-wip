@@ -16,37 +16,39 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf2;
+package dev.binding;
 
-import org.apache.jena.graph.Graph ;
-import org.apache.jena.graph.GraphUtil ;
-import org.apache.jena.sparql.graph.GraphFactory ;
-import org.seaborne.jena.inf_rdfs.AbstractTestGraphRDFS;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
-public class TestEngine2 extends AbstractTestGraphRDFS {
-
-    private GraphRDFS2 testGraph ;
-
-    public TestEngine2(){
-        Graph g = GraphFactory.createDefaultGraph() ;
-        GraphUtil.addInto(g, data) ;
-        GraphUtil.addInto(g, vocab) ;
-        testGraph = new GraphRDFS2(g) ;
-    }
-    
-    @Override
-    protected boolean removeVocabFromReferenceResults() {
-        return false ;
+/** Iterator of 3 objects */
+class Itr3<X> implements Iterator<X> {
+    private int idx;
+    private final X elt1;
+    private final X elt2;
+    private final X elt3;
+    Itr3(X x1, X x2, X x3) {
+        idx = 0;
+        elt1 = Objects.requireNonNull(x1);
+        elt2 = Objects.requireNonNull(x2);
+        elt3 = Objects.requireNonNull(x3);
     }
 
     @Override
-    protected Graph getTestGraph() {
-        return testGraph ;
+    public boolean hasNext() {
+        return idx < 3;
     }
 
     @Override
-    protected String getTestLabel() {
-        return "Naive" ;
+    public X next() {
+        idx++;
+        if ( idx == 1 ) return elt1;
+        if ( idx == 2 ) return elt2;
+        if ( idx == 2 ) return elt3;
+        throw new NoSuchElementException();
     }
 
+    @Override
+    public void remove() { throw new UnsupportedOperationException("Itr3.remove"); }
 }

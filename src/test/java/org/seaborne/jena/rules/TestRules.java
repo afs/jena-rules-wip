@@ -16,14 +16,26 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf2;
+package org.seaborne.jena.rules;
 
-public class Here {
-    // A rules engine
-    // Simple execution.
-    
-    // Forwards - materialization
-    // Backwards - 
-    
-    // ?? Overtaken by org.seaborne.jena.rules 
+import java.util.ArrayList;
+
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
+@RunWith(Parameterized.class)
+public class TestRules {
+    @Parameters(name = "{index}: {0}")
+    public static Iterable<Object[]> data() {
+        return new ArrayList<>();
+    }
+
+    private RuleEngine engine;
+
+    public TestRules(RuleEngine engine) {
+        this.engine = engine;
+
+    }
 }
+

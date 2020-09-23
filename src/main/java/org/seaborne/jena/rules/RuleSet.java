@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 public class RuleSet {
     private final List<Rule> rules ;
     private final List<Rule> unvarRules;
-    
+
     public RuleSet(List<Rule> rules) {
         this.rules = Collections.unmodifiableList(new ArrayList<>(rules));
         this.unvarRules = Collections.unmodifiableList
@@ -40,7 +40,7 @@ public class RuleSet {
     public List<Rule> asList() {
         return rules;
     }
-    
+
     public Stream<Rule> stream() {
         return rules.stream();
     }
@@ -61,12 +61,12 @@ public class RuleSet {
         return Rules.intensionalRelations(rules) ;
     }
 
-    /** Extensional relationship = relation occuring only in the body of rules.*/
+    /** Extensional relationship = relation occurring only in the body of rules.*/
     public Collection<Rel> getExtensional() {
         //Re-unvars
         return Rules.extensionalRelations(rules) ;
     }
-    
+
 //    /** Rules that has concrete predicate that is also in some rule body.
 //     * These rules may trigger other rules.
 //     */
@@ -77,14 +77,14 @@ public class RuleSet {
 //    }
 //
 //    //NEEDS REWRITE
-//    
-//    /** for each head predicate, the rule path of the loop (this is not equivalence classes) */ 
+//
+//    /** for each head predicate, the rule path of the loop (this is not equivalence classes) */
 //    public Map<Node, List<List<Rule>>> loopsChains() {
 //        // Inefficient.
 //        Collection<Node> loops = loops();
 //        Map<Node, List<List<Rule>>> results = new HashMap<>();
 //        loops.forEach(n->{
-//            Set<Node> visited = new HashSet<>(); 
+//            Set<Node> visited = new HashSet<>();
 //            List<List<Rule>> chain = followChain(visited, n);
 //            results.put(n, chain);
 //        }) ;
@@ -103,7 +103,7 @@ public class RuleSet {
 //        }) ;
 //        return chains;
 //    }
-//    
+//
 //    private List<List<Rule>> followChain(Set<Node> visited, Rule rule) {
 //        //System.err.println("followChain r="+rule);
 //        // May branch!
@@ -127,7 +127,7 @@ public class RuleSet {
     }
 
     public void forEach(Consumer<Rule> action) { rules.forEach(action); }
-    
+
     public String toMultilineString() {
         StringJoiner sj = new StringJoiner("\n") ;
         rules.stream().map(Rule::toString).forEach(sj::add);

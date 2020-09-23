@@ -28,16 +28,16 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.tdb2.store.NodeId;
 
-/** 
+/**
  * Core datastructures needed for RDFS.
- * To be general, this is in {@code <X>} space (e.g. {@link Node}, {@link NodeId}). 
+ * To be general, this is in {@code <X>} space (e.g. {@link Node}, {@link NodeId}).
  */
 public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
     public final Graph vocabGraph ;
-    
+
     // Variants for with and without the key in the value side.
-    // Adding to a list is cheap? List(elt, tail)
-    
+    //
+
     private final Map<X, Set<X>> superClasses         = new HashMap<>() ;
     private final Map<X, Set<X>> superClassesInc      = new HashMap<>() ;
     private final Map<X, Set<X>> subClasses           = new HashMap<>() ;
@@ -48,11 +48,11 @@ public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
     private final Map<X, Set<X>> superProperties      = new HashMap<>() ;
     private final Map<X, Set<X>> subPropertiesInc     = new HashMap<>() ;
     private final Map<X, Set<X>> subProperties        = new HashMap<>() ;
-    
-    // Predicate -> type 
+
+    // Predicate -> type
     private final Map<X, Set<X>> propertyRange        = new HashMap<>() ;
     private final Map<X, Set<X>> propertyDomain       = new HashMap<>() ;
-    
+
     // Type -> predicate
     private final Map<X, Set<X>> rangeToProperty      = new HashMap<>() ;
     private final Map<X, Set<X>> domainToProperty     = new HashMap<>() ;
@@ -67,7 +67,7 @@ public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
          "PREFIX  owl:    <http://www.w3.org/2002/07/owl#>",
          "PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>") ;
 
-    
+
 //    protected BaseInfSetupRDFS(Graph vocab) {
 //        this(vocab, false) ;
 //    }
@@ -75,7 +75,7 @@ public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
     protected BaseInfSetupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
         includeDerivedDataRDFS$ = incDerivedDataRDFS ;
         vocabGraph = vocab;
-        
+
         // Find super classes - uses property paths
         exec("SELECT ?x ?y { ?x rdfs:subClassOf+ ?y }", vocab, superClasses, subClasses ) ;
 
@@ -87,22 +87,22 @@ public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
 
         // Find range
         exec("SELECT ?x ?y { ?x rdfs:range ?y }", vocab, propertyRange, rangeToProperty) ;
-        
+
         // All mentioned classes
         classes.addAll(superClasses.keySet()) ;
         classes.addAll(subClasses.keySet()) ;
         classes.addAll(rangeToProperty.keySet()) ;
         classes.addAll(domainToProperty.keySet()) ;
-        
+
         deepCopyInto(superClassesInc, superClasses) ;
         addKeysToValues(superClassesInc) ;
-        
+
         deepCopyInto(subClassesInc, subClasses) ;
         addKeysToValues(subClassesInc) ;
-        
+
         deepCopyInto(superPropertiesInc, superProperties) ;
         addKeysToValues(superPropertiesInc) ;
-        
+
         deepCopyInto(subPropertiesInc, subProperties) ;
         addKeysToValues(subPropertiesInc) ;
     }
@@ -135,12 +135,12 @@ public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
 
     /** Go from Node space to X space for a node that is in the RDFS vocabulary.
      * This function is only passed Nodes that exist in the dataset.
-     * Must not return null or "don't know". 
+     * Must not return null or "don't know".
      * @param node
      * @return
      */
     protected abstract X fromNode(Node node) ;
-    
+
     public boolean includeDerivedDataRDFS() {
         return includeDerivedDataRDFS$ ;
     }
@@ -152,15 +152,15 @@ public abstract class BaseInfSetupRDFS<X> implements InfSetupRDFS<X>{
     }
 
     private Set<X> empty = Collections.emptySet() ;
-    
+
     private Set<X> result(Map<X, Set<X>> map, X elt) {
         Set<X> x = map.get(elt) ;
         return x != null ? x : empty ;
     }
-    
-    // get : return the Set corresponing to element elt  
-    // get..Inc : return the Set corresponing to element elt include self.  
-    
+
+    // get : return the Set corresponing to element elt
+    // get..Inc : return the Set corresponing to element elt include self.
+
     @Override
     public Set<X> getSuperClasses(X elt) {
         return result(superClasses, elt) ;

@@ -20,7 +20,6 @@ package org.seaborne.jena.inf_rdfs;
 
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.graph.compose.MultiUnion ;
-import org.seaborne.jena.inf_rdfs.InfFactory;
 
 public class TestGraphCombinedRDFS extends AbstractTestGraphRDFS {
 

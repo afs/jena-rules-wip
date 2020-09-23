@@ -26,7 +26,6 @@ import java.util.List ;
 import java.util.Set ;
 
 import org.apache.jena.atlas.io.IO ;
-import org.apache.jena.atlas.junit.BaseTest ;
 import org.apache.jena.atlas.lib.ListUtils ;
 import org.apache.jena.atlas.lib.SetUtils ;
 import org.apache.jena.graph.Graph ;
@@ -48,13 +47,13 @@ import org.seaborne.jena.migrate.Lib8;
 /** Testing based on a graph under test ({@link #getTestGraph()}) and a reference graph
  * ({@link #getReferenceGraph()}) that is assumed to return the correct answers.
  */
-public abstract class AbstractTestRDFS extends BaseTest {
+public abstract class AbstractTestRDFS {
     private static PrintStream      out = System.err ;
-    
+
     static Node node(String str) { return NodeFactory.createURI("http://example/"+str) ; }
 
     // XXX Check this is coverage.
-    
+
     @Test public void test_rdfs_01()        { test(node("a"), rdfType, null) ; }
     @Test public void test_rdfs_02()        { test(node("a"), rdfType, node("T2")) ; }
     @Test public void test_rdfs_03()        { test(null, rdfType, node("T2")) ; }
@@ -62,23 +61,23 @@ public abstract class AbstractTestRDFS extends BaseTest {
     @Test public void test_rdfs_04()        { test(null, null, node("T2")) ; }
     @Test public void test_rdfs_05()        { test(null, rdfType, node("T")) ; }
     @Test public void test_rdfs_05a()       { test(null, null, node("T")) ; }
-      
+
     @Test public void test_rdfs_06()        { test(node("c"), rdfType, null) ; }
     @Test public void test_rdfs_06a()       { test(node("c"), null, null) ; }
-      
+
     @Test public void test_rdfs_07()        { test(null, rdfType, null) ; }
     @Test public void test_rdfs_08()        { test(null, node("q"), null) ; }
-      
+
     @Test public void test_rdfs_08a()       { test(null, node("p"), null) ; }
     @Test public void test_rdfs_08b()       { test(null, node("pp"), null) ; }
     @Test public void test_rdfs_08c()       { test(null, node("ppp"), null) ; }
     @Test public void test_rdfs_08d()       { test(null, node("pTop"), null) ; }
-    
+
     @Test public void test_rdfs_09()        { test(node("z"), null, null) ;  }
     @Test public void test_rdfs_10()        { test(node("z"), rdfType, null) ; }
-      
+
     @Test public void test_rdfs_11()        { test(null, null, null) ; }
-      
+
     @Test public void test_rdfs_12a()       { test(null, rdfType, node("P")) ; }
     @Test public void test_rdfs_12b()       { test(null, rdfType, node("P1")) ; }
     @Test public void test_rdfs_12c()       { test(null, rdfType, node("P2")) ; }
@@ -104,29 +103,29 @@ public abstract class AbstractTestRDFS extends BaseTest {
 
     @Test public void test_rdfs_15a()       { test(null, rdfType, node("U")) ; }
     @Test public void test_rdfs_15b()       { test(null, null, node("U")) ; }
-    
+
     @Test public void test_rdfs_16a()       { test(null, null, node("X")) ; }
     @Test public void test_rdfs_16b()       { test(null, rdfType, node("X")) ; }
-    
+
     @Test public void test_rdfs_20()        { test(null, node("p"), null) ; }
     @Test public void test_rdfs_21()        { test(null, node("pp"), null) ; }
     @Test public void test_rdfs_22()        { test(null, node("ppp"), null) ; }
-    
+
     @Test public void test_rdfs_30()        { test(node("e"), null, null) ; }
     @Test public void test_rdfs_31()        { test(node("e"), node("r"), null) ; }
-    
+
     protected void test(Node s, Node p, Node o) {
         Graph refGraph = getReferenceGraph() ;
-        
+
         List<Triple> x0 = refGraph.find(s,p,o).toList() ;
-        
+
         if ( removeVocabFromReferenceResults() )
             x0 = InfGlobal.removeRDFS(x0) ;
 
         List<Triple> x1 = findInTestGraph(s,p,o) ;
-        
-        boolean b = ListUtils.equalsUnordered(x0, x1) ; 
-        
+
+        boolean b = ListUtils.equalsUnordered(x0, x1) ;
+
         if ( ! b ) {
             out.println("Expected: find("+s+", "+p+", "+o+")") ;
             print(out, x0) ;
@@ -136,7 +135,7 @@ public abstract class AbstractTestRDFS extends BaseTest {
             //out.println("Diff:") ;
             //printDiff(out, x0, x1) ;
         }
-        
+
         Assert.assertTrue(getTestLabel(), b) ;
     }
 
@@ -147,7 +146,7 @@ public abstract class AbstractTestRDFS extends BaseTest {
     protected static Graph createRDFSGraph(Model data, Model vocab) {
         return ModelFactory.createRDFSModel(vocab, data).getGraph() ;
     }
-    
+
     /** Create a Jena-rules backed graph */
     protected static Graph createRulesGraph(Model data, Model vocab, String rulesFile) {
         try {
@@ -161,19 +160,19 @@ public abstract class AbstractTestRDFS extends BaseTest {
         }
         catch (IOException ex) { IO.exception(ex) ; return null ; }
     }
-    
-    /** Indicate whether the vocabulary is visble in the answers */  
+
+    /** Indicate whether the vocabulary is visble in the answers */
     protected abstract boolean removeVocabFromReferenceResults() ;
 
-    /** Return the graph that gives the right answers */ 
+    /** Return the graph that gives the right answers */
     protected abstract Graph getReferenceGraph() ;
-    
+
     /** Return the graph under test */
     protected abstract Graph getTestGraph() ;
-    
+
     /** Return a label for the reference graph */
     protected abstract String getReferenceLabel() ;
-    
+
     /** Return a label for the graph under test */
     protected abstract String getTestLabel() ;
 
@@ -182,15 +181,15 @@ public abstract class AbstractTestRDFS extends BaseTest {
         B.stream().forEach(item -> out.println("2: "+item)) ;
         Set<X> aa = Lib8.toSet(A) ;
         Set<X> bb = Lib8.toSet(B) ;
-        SetUtils.difference(aa, bb).stream().forEach(item -> out.println("> "+item)) ;    
+        SetUtils.difference(aa, bb).stream().forEach(item -> out.println("> "+item)) ;
         SetUtils.difference(bb, aa).stream().forEach(item -> out.println("< "+item)) ;
         out.println() ;
     }
-    
+
     static protected void print(PrintStream out, Collection<Triple> x) {
         print(out, "  ", x) ;
     }
-    
+
     static protected void print(PrintStream out, String leader, Collection<Triple> x) {
         if ( x.isEmpty() )
             out.println(leader+"<empty>") ;

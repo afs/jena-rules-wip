@@ -24,12 +24,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.seaborne</groupId>
-  <artifactId>jena-inf-engine</artifactId>
+  <artifactId>jena-rules</artifactId>
   <packaging>jar</packaging>
   <name>jena-inf-engine</name>
   <version>0.0.0-SNAPSHOT</version>
 
-  <description>jena-inf-engine</description>
+  <description>jena-rules</description>
 
   <licenses>
     <license>
@@ -39,10 +39,10 @@
   </licenses>
 
   <properties>
-    <ver.jena>3.13.0-SNAPSHOT</ver.jena>
-    <ver.slf4j>1.7.25</ver.slf4j>
-    <ver.log4j>1.2.17</ver.log4j>
-    <ver.junit>4.12</ver.junit>
+    <ver.jena>3.17.0-SNAPSHOT</ver.jena>
+    <ver.slf4j>1.7.30</ver.slf4j>
+    <ver.log4j2>2.13.3</ver.log4j2>
+    <ver.junit>4.13</ver.junit>
   </properties>
 
   <dependencies>
@@ -82,26 +82,11 @@
       <scope>test</scope>
     </dependency>
 
-     <!-- Require a logging implementation -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-jdk14</artifactId>
-      <version>1.7.21</version>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>${ver.log4j2}</version>
     </dependency>
-
-    <!--
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>1.7.21</version>
-    </dependency>
-
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.17</version>
-    </dependency> 
-    -->
 
   </dependencies>
 
@@ -112,7 +97,7 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.0</version>
         <configuration>
-          <release>11</release>
+          <release>14</release>
 <!--
           <source>1.8</source>
           <target>1.8</target>

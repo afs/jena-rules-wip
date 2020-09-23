@@ -42,14 +42,14 @@ import org.seaborne.jena.rules.impl.Solution;
 
 /**
  * The <a href="">semi naïve</a> algorithm.
- * 
+ *
  * This alogorithm tracks changes durign each pass over the rules and determines
  * whether on the next round, a rule needs to be attempted. If no rels of
  * involved in the body of the rule are generated at stage N-1, there is no need
  * to evaluate a rule on stage N.
  */
 public class RuleEngineSemiNaive implements RuleEngine {
-    
+
     private final RelStore data; // RelStore.setReadOnly.
     private final RuleSet rules;
 
@@ -62,12 +62,12 @@ public class RuleEngineSemiNaive implements RuleEngine {
     public RelStore exec() {
         RelStore  generation = RelStoreFactory.createMem();
         generation.add(data);
-        
+
         // What about variable arity?
         //--
         // Algorithm:
         //    Execute once.
-        
+
 //        {
 //            RelStore rs = RelStoreFactory.createMem();
 //            rules.asList().forEach(rule->{
@@ -83,17 +83,17 @@ public class RuleEngineSemiNaive implements RuleEngine {
 //        }
 
         RelStore rsLast = null ;
-        int i = 0; 
+        int i = 0;
         while(true) {
             i++;
-            System.out.printf("S: Round %d\n", i); 
+            System.out.printf("S: Round %d\n", i);
             RelStore rsCurrent = RelStoreFactory.createMem();
             for ( Rule rule : rules.asList() ) {
                 boolean needed = false;
                 if ( rsLast == null ) {
                     needed = true ;
                 } else {
-                    
+
                     // Var predicate.
                     Set<Node> predicates = rsLast.get("").map(r->r.getTuple().get(1)).filter(p->!p.isVariable()).collect(Collectors.toSet());
                     for ( Rel r : rule.getBody() ) {
@@ -118,7 +118,7 @@ public class RuleEngineSemiNaive implements RuleEngine {
                     System.out.println("==== "+rule);
                     evalOne(generation, rsCurrent, rule);
                 } else {
-                    System.out.println("---- "+rule);
+                    //System.out.println("Skip: "+rule);
                 }
             }
             // Changes?
@@ -128,11 +128,11 @@ public class RuleEngineSemiNaive implements RuleEngine {
             }
             generation.add(rsCurrent);
             rsLast = rsCurrent ;
-        }        
+        }
     }
-    
+
     private Map<String,RelStore> slots() {
-        Map<String,RelStore> work = new HashMap<>(); 
+        Map<String,RelStore> work = new HashMap<>();
         List<String> names = rules.getHeadNames();
         names.stream().forEach(relName->{
             if ( ! work.containsKey(relName) )
@@ -140,7 +140,7 @@ public class RuleEngineSemiNaive implements RuleEngine {
         });
         return work;
     }
-    
+
     private static void evalOne(RelStore data, RelStore acc, Rule rule) {
         RelStore data2 = RelStoreFactory.combine(data, acc);
         List<Rel> body = rule.getBody();
@@ -153,7 +153,7 @@ public class RuleEngineSemiNaive implements RuleEngine {
         for(Rel rel: body) {
             chain = step(data2, rel, chain);
         }
-        
+
         chain.forEachRemaining(soln->{
             Rel x = substitute(soln, rule.getHead());
             emit(acc, x, data);
@@ -175,7 +175,7 @@ public class RuleEngineSemiNaive implements RuleEngine {
     private static void emit(RelStore acc, Rel fact, RelStore data) {
         if ( !fact.isConcrete() )
             System.out.println("Not concrete: "+fact);
-        
+
         if ( ! data.contains(fact) && !acc.contains(fact) ) {
             System.out.println("Emit:   "+fact);
             acc.add(fact);
@@ -235,11 +235,11 @@ public class RuleEngineSemiNaive implements RuleEngine {
         return values.getOrDefault(Var.alloc(node), node);
     }
 
-    /** Evaluate a BGP : encapsulate for a better/different version */  
+    /** Evaluate a BGP : encapsulate for a better/different version */
     private static QueryIterator match(Graph source, BasicPattern pattern) {
-        ExecutionContext execContext = new ExecutionContext(ARQ.getContext(), source, null, null) ; 
+        ExecutionContext execContext = new ExecutionContext(ARQ.getContext(), source, null, null) ;
         // Create a chain of triple iterators.
-        QueryIterator chain = QueryIterSingleton.create(BindingFactory.root(), execContext) ; 
+        QueryIterator chain = QueryIterSingleton.create(BindingFactory.root(), execContext) ;
         for (Triple triple : pattern)
             chain = new QueryIterTriplePattern(chain, triple, execContext) ;
         return chain ;

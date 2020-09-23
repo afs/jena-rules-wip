@@ -19,7 +19,6 @@
 package org.seaborne.jena.inf_rdfs;
 
 import org.apache.jena.graph.Graph ;
-import org.seaborne.jena.inf_rdfs.InfFactory;
 
 public class TestGraphSplitRDFS extends AbstractTestGraphRDFS {
 

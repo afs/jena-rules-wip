@@ -1,5 +1,5 @@
 /*
- *  Licensed under the Apache License, Version 2.0 (the "License");
+  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
  *  You may obtain a copy of the License at
  *
@@ -43,12 +43,12 @@ public class InfSetupRDFS_TDB1 extends BaseInfSetupRDFS<NodeId> {
             throw new IllegalArgumentException("Not a TDB1 DatasetGraph");
         this.nodetable = dsgtdb.getTripleTable().getNodeTupleTable().getNodeTable() ;
     }
-    
+
     @Override
     protected NodeId fromNode(Node node) {
         NodeId n = nodetable.getNodeIdForNode(node) ;
         if ( NodeId.isDoesNotExist(n) )
-            throw new TDBException("Called to provide a NodeId for a Node not in the dataset: "+n); 
+            throw new TDBException("Called to provide a NodeId for a Node not in the dataset: "+n);
         return n ;
     }
 }

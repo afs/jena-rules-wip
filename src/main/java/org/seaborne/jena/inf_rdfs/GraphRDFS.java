@@ -17,7 +17,7 @@
 
 package org.seaborne.jena.inf_rdfs;
 
-import java.util.* ;
+import java.util.Iterator;
 
 import org.apache.jena.graph.Graph ;
 import org.apache.jena.graph.Node ;
@@ -30,25 +30,25 @@ import org.seaborne.jena.inf_rdfs.engine.InferenceSetupRDFS;
 import org.slf4j.Logger ;
 import org.slf4j.LoggerFactory ;
 
-/** RDFS graph over a plain base graph.
- *  Precalculated RDFS.
+/**
+ * RDFS graph over a plain base graph.
  */
 public class GraphRDFS extends GraphWrapper {
     private static Logger log = LoggerFactory.getLogger(GraphRDFS.class) ;
-    
+
     private Find3_Graph fGraph ;
     private InferenceSetupRDFS setup ;
 
     public GraphRDFS(InferenceSetupRDFS setup, Graph graph) {
         this(setup, graph, new Find3_Graph(setup, graph));
     }
-    
+
     private GraphRDFS(InferenceSetupRDFS setup, Graph graph, Find3_Graph fGraph) {
         super(graph) ;
         this.setup = setup ;
         this.fGraph = fGraph;
     }
-    
+
     @Override
     public ExtendedIterator<Triple> find(Triple m) {
         return find(m.getSubject(), m.getPredicate(), m.getObject()) ;
@@ -60,11 +60,54 @@ public class GraphRDFS extends GraphWrapper {
         return WrappedIterator.create(iter) ;
     }
 
-    static public Iterator<Triple> print(Iterator<Triple> iter) {
-        List<Triple> triples = new ArrayList<>() ; 
-        for ( ; iter.hasNext() ;)
-            triples.add(iter.next()) ;
-        triples.stream().forEach(t -> System.out.println("# "+t)) ;
-        return triples.iterator() ;
+    // This is a read-only RDFS "view".
+
+//
+//
+//    // Transactions.
+//
+//    // Contains
+//
+//    // isEmpty
+//
+//    // size (!!)
+//
+//    private boolean isSetup = false;
+//    private void change(Triple t) {}
+//    private void checkSetup() {
+//        //this.setup = new setup ;
+//    }
+//
+// implements GraphWithPerform
+//    @Override
+//    public void performAdd(Triple t) {
+//        change(t);
+//        super.add(t);
+//    }
+//
+//    @Override
+//    public void performDelete(Triple t) {
+//        change(t);
+//        super.delete(t);
+//    }
+//
+//    @Override
+//    public void remove(Node s, Node p, Node o) {
+//        // Decompose.
+//        // Execute on base.
+//        super.remove(s, p, o) ;
+//    }
+//
+//    @Override
+//    public int size() {
+//        // Report the size of the underlying graph.
+//        return super.size();
+//    }
+
+    @Override
+    public boolean dependsOn(Graph other) {
+        if ( other == super.get() )
+            return true;
+        return super.dependsOn(other);
     }
 }

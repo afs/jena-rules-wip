@@ -24,7 +24,7 @@ import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.sse.SSE;
 
-/** Strictly : a "Literal" but that is confusing for RDF */
+/** Strictly : in datalog, this is a "Literal" but that is confusing for RDF */
 public class Rel  {
     private final String name;
     private final Tuple<Node> tuple;

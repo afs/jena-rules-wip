@@ -16,21 +16,49 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf2;
+package dev.binding;
 
 import java.util.Iterator;
-import java.util.stream.Stream;
+import java.util.Map;
 
-import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.graph.Triple;
+import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.core.Var;
 
-public interface RuleEngine {
-    
-    public Iterator<Triple> match(Triple pattern) ;
+/**
+ * Implement {@link Binding} with a {@link Map}.
+ */
+public class BindingOverMap extends BindingBase {
 
-    // One day, parallel execution ... 
-    public default Stream<Triple> matchStream(Triple pattern) {
-        // But for now ...
-        return Iter.asStream(match(pattern));
+    private final Map<Var, Node> map;
+
+    /*package*/BindingOverMap(Binding parent, Map<Var, Node> map) {
+        super(parent);
+        this.map = map;
+    }
+
+    @Override
+    public Iterator<Var> vars1() {
+        return map.keySet().iterator();
+    }
+
+    @Override
+    public boolean contains1(Var var) {
+        return map.containsKey(var);
+    }
+
+    @Override
+    public Node get1(Var var) {
+        return map.get(var);
+    }
+
+    @Override
+    public int size1() {
+        return map.size();
+    }
+
+    @Override
+    public boolean isEmpty1() {
+        return map.isEmpty();
     }
 }
+

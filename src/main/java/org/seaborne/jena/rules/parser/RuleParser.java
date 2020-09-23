@@ -26,22 +26,32 @@ import org.apache.jena.atlas.lib.tuple.TupleFactory;
 import org.apache.jena.graph.Node;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.PrefixMapFactory;
-import org.apache.jena.riot.tokens.Token;
-import org.apache.jena.riot.tokens.TokenType;
-import org.apache.jena.riot.tokens.Tokenizer;
-import org.apache.jena.riot.tokens.TokenizerFactory;
+import org.apache.jena.riot.tokens.*;
 import org.apache.jena.sparql.sse.SSE;
 import org.seaborne.jena.rules.Rel;
 import org.seaborne.jena.rules.Rule;
 
+/**
+ * Syntax:<br/>
+ * <pre>
+ *   fact(...).
+ *   head(...) <- body .
+ * </pre>
+ * where <tt>body</tt> is a number of terms (class {@link Rel}).
+ * Rule clause terms can be named or unnamed.
+ * <pre>
+ *     (:s :p ?o) <- (:s :q1 ?z ) (?z :q2 ?o) .
+ * <pre>
+ *
+ */
 public class RuleParser {
 
     // Replace with javacc sometime.
-    
+
     private static PrefixMap pmap = PrefixMapFactory.create(SSE.getPrefixMapRead());
-    
+
     public static Rel parseRel(String x) {
-        Tokenizer tok = TokenizerFactory.makeTokenizerString(x);
+        Tokenizer tok = TokenizerText.fromString(x);
         if ( ! tok.hasNext() )
             throw new RuleParseException("No token") ;
         Rel rel = parseRel(tok);
@@ -49,7 +59,7 @@ public class RuleParser {
             throw new RuleParseException("Parse error: Content after ')': "+tok.next()+" ...");
         return rel;
     }
-    
+
     public static Rel parseRel(Tokenizer tok) {
         if ( ! tok.hasNext() )
             throw new RuleParseException("No token") ;
@@ -59,7 +69,7 @@ public class RuleParser {
             tok.next();
         } else {
             Token token = tok.next();
-            if ( ! token.isString() && ! token.isWord() && ! token.hasType(TokenType.UNDERSCORE) ) 
+            if ( ! token.isString() && ! token.isWord() && ! token.hasType(TokenType.UNDERSCORE) )
                 throw new RuleParseException("Parse error: Rel name: "+token) ;
             if ( token.hasType(TokenType.UNDERSCORE) )
                 relName = "_";
@@ -71,7 +81,7 @@ public class RuleParser {
             if ( token.getType() != TokenType.LPAREN)
                 throw new RuleParseException("Parse error: Expected LPAREN: got: "+token) ;
         }
-        
+
         boolean first = true;
         List<Node> terms = new ArrayList<>();
         while(tok.hasNext()) {
@@ -90,7 +100,7 @@ public class RuleParser {
         Tuple<Node> tuple = TupleFactory.create(terms);
         return new Rel(relName, tuple);
     }
-    
+
     private static Node tokenToNode(Token token) {
         if ( token.getType() == TokenType.UNDERSCORE )
             return Node.ANY;
@@ -100,7 +110,7 @@ public class RuleParser {
 //            throw new RuleParseException("Parse error: Expected node token, got: "+token);
 //        return n;
     }
-    
+
     private static void skipComma(Tokenizer tok) {
         if ( ! tok.hasNext() )
             throw new RuleParseException("Parse error: Early end of token input");
@@ -112,18 +122,18 @@ public class RuleParser {
         }
         return;
     }
-    
+
     public static Rule parseRule(String x) {
         // fact(,,,).
         // head(...) <- body .
-        
+
         // rel{0,1} <- rel{0,} ...
         if ( ! x.contains("<-") ) {
-            Tokenizer tok = TokenizerFactory.makeTokenizerString(x);
+            Tokenizer tok = TokenizerText.fromString(x);
             Rel rel = parseRel(tok);
             if ( !tok.hasNext() )
                 throw new RuleParseException("Parse error: Expected DOT after fact.");
-            Token peekToken = tok.peek(); 
+            Token peekToken = tok.peek();
             if ( peekToken == null || peekToken.getType() == TokenType.EOF )
                 throw new RuleParseException("Parse error: Unexpected end of fact.");
             if ( peekToken == null || peekToken.getType() == TokenType.DOT )
@@ -139,21 +149,21 @@ public class RuleParser {
         z[0] = z[0].trim();
         if ( z[0].isEmpty() )
             throw new RuleParseException("No head to rule");
-        
+
         Rel head = parseRel(z[0]);
-        Tokenizer tok = TokenizerFactory.makeTokenizerString(z[1]);
+        Tokenizer tok = TokenizerText.fromString(z[1]);
         List<Rel> body = new ArrayList<>();
         boolean first = true;
-        
+
         while(tok.hasNext()) {
-            Token peekToken = tok.peek(); 
+            Token peekToken = tok.peek();
             if ( peekToken == null || peekToken.getType() == TokenType.EOF )
                 break;
             if ( peekToken == null || peekToken.getType() == TokenType.DOT ) {
                 tok.next();
                 break;
             }
-            
+
             if ( ! first )
                 skipComma(tok);
             else
@@ -161,7 +171,7 @@ public class RuleParser {
             Rel r = parseRel(tok);
             body.add(r);
         }
-        
+
         return new Rule(head, body);
     }
 }

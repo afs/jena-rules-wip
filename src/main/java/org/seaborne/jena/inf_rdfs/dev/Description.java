@@ -20,7 +20,7 @@ package org.seaborne.jena.inf_rdfs.dev;
 
 public class Description {
     
-    // PAckage "inf" - RDFS and a bit. One data triple inference. 
+    // Package "inf" - RDFS and a bit. One data triple inference. 
     
     /*
      * InfSetupRDFS > BaseInfSetupRDFS<X> : compiled datastructures.

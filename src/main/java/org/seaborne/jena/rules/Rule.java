@@ -33,12 +33,11 @@ public class Rule {
        this.body = null;
        check();
     }
-    
+
     //@SafeVarargs
     public Rule(Rel head, Rel...body) {
         this.head = head;
-        //List.of in java9
-        this.body = Collections.unmodifiableList(Arrays.asList(body)) ;
+        this.body = List.of(body) ;
         check();
     }
 
@@ -67,11 +66,11 @@ public class Rule {
         for ( Node n : head.getTuple() ) {
             if ( Var.isVar(n) ) {
                 if ( ! vars.contains(n) )
-                    throw new RuleException("Variable '"+n+"' in head but not in body"); 
+                    throw new RuleException("Variable '"+n+"' in head but not in body");
             }
         }
     }
-    
+
     private void accVars(Collection<Var> acc, Rel rel) {
         rel.getTuple().forEach(n->{
             if ( Var.isVar(n) )
@@ -86,11 +85,11 @@ public class Rule {
     public List<Rel> getBody() {
         return body ;
     }
-    
+
     public boolean isFact() {
         return body==null;
     }
-    
+
     public Rel getFact() {
         if ( ! isFact() )
             throw new RuleException("Not a fact: "+this);
@@ -98,16 +97,16 @@ public class Rule {
     }
 
     //Cache strings.?
-    
+
     @Override
     public String toString() {
-        return str(this); 
+        return str(this);
     }
 
     private static String p(Rel rel) {
         return rel.toString();
     }
-    
+
 
     public static String str(Rule rule) {
         StringBuilder sb = new StringBuilder();
@@ -129,6 +128,6 @@ public class Rule {
     public static String str(List<Rule> rules) {
         StringJoiner sj = new StringJoiner(",\n  ", "[ ", "\n]") ;
         rules.forEach((r)->sj.add(str(r))) ;
-        return sj.toString() ; 
+        return sj.toString() ;
     }
 }

@@ -49,64 +49,64 @@ import org.seaborne.jena.inf_rdfs.InferenceStreamRDFS;
 import org.seaborne.jena.inf_rdfs.engine.InfGlobal;
 import org.seaborne.jena.inf_rdfs.engine.InferenceSetupRDFS;
 import org.seaborne.jena.inf_rdfs.tdb.InfSetupRDFS_TDB1;
-import org.seaborne.jena.inf_rdfs.tdb.InfSetupRDFS_TDB2; 
+import org.seaborne.jena.inf_rdfs.tdb.InfSetupRDFS_TDB2;
 
 public class DevRDFS {
-    static { LogCtl.setLog4j() ; }
-    
+    static { LogCtl.setLogging(); }
+
     // Case of stuff in the data :
     // :T rdfs:label "TYPE" .
     // Better handling of vocab-in-data.
     //   1 - check on load.
     //   2 - InfGlobal.removeRDFS needs to be better yet? based on data?
-    
+
     /* makes sense:
      * No vocab + exclude vocab infs
      * Include vocab + include vocab infs
-     * 
+     *
      * Do not make sense?
      * No vocab + include vocab infs
      * Include vocab + exclude vocab infs
-     * 
+     *
      */
-    
+
     /*
      * QueryExecutionDSG etc over Graphs/DatasetGraphs
-     * 
-     * Setup engine <X> -- abstract class with Node -> X function. 
+     *
+     * Setup engine <X> -- abstract class with Node -> X function.
      * StreamRDF versions of basic range/domain;
-     *   SubProperty -> R/D -> SubClass 
-     * 
-     * When to materialize? Recursive calls into the source. 
+     *   SubProperty -> R/D -> SubClass
+     *
+     * When to materialize? Recursive calls into the source.
      * GraphRDFS (stream version) needs cleaning.
-     *  
+     *
      * coverage
      * Duplicates in (? ? ?)combined due to subClassOf
      *   Another rules file - RDFS graph without axioms.
-     * 
+     *
      * rdfs:member, list:member
      */
-    
+
     // More tests
     //   Coverage
     //   find_X_rdfsSubClassOf_Y
-    
+
     // Tests for:
     //   InfererenceProcessTriple
     //   InferenceProcessStreamRDF
     //   InfererenceProcessIteratorRDFS
-    
+
     // Test (D,V) , (D,-), (-, V), (D+V, D+V)
     //   Mode D-extract-V.
-    
+
     // ANY_ANY_T - filter rdf:type and replace - no distinct needed.
-    
+
     // Use InfFactory.
-    
+
     static Graph inf ;
-    static Graph g_rdfs2 ; 
+    static Graph g_rdfs2 ;
     static Graph g_rdfs3 ;
-    
+
     public static void main(String...argv) throws IOException {
         //basic();
         //plain() ;
@@ -116,24 +116,24 @@ public class DevRDFS {
     private static void basic() {
         String DATA_FILE = "data.ttl" ;
         String VOCAB_FILE = "vocab.ttl" ;
-        
+
         System.out.println("---- Schema");
         Model vocab = RDFDataMgr.loadModel(VOCAB_FILE) ;
 //        RDFDataMgr.write(System.out, vocab, Lang.TTL);
-        
+
         System.out.println("---- Data");
         Model data = RDFDataMgr.loadModel(DATA_FILE) ;
 //        RDFDataMgr.write(System.out, data, Lang.TTL);
         System.out.println("----");
-        
+
         InferenceSetupRDFS setup = InfFactory.setupRDF(vocab.getGraph(), false) ;
         Graph graph = new GraphRDFS(setup, data.getGraph()) ;
-        
+
         Node n_a = SSE.parseNode(":a");
         Node n_T = SSE.parseNode(":T");
         Node n_T2 = SSE.parseNode(":T2");
         Node n_b = SSE.parseNode(":b");
-        
+
         Iter.print(graph.find(n_a, RDF.Nodes.type, null));
         System.out.println("--");
         Iter.print(graph.find(null, RDF.Nodes.type, n_T2));
@@ -158,11 +158,11 @@ public class DevRDFS {
         InfSetupRDFS_TDB1 setup1 = new InfSetupRDFS_TDB1(vocab.getGraph(), dsg1, false) ;
         //Graph graph = new GraphRDFS(setup1, data.getGraph()) ;
         // TDB2
-        
+
         DatasetGraph dsg2 = DatabaseMgr.createDatasetGraph();
         InfSetupRDFS_TDB2 setup2 = new InfSetupRDFS_TDB2(vocab.getGraph(), dsg2, false) ;
     }
-    
+
     public static void plain(String...argv) throws IOException {
         String DIR = "testing/Inf" ;
 //        String DATA_FILE = DIR+"/rdfs-data.ttl" ;
@@ -179,21 +179,21 @@ public class DevRDFS {
         rules = rules.replaceAll("#[^\\n]*", "") ;
 
         InferenceSetupRDFS setup = InfFactory.setupRDF(vocab.getGraph(), false) ;
-        
+
         Reasoner reasoner = new GenericRuleReasoner(Rule.parseRules(rules));
         InfModel m = ModelFactory.createInfModel(reasoner, vocab, data);
         inf = m.getGraph() ;
         g_rdfs2 = new GraphRDFS(setup, data.getGraph()) ;
         //g_rdfs3 = new GraphRDFS3(setup, data.getGraph()) ;
-        
+
         //test(null, null, node("T2")) ;
-        
+
         test(node("T"), null, null ) ;
-        
+
         // Expansion
         //InferenceProcessorRDFS proc = new InferenceProcessorRDFS(setup) ;
     }
-    
+
     public static void expand() throws IOException {
         boolean combined = false ;
         String DIR = "testing/Inf" ;
@@ -204,12 +204,12 @@ public class DevRDFS {
         System.out.println("---- Schema");
         Model vocab = RDFDataMgr.loadModel(VOCAB_FILE) ;
         RDFDataMgr.write(System.out, vocab, Lang.TTL);
-        
+
         System.out.println("---- Data");
         Model data = RDFDataMgr.loadModel(DATA_FILE) ;
         RDFDataMgr.write(System.out, data, Lang.TTL);
-        
-        // Jena rules RDFS 
+
+        // Jena rules RDFS
 //        System.out.println("---- Rules");
 //        String rules = FileUtils.readWholeFileAsUTF8(RULES_FILE) ;
 //        System.out.print(rules);
@@ -217,11 +217,11 @@ public class DevRDFS {
 //        System.out.println();
 //        Reasoner reasoner = new GenericRuleReasoner(Rule.parseRules(rules));
 //        InfModel m = ModelFactory.createInfModel(reasoner, vocab, data);
-        
+
         System.out.println("---- Expansion");
         // Expansion Graph
         Graph graphExpanded = Factory.createDefaultGraph() ;
-        
+
         InferenceSetupRDFS setup = InfFactory.setupRDF(vocab.getGraph(), combined) ;
         StreamRDF stream = StreamRDFLib.graph(graphExpanded) ;
         // Apply inferences.
@@ -234,7 +234,7 @@ public class DevRDFS {
         graph.getPrefixMapping().getNsPrefixMap().forEach(stream::prefix) ;
         graph.find(Node.ANY, Node.ANY, Node.ANY).forEachRemaining(stream::triple);
     }
-    
+
     private static void test(Node s, Node p, Node o) {
         compare("G2", g_rdfs2, inf, s, p, o) ;
     }
@@ -245,34 +245,34 @@ public class DevRDFS {
     }
 
     static Node node(String str) { return NodeFactory.createURI("http://example/"+str) ; }
-    
+
     static void dwim(Graph gTest, Graph gInf, Node s, Node p , Node o) {
         dwim$("inference", gInf, s,p,o, true) ;
         dwim$("test", gTest, s,p,o, false) ;
         System.out.println() ;
     }
-    
+
     static void dwim(Graph graph, Node s, Node p , Node o) {
         dwim$(null, graph, s,p,o, false) ;
     }
-    
-    
+
+
 //    static Filter<Triple> filterRDFS = new Filter<Triple>() {
 //        @Override
 //        public boolean accept(Triple triple) {
 //            if ( InfGlobal.includeDerivedDataRDFS ) {
 //                Node p = triple.getPredicate() ;
-//                return ! p.equals(RDFS.Nodes.domain) && ! p.equals(RDFS.Nodes.range) ; 
+//                return ! p.equals(RDFS.Nodes.domain) && ! p.equals(RDFS.Nodes.range) ;
 //            }
-//            return  
-//                ! triple.getPredicate().getNameSpace().equals(RDFS.getURI()) ; 
+//            return
+//                ! triple.getPredicate().getNameSpace().equals(RDFS.getURI()) ;
 //            }
 //    } ;
-    
+
     static void dwim$(String label, Graph g, Node s, Node p , Node o, boolean filter) {
         if ( label != null )
             System.out.println("** Graph ("+label+"):") ;
-        System.out.printf("find(%s, %s, %s)\n", str(s), str(p), str(o)) ; 
+        System.out.printf("find(%s, %s, %s)\n", str(s), str(p), str(o)) ;
         ExtendedIterator<Triple> iter = g.find(s, p, o) ;
         List<Triple> x = iter.toList() ;
         if ( filter )
@@ -280,7 +280,7 @@ public class DevRDFS {
         x.forEach(t -> System.out.println("    "+t)) ;
         System.out.println() ;
     }
-    
+
     static void compare(String label, Graph testGraph, Graph refGraph, Node s, Node p , Node o) {
         if ( label != null )
             System.out.println("** Compare ("+label+"):") ;
@@ -291,7 +291,7 @@ public class DevRDFS {
         List<Triple> x2 = refGraph.find(s, p, o).toList() ;
         if ( true )
             x2 = InfGlobal.removeRDFS(x2) ;
-        
+
         boolean b = sameElts(x1, x2) ;
         if ( !b ) {
             System.out.println("  Different:") ;
@@ -301,14 +301,14 @@ public class DevRDFS {
             System.out.println("  Same:") ;
             x1.stream().map(SSE::str).forEach(t -> System.out.println("    "+t)) ;
         }
-            
+
         System.out.println() ;
     }
 
-    /** Test for same elements, regarless of cardinality */ 
+    /** Test for same elements, regarless of cardinality */
     public static <T> boolean sameElts(Collection<T> left, Collection<T> right) {
         return right.containsAll(left) && left.containsAll(right) ;
     }
-    
+
 }
 

@@ -23,8 +23,6 @@ import org.apache.jena.riot.system.StreamRDFLib ;
 import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.sparql.graph.GraphFactory ;
 import org.junit.BeforeClass ;
-import org.seaborne.jena.inf_rdfs.InfFactory;
-import org.seaborne.jena.inf_rdfs.InferenceStreamRDFS;
 import org.seaborne.jena.inf_rdfs.engine.InferenceSetupRDFS;
 
 /** Test of RDFS.
