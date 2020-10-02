@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package previous.rules1.pf_table;
+package pf_table;
 
 import java.util.Collection ;
 import java.util.Iterator ;

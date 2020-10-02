@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package previous.rules1;
+package org.seaborne.jena.rules.backwards;
 
 import static java.util.stream.Collectors.toList ;
 

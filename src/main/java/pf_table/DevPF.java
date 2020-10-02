@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package previous.rules1.pf_table;
+package pf_table;
 
 import org.apache.jena.atlas.lib.StrUtils ;
 import org.apache.jena.graph.NodeFactory ;
@@ -30,7 +30,7 @@ import org.apache.jena.sparql.util.QueryExecUtils ;
 import org.apache.jena.sys.JenaSystem ;
 import org.apache.jena.vocabulary.RDF ;
 import org.apache.jena.vocabulary.RDFS ;
-import previous.rules1.pf_table.PFbyTable.Table;
+import pf_table.PFbyTable.Table;
 
 public class DevPF {
     // Table-backed property function.
