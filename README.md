@@ -1,2 +1,1 @@
-# jena-rules
-Jena Rules (experimental)
+Experimental prototyping.
