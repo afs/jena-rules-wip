@@ -18,26 +18,72 @@
 
 package org.seaborne.jena.rules;
 
+import java.util.List;
 import java.util.StringJoiner;
 
 import org.apache.jena.atlas.lib.tuple.Tuple;
+import org.apache.jena.atlas.lib.tuple.TupleFactory;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.sse.SSE;
 
-/** Strictly : in datalog, this is a "Literal" but that is confusing for RDF */
+/**
+ * Strictly : in datalog, this is a "Literal, but that is confusing for RDF,
+ * or "Atom", yet it is composite.
+ */
 public class Rel  {
     private final String name;
     private final Tuple<Node> tuple;
 
+    public static Rel fromTriple(Triple triple) {
+        return new Rel("", TupleFactory.create3(triple.getSubject(), triple.getPredicate(), triple.getObject()));
+    }
+
+    public static Triple toTripleAny(Rel rel) {
+        if ( rel.len() != 3 )
+            throw new IllegalArgumentException("Rel.toTriple: arg not of length 3: "+rel);
+        if ( !rel.name.isEmpty() )
+            throw new IllegalArgumentException("Rel.toTriple: name is not \"\"");
+        return Triple.create(any(rel.get(0)), any(rel.get(1)), any(rel.get(2)));
+
+    }
+    private static Node any(Node node) {
+        if ( node == null ) return Node.ANY;
+        if ( Var.isVar(node) ) return Node.ANY;
+        return node;
+    }
+
+    public static Triple toTriple(Rel rel) {
+        if ( rel.len() != 3 )
+            throw new IllegalArgumentException("Rel.toTriple: arg not of length 3: "+rel);
+        if ( !rel.name.isEmpty() )
+            throw new IllegalArgumentException("Rel.toTriple: name is not \"\"");
+        return Triple.create(rel.get(0), rel.get(1), rel.get(2));
+    }
+
     public Rel(String name, Tuple<Node> tuple) {
         this.name = name;
-        this.tuple = tuple; 
+        this.tuple = tuple;
+    }
+
+    public Rel(String name, Node...nodes) {
+        this.name = name;
+        this.tuple = TupleFactory.tuple(nodes);
+    }
+
+    public Rel(String name, List<Node> list) {
+        this.name = name;
+        this.tuple = TupleFactory.create(list);
     }
 
     public String getName() {
         return name;
     }
 
+    public Node get(int idx) {
+        return tuple.get(idx);
+    }
     public Tuple<Node> getTuple() {
         return tuple;
     }
@@ -85,7 +131,7 @@ public class Rel  {
             return false;
         return true;
     }
-    
+
     @Override
     public String toString() {
         StringJoiner sj = new StringJoiner(", ", name+"(", ")");

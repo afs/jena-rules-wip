@@ -18,32 +18,45 @@
 
 package org.seaborne.jena.rules;
 
-import org.seaborne.jena.rules.impl.RelStore2;
-import org.seaborne.jena.rules.impl.RelStoreSimple;
+import org.apache.jena.graph.Graph;
+import org.seaborne.jena.rules.store.*;
 
 public class RelStoreFactory {
+    private static RelStore EMPTY = RelStoreSimple.create().build();
+
     private RelStoreFactory() {}
 
-    public static RelStore create() {
-        return new RelStoreSimple();
-    }
-    
-    /** Create a {@link RelStore} that is suitable for temporary working data. */
-    public static RelStore createMem() {
-        return new RelStoreSimple();
+    public static RelStoreBuilder create() {
+        return RelStoreSimple.create();
     }
 
-    /** Merge two {@link RelStore}s into one. */ 
+    public static RelStoreAcc createAcc() {
+        return new RelStoreAccSimple();
+    }
+
+    /** Create a {@link RelStoreBuilder} that is suitable for temporary working data. */
+    public static RelStoreBuilder createMem() {
+        return RelStoreSimple.create();
+    }
+
+    /** Create a {@link RelStore} for a {@link Graph}. */
+    public static RelStore create(Graph graph) {
+        return new RelStoreGraph(graph);
+    }
+
+    /** Merge two {@link RelStore}s into one. */
     public static RelStore combine(RelStore data, RelStore acc) {
         //XXX Do better!
-        RelStore rs = createMem();
+        RelStoreBuilder rs = createMem();
         rs.add(data);
         rs.add(acc);
-        return rs;
+        return rs.build();
     }
-    
+
     public static RelStore union(RelStore rs1, RelStore rs2) {
         return new RelStore2(rs1, rs2);
     }
+
+    public static RelStore empty() { return EMPTY; }
 }
 

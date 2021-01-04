@@ -16,25 +16,23 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package org.seaborne.jena.rules.exec;
 
-import java.util.ArrayList;
+import org.seaborne.jena.rules.RelStore;
+import org.seaborne.jena.rules.RuleExecCxt;
+import org.seaborne.jena.rules.RuleSet;
+import org.seaborne.jena.rules.RulesEngine;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+public abstract class RulesEngineBkd implements RulesEngine {
 
-@RunWith(Parameterized.class)
-public class TestRules {
-    @Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> data() {
-        return new ArrayList<>();
-    }
+    protected static RuleExecCxt rCxt = RuleExecCxt.global;
 
-    private RulesEngine engine;
+    protected final RelStore data;
+    protected final RuleSet rules;
 
-    public TestRules(RulesEngine engine) {
-        this.engine = engine;
-
+    protected RulesEngineBkd(RelStore data, RuleSet rules) {
+        this.data = data;
+        this.rules = rules;
     }
 }
+

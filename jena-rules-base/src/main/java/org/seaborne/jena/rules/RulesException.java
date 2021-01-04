@@ -18,23 +18,9 @@
 
 package org.seaborne.jena.rules;
 
-import java.util.ArrayList;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
-@RunWith(Parameterized.class)
-public class TestRules {
-    @Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> data() {
-        return new ArrayList<>();
-    }
-
-    private RulesEngine engine;
-
-    public TestRules(RulesEngine engine) {
-        this.engine = engine;
-
-    }
+public class RulesException extends RuntimeException {
+    public RulesException()                          { super() ; }
+    public RulesException(String msg)                { super(msg) ; }
+    public RulesException(Throwable th)              { super(th) ; }
+    public RulesException(String msg, Throwable th)  { super(msg, th) ; }
 }

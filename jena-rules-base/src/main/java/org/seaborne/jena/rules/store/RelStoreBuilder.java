@@ -16,25 +16,29 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package org.seaborne.jena.rules.store;
 
-import java.util.ArrayList;
+import java.util.Collection;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.seaborne.jena.rules.Rel;
+import org.seaborne.jena.rules.RelStore;
 
-@RunWith(Parameterized.class)
-public class TestRules {
-    @Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> data() {
-        return new ArrayList<>();
+public interface RelStoreBuilder {
+
+    public default RelStoreBuilder add(RelStore relStore) {
+        relStore.all().forEach(this::add);
+        return this;
     }
 
-    private RulesEngine engine;
-
-    public TestRules(RulesEngine engine) {
-        this.engine = engine;
-
+    public default RelStoreBuilder add(Collection<Rel> rels) {
+        rels.forEach(r->this.add(r));
+        return this;
     }
+
+    public RelStoreBuilder add(Rel rel);
+
+    public RelStoreBuilder delete(Rel rel);
+
+    public RelStore build();
+
 }

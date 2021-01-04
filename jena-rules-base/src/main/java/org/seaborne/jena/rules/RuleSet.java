@@ -20,15 +20,54 @@ package org.seaborne.jena.rules;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.PrintStream;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.jena.atlas.lib.CollectionUtils;
+import org.apache.jena.atlas.lib.StreamOps;
 
 public class RuleSet implements Iterable<Rule>{
     private final List<Rule> rules ;
     private final List<Rule> unvarRules;
 
-    public RuleSet(List<Rule> rules) {
+    public static class Builder {
+        private final List<Rule> accRules =  new ArrayList<>() ;
+
+        public Builder() {}
+
+        public Builder add(Rule rule) {
+            accRules.add(rule);
+            return this;
+        }
+
+        public Builder add(Rule... rules) {
+            for ( Rule r : rules)
+                accRules.add(r);
+            return this;
+        }
+
+        public Builder add(Collection<Rule> rules) {
+            rules.forEach(this::add);
+            return this;
+        }
+
+        public RuleSet build() {
+            List<Rule> rules = new ArrayList<>(this.accRules);
+            return new RuleSet(rules);
+        }
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    public static RuleSet create(Rule ... rules) {
+        return new Builder().add(rules).build();
+    }
+
+    private RuleSet(List<Rule> rules) {
         this.rules = Collections.unmodifiableList(new ArrayList<>(rules));
         this.unvarRules = Collections.unmodifiableList
             (rules.stream().sequential()
@@ -40,6 +79,10 @@ public class RuleSet implements Iterable<Rule>{
         return rules;
     }
 
+    public int size() {
+        return rules.size();
+    }
+
     @Override
     public Iterator<Rule> iterator() {
         return rules.iterator();
@@ -47,6 +90,29 @@ public class RuleSet implements Iterable<Rule>{
 
     public Stream<Rule> stream() {
         return rules.stream();
+    }
+
+    /** Get a rule that exactly matches the {@code Rel} (same variable names). */
+    public Rule get(Rel rel) {
+        return stream().filter(r->rel.equals(r.getHead())).findAny().orElse(null);
+    }
+
+    /** Get all the rules that exactly match the {@code Rel} (same variable names). */
+    public Collection<Rule> getAll(Rel rel) {
+        return stream().filter(r->rel.equals(r.getHead())).collect(Collectors.toList());
+    }
+
+    /** Get the rule that exactly matches the {@code Rel} (same variable names) or throw a {@link RulesException}. */
+    public Rule getOne(Rel rel) {
+        Collection<Rule> c = getAll(rel);
+        if ( c.size() != 1 )
+            throw new RulesException("Not exactly one match: "+rel+" : got "+c);
+        return CollectionUtils.oneElt(c);
+    }
+
+    public Collection<Rule> provides(Rel rel) {
+        Stream<Rule> providers = stream().filter(rule -> RuleOps.provides(rel, rule.getHead()));
+        return StreamOps.toList(providers);
     }
 
     public List<Rel> getHeads() {
@@ -62,13 +128,13 @@ public class RuleSet implements Iterable<Rule>{
      */
     public Set<Rel> getIntensional() {
         //Re-unvars
-        return Rules.intensionalRelations(rules) ;
+        return RuleOps.intensionalRelations(rules) ;
     }
 
     /** Extensional relationship = relation occurring only in the body of rules.*/
     public Collection<Rel> getExtensional() {
         //Re-unvars
-        return Rules.extensionalRelations(rules) ;
+        return RuleOps.extensionalRelations(rules) ;
     }
 
 //    /** Rules that has concrete predicate that is also in some rule body.
@@ -132,23 +198,32 @@ public class RuleSet implements Iterable<Rule>{
 
     //public void forEach(Consumer<? super Rule> action) { rules.forEach(action); }
 
+    public void print() {
+        print(System.out);
+    }
+
+    private void print(PrintStream out) {
+        System.out.println("[RuleSet]");
+        rules.stream().map(Rule::toString).forEach(r->System.out.println("  "+r));
+    }
+
     public String toMultilineString() {
-        StringJoiner sj = new StringJoiner("\n") ;
+        StringJoiner sj = new StringJoiner(" .\n", "", " .\n") ;
         rules.stream().map(Rule::toString).forEach(sj::add);
         return sj.toString();
     }
 
     @Override
     public String toString() {
-        StringJoiner sj = new StringJoiner("\n") ;
+        StringJoiner sj = new StringJoiner(" . ", "", " .") ;
         rules.stream().map(Rule::toString).forEach(sj::add);
         return sj.toString();
     }
 
     // Convert a rule to use "any", not named variables.
     private Rule unvar(Rule r) {
-        Rel h2 = Rules.unvar(r.getHead());
-        List<Rel> b2 = r.getBody().stream().map(Rules::unvar).collect(Collectors.toList());
+        Rel h2 = RuleOps.unvar(r.getHead());
+        List<Rel> b2 = r.getBody().stream().map(RuleOps::unvar).collect(Collectors.toList());
         return new Rule(h2, b2);
     }
 }

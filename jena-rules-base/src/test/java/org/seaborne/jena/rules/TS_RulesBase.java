@@ -24,7 +24,10 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses( {
     TestParser.class
+    //, TestMGU.class
     , TestRelStore.class
+    , TestDependencyGraph.class
+    , TestSolve.class
 })
 
 public class TS_RulesBase { }

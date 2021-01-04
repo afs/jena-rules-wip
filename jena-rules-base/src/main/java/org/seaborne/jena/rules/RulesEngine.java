@@ -18,23 +18,22 @@
 
 package org.seaborne.jena.rules;
 
-import java.util.ArrayList;
+import java.util.stream.Stream;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import migrate.binding.Binding;
+import org.seaborne.jena.rules.api.EngineType;
 
-@RunWith(Parameterized.class)
-public class TestRules {
-    @Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> data() {
-        return new ArrayList<>();
-    }
+public interface RulesEngine {
 
-    private RulesEngine engine;
+    interface Factory { RulesEngine build(RelStore data, RuleSet ruleSet); }
 
-    public TestRules(RulesEngine engine) {
-        this.engine = engine;
+    public EngineType engineType();
 
-    }
+    public Stream<Rel> stream();
+
+    public RelStore materialize();
+
+    public default void update() {}
+
+    public Stream<Binding> solve(Rel query);
 }

@@ -25,8 +25,8 @@ import org.apache.jena.sparql.core.Var;
 
 public class Rule {
 
-    // The code does not depend on using this value. 
-    private static List<Rel> EMPTY_BODY = Collections.emptyList(); 
+    // The code does not depend on using this value.
+    private static List<Rel> EMPTY_BODY = Collections.emptyList();
     private  Rel head ;
     private  List<Rel> body ;
 
@@ -57,7 +57,7 @@ public class Rule {
      */
     private void check() {
         if ( head == null )
-            throw new RuleException("Null head");
+            throw new RulesException("Null head");
         if ( head == null )
             return ;
         Set<Var> vars = new HashSet<>();
@@ -69,7 +69,7 @@ public class Rule {
         for ( Node n : head.getTuple() ) {
             if ( Var.isVar(n) ) {
                 if ( ! vars.contains(n) )
-                    throw new RuleException("Variable '"+n+"' in head but not in body");
+                    throw new RulesException("Variable '"+n+"' in head but not in body");
             }
         }
     }
@@ -95,8 +95,26 @@ public class Rule {
 
     public Rel getFact() {
         if ( ! isFact() )
-            throw new RuleException("Not a fact: "+this);
+            throw new RulesException("Not a fact: "+this);
         return head;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(body, head);
+    }
+
+    // Rules are equal if they are the exactly the same (same variables names)
+    @Override
+    public boolean equals(Object obj) {
+        if ( this == obj )
+            return true;
+        if ( obj == null )
+            return false;
+        if ( getClass() != obj.getClass() )
+            return false;
+        Rule other = (Rule)obj;
+        return Objects.equals(body, other.body) && Objects.equals(head, other.head);
     }
 
     //Cache strings.?
@@ -110,27 +128,26 @@ public class Rule {
         return rel.toString();
     }
 
-
     public static String str(Rule rule) {
         StringBuilder sb = new StringBuilder();
         if ( rule.getHead() != null ) {
             sb.append(p(rule.getHead()));
-            sb.append(" ");
         }
-        sb.append("<-");
         if ( ! rule.getBody().isEmpty() ) {
-            StringJoiner sj = new StringJoiner(", ") ;
+            sb.append(" ");
+            sb.append("<-");
+            StringJoiner sj = new StringJoiner(" ") ;
             rule.getBody().stream().map(Rule::p).forEach(sj::add);
             sb.append(" ");
             sb.append(sj.toString());
         }
-        sb.append(" .");
+        //sb.append(" .");
         return sb.toString();
     }
 
-    public static String str(List<Rule> rules) {
-        StringJoiner sj = new StringJoiner(",\n  ", "[ ", "\n]") ;
-        rules.forEach((r)->sj.add(str(r))) ;
-        return sj.toString() ;
-    }
+//    public static String str(List<Rule> rules) {
+//        StringJoiner sj = new StringJoiner(",\n  ", "[ ", "\n]") ;
+//        rules.forEach((r)->sj.add(str(r))) ;
+//        return sj.toString() ;
+//    }
 }

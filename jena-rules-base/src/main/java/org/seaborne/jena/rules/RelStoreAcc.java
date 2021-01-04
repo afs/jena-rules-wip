@@ -18,23 +18,33 @@
 
 package org.seaborne.jena.rules;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.apache.jena.atlas.iterator.Iter;
 
-@RunWith(Parameterized.class)
-public class TestRules {
-    @Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> data() {
-        return new ArrayList<>();
+/** Mutable {@link RelStore} */
+public interface RelStoreAcc extends RelStore {
+    public default RelStore freeze() {
+        this.setReadOnly();
+        return this;
     }
 
-    private RulesEngine engine;
+    public default void setReadOnly() { setWritable(false); }
+    public void setWritable(boolean allowUpdate);
 
-    public TestRules(RulesEngine engine) {
-        this.engine = engine;
+    public default boolean isReadonly() { return ! isUpdateable();}
+    public boolean isUpdateable();
 
+    public void add(Rel rel);
+
+    public default void add(RelStore data) {
+        data.all().forEach(this::add);
+    }
+
+    public void delete(Rel rel);
+
+    public default void removeAll(Rel rel) {
+        List<Rel> x = Iter.toList(find(rel));
+        x.forEach((r) -> delete(r));
     }
 }

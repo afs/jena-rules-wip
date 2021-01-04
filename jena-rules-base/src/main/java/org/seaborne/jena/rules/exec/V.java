@@ -16,25 +16,22 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package org.seaborne.jena.rules.exec;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.seaborne.jena.rules.Rel;
 
-@RunWith(Parameterized.class)
-public class TestRules {
-    @Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> data() {
-        return new ArrayList<>();
+public abstract class V {
+    public enum Op { AND, OR }
+    List<V> elts = new ArrayList<V>();
+
+    public void add(Rel rel) {
     }
 
-    private RulesEngine engine;
-
-    public TestRules(RulesEngine engine) {
-        this.engine = engine;
-
+    public void add(V elt) {
+        elts.add(elt);
     }
 }
+

@@ -24,49 +24,49 @@ import static org.junit.Assert.assertTrue;
 
 import org.apache.jena.graph.Node;
 import org.junit.Test;
-import org.seaborne.jena.rules.parser.RuleParseException;
-import org.seaborne.jena.rules.parser.RuleParser;
+import org.seaborne.jena.rules.lang.RuleParseException;
+import org.seaborne.jena.rules.lang.RulesParser;
 
 public class TestParser {
     private Rule parseRule(String string) {
-        Rule rule = RuleParser.parseRule(string);
+        Rule rule = RulesParser.parseRule(string);
         return rule;
     }
 
-    private Rel parseRel(String string) {
-        Rel rel = RuleParser.parseRel(string);
+    private Rel parseAtom(String string) {
+        Rel rel = RulesParser.parseAtom(string);
         return rel;
     }
 
     @Test public void rule_rel_1() {
-        Rel r = parseRel("fact()");
+        Rel r = parseAtom("fact()");
     }
-    
+
     @Test public void rule_rel_2() {
-        Rel r = parseRel("rel(1,2,3)");
+        Rel r = parseAtom("rel(1,2,3)");
         assertEquals(3, r.getTuple().len());
     }
-    
+
     @Test public void rule_rel_3() {
-        Rel r = parseRel("rel(1 2 3)");
+        Rel r = parseAtom("rel(1 2 3)");
         assertEquals(3, r.getTuple().len());
     }
 
     @Test public void rule_rel_4() {
-        Rel r = parseRel("rel(:a <b> '3')");
+        Rel r = parseAtom("rel(:a <b> '3')");
         assertEquals(3, r.getTuple().len());
         assertEquals("rel", r.getName());
     }
 
     @Test public void rule_rel_5() {
-        Rel r = parseRel("(?x)");
+        Rel r = parseAtom("(?x)");
         assertEquals(1, r.getTuple().len());
         assertTrue(r.getTuple().get(0).isVariable());
         assertEquals("", r.getName());
     }
 
     @Test public void rule_rel_6() {
-        Rel r = parseRel("any(_)");
+        Rel r = parseAtom("any(_)");
         assertEquals(1, r.getTuple().len());
         assertTrue(r.getTuple().get(0).equals(Node.ANY));
     }
@@ -75,24 +75,29 @@ public class TestParser {
         Rule r = parseRule("fact() .");
         assertTrue(r.isFact());
     }
-    
+
     @Test public void rule_fact_2() {
         Rule r = parseRule("fact(1,2,3) .");
         assertTrue(r.isFact());
     }
-    
+
     @Test public void rule_fact_3() {
         Rule r = parseRule("fact(1 2 3) .");
         assertTrue(r.isFact());
     }
-    
+
     @Test public void rule_fact_4() {
         Rule r = parseRule("(<s> <p> <o>) .");
         assertTrue(r.isFact());
     }
 
+    @Test public void rule_fact_5() {
+        Rule r = parseRule("(<s> <p> <o>)");
+        assertTrue(r.isFact());
+    }
+
     // Error.
-    @Test(expected=RuleException.class)
+    @Test(expected=RulesException.class)
     public void rule_fact_err_1() {
         Rule r = parseRule("fact(1,?x,3) .");
         assertTrue(r.isFact());
@@ -105,7 +110,7 @@ public class TestParser {
         assertNull(r.getHead());
         assertTrue(r.getBody().isEmpty());
     }
-    
+
     @Test(expected=RuleParseException.class)
     public void rule_parse_2() {
         Rule r = parseRule("<-");
@@ -123,7 +128,7 @@ public class TestParser {
         assertNotNull(r.getFact());
         assertEquals("head", r.getFact().getName());
     }
-    
+
     @Test
     public void rule_parse_4() {
         Rule r = parseRule("head()<-body().");
@@ -132,7 +137,7 @@ public class TestParser {
         assertFalse(r.getBody().isEmpty());
         assertFalse(r.isFact());
     }
-    
+
     @Test
     public void rule_parse_5() {
         Rule r = parseRule("head()<-lit1() , lit2() .");
@@ -140,5 +145,43 @@ public class TestParser {
         assertNotNull(r.getHead());
         assertEquals(2, r.getBody().size());
     }
+
+    @Test
+    public void rule_parse_6() {
+        Rule r = parseRule("head():-lit1() , lit2() .");
+        assertNotNull(r);
+        assertNotNull(r.getHead());
+        assertEquals(2, r.getBody().size());
+    }
+
+    @Test
+    public void rule_parse_7() {
+        Rule r = parseRule("head():-lit1() lit2() .");
+        assertNotNull(r);
+        assertNotNull(r.getHead());
+        assertEquals(2, r.getBody().size());
+    }
+
+    @Test(expected=RuleParseException.class)
+    public void rule_parse_90() {
+        Rule r = parseRule("");
+    }
+
+    @Test(expected=RuleParseException.class)
+    public void rule_parse_91() {
+        Rule r = parseRule(".");
+    }
+
+    @Test(expected=RuleParseException.class)
+    public void rule_parse_92() {
+        Rule r = parseRule(". head():-lit1() lit2() .");
+    }
+
+    @Test(expected=RuleParseException.class)
+    public void rule_parse_93() {
+        Rule r = parseRule("head():-lit1() lit2() . .");
+    }
+
+    // XXX parse RuleSets
 
 }

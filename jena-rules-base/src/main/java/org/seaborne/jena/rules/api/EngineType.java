@@ -16,25 +16,21 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package org.seaborne.jena.rules.api;
 
-import java.util.ArrayList;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
-@RunWith(Parameterized.class)
-public class TestRules {
-    @Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> data() {
-        return new ArrayList<>();
-    }
-
-    private RulesEngine engine;
-
-    public TestRules(RulesEngine engine) {
-        this.engine = engine;
+// Algorithm: Jacobi
+//   Do each pass with respect to the previous round.
+// Algorithm: Gauss-Seidel
+public enum EngineType {
+    // Default navive (used for tests).
+    FWD_NAIVE
+    , FWD_NAIVE_JACOBI
+    , FWD_NAIVE_GUEASS_SEIDEL
+    , FWD_SEMINAIVE
+    , BKD_NON_RECURSIVE_SLD
+    , BKD_QSQR
+    , BKD_QSQI
+//    , MAGIC
 
     }
-}

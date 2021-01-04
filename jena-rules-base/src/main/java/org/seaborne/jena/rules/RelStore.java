@@ -18,30 +18,34 @@
 
 package org.seaborne.jena.rules;
 
+import java.io.PrintStream;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface RelStore {
     // Maybe RelStore -> Map of "Rels", all Rels of the same name
 
-    public default void setReadOnly() { setWritable(false); }
-    public void setWritable(boolean allowUpdate);
-    
-    public default boolean isReadonly() { return ! isUpdateable();} 
-    public boolean isUpdateable();
-    
-    public void add(Rel rel);
-    public void add(RelStore data);
-
-    public void delete(Rel rel);
-    public void removeAll(Rel rel);
+//    public default void setReadOnly() { setWritable(false); }
+//    public void setWritable(boolean allowUpdate);
+//
+//    public default boolean isReadonly() { return ! isUpdateable();}
+//    public boolean isUpdateable();
+//
+//    public void add(Rel rel);
+//    public void add(RelStore data);
+//
+//    public void delete(Rel rel);
+//    public void removeAll(Rel rel);
 
     public Iterator<Rel> find(Rel rel);
-    
+
     /** Get all the Rels matching a name*/
     public Stream<Rel> get(String relName);
-    
-    /** Does this RelStore have any rels of a given name? */ 
+
+    /** Does this RelStore have any rels of a given name? */
     public boolean containRel(String relName);
 
     public boolean matches(Rel rel);
@@ -52,8 +56,28 @@ public interface RelStore {
     public boolean isEmpty();
 
     public long size();
-    
+
     public Stream<Rel> all();
 
+    /** Set equals */
+    public static boolean equals(RelStore rs1, RelStore rs2) {
+        Set<Rel> set1 = rs1.all().collect(Collectors.toSet());
+        Set<Rel> set2 = rs2.all().collect(Collectors.toSet());
+        return set1.equals(set2);
+    }
+
+    public static String toMultiLineString(RelStore relStore) {
+        StringJoiner sj = new StringJoiner("\n + ", "++ ", "");
+        relStore.all().forEach(r -> sj.add(r.toString()));
+        return sj.toString();
+    }
+
+    public static void print(PrintStream out, RelStore relStore) {
+        boolean first = true;
+        relStore.all().forEach(r->{
+            out.print("+ " );
+            out.println(r);
+        });
+    }
 }
 

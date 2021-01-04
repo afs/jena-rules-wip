@@ -18,103 +18,251 @@
 
 package org.seaborne.jena.rules;
 
+import java.io.PrintStream;
 import java.util.*;
+import java.util.function.Consumer;
 
-import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap;
 import org.apache.jena.ext.com.google.common.collect.Multimap;
-import org.apache.jena.graph.Node;
 
-/** Rules dependency graph */ 
+/**
+ * Rules dependency graph. The graph has vertices of rules and links being "depends
+ * on" another rule, i.e. for a node that is a head of a rule, it is linked to the
+ * relations in its body. from this, we can determine whether a rule is:
+ * <ul>
+ * <li>Data only (body contains relations that only appear in the data)</li>
+ * <li>Not-recursive: it can be solved by top-down flattening</li>
+ * <li>Mutually recursive rules</li>
+ * <li>linear (only one body relationship is recursive)</li>
+ * </ul>
+ */
 public class DependencyGraph {
-    private Multimap<Rel, Rel> direct = ArrayListMultimap.create();
-    private Multimap<Rel, Rule> rules = ArrayListMultimap.create();
-    
-    public void put(Rule rule) {
-        Rel head = rule.getHead();
-        if ( direct.containsKey(head) )
-            direct.removeAll(head);
-        List<Rel> body = rule.getBody();
-        body.forEach(r->direct.put(head,r));
-        rules.put(head, rule);
+    // Rule -> other rules it needs
+    // This is not the body - a Rel in the body may have more than one rule it depends on
+
+    private Multimap<Rule, Rule> direct = ArrayListMultimap.create();
+    // Rule -> predicates without rules (so mush be in the data)
+
+    private Multimap<Rule, Rel> data = ArrayListMultimap.create();
+//    private Multimap<Rel, Rule> rules = ArrayListMultimap.create();
+    private final RuleSet ruleSet;
+
+    public DependencyGraph(RuleSet ruleSet) {
+        this.ruleSet = ruleSet;
+        ruleSet.forEach(this::put);
     }
-    
+
+    public RuleSet getRuleSet() {
+        return ruleSet;
+    }
+
+    private boolean DEBUG = false;
+
+    private void put(Rule rule) {
+        if ( DEBUG )
+            System.out.println("put:"+rule);
+        List<Rel> body = rule.getBody();
+        body.forEach(bodyRel->{
+            Collection<Rule> c = RuleOps.provides(bodyRel, ruleSet);
+            if ( c.isEmpty() ) {
+                if ( DEBUG )
+                    System.out.println("    data:"+bodyRel);
+                data.put(rule, bodyRel);
+            } else {
+                if ( DEBUG )
+                    System.out.println("    "+c);
+                direct.putAll(rule, c);
+            }
+        });
+    }
+
+    public void walk(Rule rule, Consumer<Rule> action) {
+        walk$(rule, action);
+    }
+
+    // Use the direct set.
+
+    private void walk$(Rule rule, Consumer<Rule> action) {
+        Set<Rule> acc = new HashSet<>();
+        Deque<Rule> stack = new ArrayDeque<>();
+        walk$(rule, action, acc, stack);
+    }
+
+    private void walk$(Rule rule, Consumer<Rule> action, Set<Rule> visited, Deque<Rule> pathVisited) {
+        if ( visited.contains(rule) )
+            return;
+        visited.add(rule);
+        action.accept(rule);
+        pathVisited.push(rule);
+        walkStep(rule, action, visited, pathVisited);
+        pathVisited.pop();
+    }
+
+    private void walkStep(Rule rule, Consumer<Rule> action, Set<Rule> visited, Deque<Rule> pathVisited) {
+        Collection<Rule> others = direct.get(rule);
+        for ( Rule otherRule : others ) {
+            walk$(otherRule, action, visited, pathVisited);
+        }
+    }
+
+    // Recursion test. Like walk but with early exit.
+    // Can terminate early if all we want is whether it is/is not recursive.
     public boolean isRecursive(Rule rule) {
         Deque<Rule> stack = new ArrayDeque<>();
-        boolean b = isRecursive(rule, stack);
+        boolean b = isRecursive(rule, rule, stack);
         if ( b ) {
-            stack.stream().map(r->r.getHead()).forEach(h->System.out.printf("--%s", h));
-            System.out.println();
-            System.out.println(stack);
+            if ( DEBUG ) {
+                stack.stream().map(r->r.getHead()).forEach(h->System.out.printf("--%s", h));
+                System.out.println();
+                System.out.println(stack);
+            }
         }
         return b;
     }
 
-    private boolean isRecursive(Rule rule, Deque<Rule> visited) {
-        if ( visited.contains(rule) )
+    private boolean isRecursive(Rule topRule, Rule rule, Deque<Rule> visited) {
+        if ( DEBUG )
+            System.out.printf("isRecursive(\n  %s,\n  %s,\n  %s)\n", topRule, rule, visited);
+        if ( ! visited.isEmpty() && topRule.equals(rule))
             return true;
+        if ( visited.contains(rule) )
+            // Other cycle.
+            return false;
         visited.push(rule);
-        boolean b = isRecursive2(rule, visited) ;
+        boolean b = isRecursive2(topRule, rule, visited) ;
         if ( b )
             return b;
         visited.pop();
         return false;
     }
-    
-    private boolean isRecursive2(Rule rule, Deque<Rule> visited) {
+
+    private boolean isRecursive2(Rule topRule, Rule rule, Deque<Rule> visited) {
         Rel head = rule.getHead();
         List<Rel> body = rule.getBody();
         for ( Rel bodyRel : body ) {
-            Collection<Rule> others = matches(bodyRel, rules);
+            // Not the dependencyGraph because this considers "provides", not "matches".
+            Collection<Rule> others = ruleSet.provides(bodyRel);
             for ( Rule otherRule : others ) {
-                if ( isRecursive(otherRule, visited) )
+                if ( isRecursive(topRule, otherRule, visited) )
                     return true;
             }
         }
         return false;
     }
 
-    public static Collection<Rule> matches(Rel rel, Multimap<Rel, Rule> rules) {
-        List<Rule> array = new ArrayList<>();
-        rules.forEach((head,body)->{
-            if ( provides(rel, head) )
-                array.add(body);
-        });
-        return array; 
-    }
-    
-    // Need mapping version
-    /** Does {@code target} help to solver.<br/>
-     * <tt>target &lt;- src</tt>
-     * @param target
-     * @param src
-     * @return boolean
-     */
-    
-    public static boolean provides(Rel target, Rel src) {
-        Objects.requireNonNull(target);
-        Objects.requireNonNull(src);
-        if ( ! target.getName().equals(src.getName()) )
-            return false;
-        Tuple<Node> tRel = target.getTuple();
-        Tuple<Node> tR = src.getTuple();
-        if ( tRel.len() != tR.len() )
-            return false;
-        for ( int i = 0 ; i < tRel.len() ; i++ ) {
-            Node right = tRel.get(i);
-            Node left = tR.get(i);
-            if ( ! provides(right, left) )
-                return false;
-        }
-        return true;
+
+//    // Write a walk with termination criterion.
+//
+//    // --- Equivalence class
+//
+//    /** Return the equivalence class for a rule (all the rules in any recursion path) */
+//    public Set<Rule> recursionEquivalence(Rule rule) {
+//        Set<Rule> acc = new HashSet<>();
+//        Deque<Rule> stack = new ArrayDeque<>();
+//        isRecursiveEquiv(rule, stack, acc);
+//        return acc;
+//    }
+//
+//    private boolean isRecursiveEquiv(Rule rule, Deque<Rule> visited, Set<Rule> acc) {
+//        if ( visited.contains(rule) )
+//            return true;
+//        visited.push(rule);
+//        boolean b = isRecursiveEquiv2(rule, visited, acc);
+//        if ( b )
+//            acc.addAll(visited);
+//        visited.pop();
+//        return b;
+//    }
+//
+//    private boolean isRecursiveEquiv2(Rule rule, Deque<Rule> visited, Set<Rule> acc) {
+//        Rel head = rule.getHead();
+//        List<Rel> body = rule.getBody();
+//        boolean b = false;
+//        for ( Rel otherRule : body ) {
+//            Collection<Rule> others = matches(otherRule.getHead(), ruleSet);
+//            boolean b1 = isRecursiveEquiv(otherRule, visited, acc);
+//            b = b | b1;
+//        }
+//        return b;
+//    }
+//
+//    // Recursion test. Do we circle back to the input?
+//    // Can terminate early if all we want is whether it is/is not recursive.
+//    public boolean isRecursive(Rule rule) {
+//        Deque<Rule> stack = new ArrayDeque<>();
+//        boolean b = isRecursive(rule, stack);
+//        if ( b ) {
+//            stack.stream().map(r->r.getHead()).forEach(h->System.out.printf("--%s", h));
+//            System.out.println();
+//            System.out.println(stack);
+//        }
+//        return b;
+//    }
+//
+//    private boolean isRecursive(Rule rule, Deque<Rule> visited) {
+//        if ( visited.contains(rule) )
+//            return true;
+//        visited.push(rule);
+//        boolean b = isRecursive2(rule, visited) ;
+//        if ( b )
+//            return b;
+//        visited.pop();
+//        return false;
+//    }
+//
+//    private boolean isRecursive2(Rule rule, Deque<Rule> visited) {
+//        Rel head = rule.getHead();
+//        List<Rel> body = rule.getBody();
+//        for ( Rel bodyRel : body ) {
+//            Collection<Rule> others = matches(bodyRel, rules);
+//            for ( Rule otherRule : others ) {
+//                if ( isRecursive(otherRule, visited) )
+//                    return true;
+//            }
+//        }
+//        return false;
+//    }
+
+//    /** Return the relationships (rels) that match the given relationship. */
+//    public static Collection<Rule> matches(Rel rel, Multimap<Rel, Rule> rules) {
+//        List<Rule> array = new ArrayList<>();
+//        rules.forEach((head,body)->{
+//            if ( provides(rel, head) )
+//                array.add(body);
+//        });
+//        return array;
+//    }
+
+//    /** Return the rules that match the given relationship. */
+//    private static Collection<Rule> matches(Rule rule, RuleSet ruleSet) {
+//        List<Rule> array = new ArrayList<>();
+//
+//        for ( Rel bodyRel : rule.getBody() ) {
+//            // find all rules in the RuleSet that provide the rule
+//            for ( Rule r : ruleSet ) {
+//                if ( provides(bodyRel, r.getHead()) ) {
+//                    array.add(r);
+//                }
+//            }
+//        }
+//        return array;
+//    }
+
+    public void print() {
+        print(System.out);
     }
 
-    // Does not consider variable names.
-    private static boolean provides(Node right, Node left) {
-        if ( right.isVariable() || left.isVariable() )
-            return true;
-        // Ground terms match.
-        return right.equals(left) ;
+    public void print(PrintStream out) {
+        System.out.println("[DependencyGraph]");
+        for ( Rule r : direct.keySet() ) {
+            out.println(r);
+            Collection<Rule> c = direct.get(r);
+            c.forEach(rr -> {
+                out.print("  ");
+                out.print(rr);
+                out.println();
+            });
+        }
     }
 }
 

@@ -18,11 +18,17 @@
 
 package org.seaborne.jena.rules;
 
+import org.apache.jena.atlas.io.IndentedWriter;
+
 public class RuleExecCxt {
-    public boolean DEBUG = false;
-    
+    public static RuleExecCxt global = new RuleExecCxt();
+
+    private boolean DEBUG = false;
+    private IndentedWriter out = IndentedWriter.stdout;
+
     public RuleExecCxt() {}
-    
-    public boolean debug() { return DEBUG; } 
+
+    public boolean debug() { return DEBUG; }
+    public IndentedWriter out() { return out; }
 }
 

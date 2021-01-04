@@ -16,25 +16,34 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package migrate.binding;
 
-import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
-
-@RunWith(Parameterized.class)
-public class TestRules {
-    @Parameters(name = "{index}: {0}")
-    public static Iterable<Object[]> data() {
-        return new ArrayList<>();
+/** Iterator of 1 objects */
+class Itr1<X> implements Iterator<X> {
+    // Same as Iter.singletonIterator but named for tracking and development usage.
+    private int idx;
+    private final X elt1;
+    Itr1(X x1) {
+        idx = 0;
+        elt1 = Objects.requireNonNull(x1);
     }
 
-    private RulesEngine engine;
-
-    public TestRules(RulesEngine engine) {
-        this.engine = engine;
-
+    @Override
+    public boolean hasNext() {
+        return idx < 1;
     }
+
+    @Override
+    public X next() {
+        idx++;
+        if ( idx == 1 ) return elt1;
+        throw new NoSuchElementException();
+    }
+
+    @Override
+    public void remove() { throw new UnsupportedOperationException("Itr1.remove"); }
 }
