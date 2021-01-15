@@ -44,6 +44,7 @@ public class Sub {
 
     /** Substitute for variables in a {@link Rel} */
     public static Rel substitute(Binding binding, Rel rel) {
+        // XXX Don't create new object if no change. 
         if ( binding.isEmpty() )
             return rel;
         int N = rel.getTuple().len();

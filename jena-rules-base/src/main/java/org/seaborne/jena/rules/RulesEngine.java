@@ -29,11 +29,30 @@ public interface RulesEngine {
 
     public EngineType engineType();
 
+    /**
+     * Return all bindings satisfy the query atom,given the data and {@link RuleSet}.
+     */
+    public Stream<Binding> solve(Rel query);
+
+    /**
+     * Return a {@link Stream} of all derived relationships. It does not include
+     * the data unless a data term is also derived by the rules. This may contain
+     * duplicates because an atom may be inferred by multiple routes. The
+     * multiplicity of duplicates is not significant and it should not be taken as a
+     * indication of how many ways there are of generation the atom because the engine
+     * is entitled to optimize execution.
+     */
     public Stream<Rel> stream();
 
+    /**
+     * Return a {@link RelStore} that contains the data and all relationship derived
+     * from the rules
+     */
     public RelStore materialize();
 
+    /**
+     * Note an update to the data has happened
+     * (Optional operation).
+     */
     public default void update() {}
-
-    public Stream<Binding> solve(Rel query);
 }

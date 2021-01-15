@@ -23,14 +23,14 @@ import static org.junit.Assert.*;
 import java.util.Collection;
 
 import org.junit.Test;
-import org.seaborne.jena.rules.lang.RulesParser;
+import static org.seaborne.jena.rules.RuleTestLib.*;
 
 public class TestDependencyGraph {
     @Test public void dependency_1() {
         DependencyGraph dGraph = dependencyGraph("r(?x,?y) <- s(?x ?y)"
                                                 ,"r(?x,?y) <- r(?x,?z) r(?x,?y)"
                                                 );
-        Rel rel1 = rel("r(?x,?y)");
+        Rel rel1 = query("r(?x,?y)");
         assertNotNull(dGraph.getRuleSet().get(rel1));
         assertEquals(2, dGraph.getRuleSet().getAll(rel1).size());
     }
@@ -38,11 +38,11 @@ public class TestDependencyGraph {
     @Test public void dependency_2() {
         DependencyGraph dGraph = dependencyGraph("r(?x,?y) <- s(?x ?y)");
 
-        Rel rel1 = rel("r(?x,?y)");
+        Rel rel1 = query("r(?x,?y)");
         Collection<Rule> c1 = dGraph.getRuleSet().provides(rel1);
         assertEquals(1, c1.size());
 
-        Rel rel2 = rel("s(?x,?y)");
+        Rel rel2 = query("s(?x,?y)");
         Collection<Rule> c2 = dGraph.getRuleSet().provides(rel2);
         assertEquals(0, c2.size());
 
@@ -65,16 +65,14 @@ public class TestDependencyGraph {
                                                 );
         RuleSet ruleSet = dGraph.getRuleSet();
 
-        Rel rel1 = rel("t(?x,?y)");
+        Rel rel1 = atom("t(?x,?y)");
         Rule rule = ruleSet.getOne(rel1);
         dGraph.isRecursive(rule);
         assertFalse(dGraph.isRecursive(rule));
     }
 
-    private static Rel rel(String s) { return RulesParser.parseAtom(s); }
-
     private static DependencyGraph dependencyGraph(String ...xs) {
-        RuleSet rs = RulesParser.rules(xs);
+        RuleSet rs = rules(xs);
         return new DependencyGraph(rs);
     }
 }

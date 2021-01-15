@@ -23,10 +23,7 @@ import static java.lang.String.format;
 import java.util.*;
 import java.util.function.Function;
 
-import migrate.binding.Binding;
-import migrate.binding.BindingBuilder;
-import migrate.binding.BindingFactory;
-import migrate.binding.Sub;
+import migrate.binding.*;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.InternalErrorException;
 import org.apache.jena.atlas.lib.tuple.Tuple;
@@ -57,25 +54,38 @@ public class BkdSolver {
      * Data is on argument {@code relStore}, rules in {@code ruleSet}.
      */
     public static Iterator<Binding> solver(Rel pattern, RuleSet ruleSet, RelStore relStore) {
+
+        // Rename away.
+        // XXX Better to do oncewhen rule set created the getHeadExec, getBodyExec.
+        ruleSet = Renamer.rename("V", ruleSet);
+
         RuleExecCxt rCxt = RuleExecCxt.global;
-        if ( RuleExecCxt.global.debug() )
-            rCxt.out().printf("SLD/NR(%s)\n", pattern);
+        if ( rCxt.trace() )
+            rCxt.out().printf("solver(%s)\n", pattern);
+
         // XXX Check for recursion.
         //ruleSet.isRecursive();
         try {
-            return solver(RuleExecCxt.global, 1, BindingFactory.root(), pattern, ruleSet, relStore);
+            Iterator<Binding> iter = solver(rCxt, 1, BindingFactory.root(), pattern, ruleSet, relStore);
+            if ( rCxt.trace() )
+                rCxt.out().println();
+            //iter = RulesLib.print(rCxt.out(), iter);
+            return iter;
         } finally { rCxt.out().flush(); }
     }
 
-    /** The main solver - this is called recursively.
-     * @param rCxt TODO*/
+    /**
+     * The main solver - this is called recursively.
+     */
     private static Iterator<Binding> solver(RuleExecCxt rCxt, int depth, Binding input, Rel pattern, RuleSet ruleSet, RelStore relStore) {
-        if ( rCxt.debug() ) {
-            rCxt.out().println(">> Level "+depth);
-            rCxt.out().println("   Pattern: "+pattern);
-        }
-        Rel pattern1 = Sub.substitute(input, pattern);
+        functionEnter(rCxt, "solver[%s](%s, %s)", depth, pattern, input);
+        Iterator<Binding> iter = solverWorker(rCxt, depth, input, pattern, ruleSet, relStore);
+        iter = functionExit(rCxt, iter, "solver[%d](%s, %s)", depth, pattern, input);
+        return iter;
+    }
 
+    private static Iterator<Binding> solverWorker(RuleExecCxt rCxt, int depth, Binding input, Rel pattern, RuleSet ruleSet, RelStore relStore) {
+        Rel pattern1 = Sub.substitute(input, pattern);
         // Non-recursive => at most one deep for each rule in the ruleset
         // Max depth is RuleSet.size
 
@@ -84,16 +94,10 @@ public class BkdSolver {
 
         // Data/EDB
         Iterator<Binding> matches1 = dataSolver(rCxt, input, pattern1, relStore);
-        if ( rCxt.debug() )
-            matches1 = RulesLib.debug(rCxt.out(), depth, "Data", matches1);
-
-        // Rules/IDB
+        // Pass across?
         Iterator<Binding> matches2 = ruleSetSolver(rCxt, depth, input, pattern1, ruleSet, relStore);
-        if ( rCxt.debug() )
-            matches2 = RulesLib.debug(rCxt.out(), depth, "Rules", matches2);
 
         Iterator<Binding> matches = Iter.concat(matches1, matches2);
-        if ( rCxt.debug() ) rCxt.out().println("<< Level "+depth);
         if ( matches == null )
             return Iter.nullIterator();
         return matches;
@@ -101,14 +105,24 @@ public class BkdSolver {
 
     /** Find matching rules and resolve. */
     private static Iterator<Binding> ruleSetSolver(RuleExecCxt rCxt, int depth, Binding input, Rel pattern1, RuleSet ruleSet, RelStore relStore) {
+        functionEnter(rCxt, "ruleSetSolver(%s)", pattern1);
+        Iterator<Binding> iter = ruleSetSolverWorker(rCxt, depth, input, pattern1, ruleSet, relStore);
+        iter = functionExit(rCxt, iter, "ruleSetSolver(%s)", pattern1);
+        return iter;
+    }
+
+    private static Iterator<Binding> ruleSetSolverWorker(RuleExecCxt rCxt, int depth, Binding input, Rel pattern1, RuleSet ruleSet, RelStore relStore) {
         List<Rule> matchingRules = findCompatible(ruleSet, pattern1);
+        if ( matchingRules.isEmpty() ) {
+            return Iter.nullIterator();
+        }
 
         Iterator<Binding> chain = null;
         for ( Rule rule: matchingRules ) {
-            if ( rCxt.debug() )
-                rCxt.out().println("Rule: "+rule);
-            Iterator<Binding> chain1 = ruleSolver(rCxt, depth, input, pattern1, rule, ruleSet, relStore);
-            chain = Iter.concat(chain,  chain1);
+            // XXX Is this another flatMap?
+            //chain = Iter.flatMap(chain, binding->solver(rCxt, depth+1, binding, relBody, ruleSet, relStore));
+            Iterator<Binding> chainStep = ruleEvalSolver(rCxt, depth, input, pattern1, rule, ruleSet, relStore);
+            chain = Iter.concat(chain,  chainStep);
         }
         return chain;
     }
@@ -127,55 +141,53 @@ public class BkdSolver {
     }
 
     /** Resolve one rule. */
-    private static Iterator<Binding> ruleSolver(RuleExecCxt rCxt, int depth, Binding input, Rel pattern1, Rule rule, RuleSet ruleSet, RelStore relStore) {
+    private static Iterator<Binding> ruleEvalSolver(RuleExecCxt rCxt, int depth, Binding input, Rel pattern, Rule rule, RuleSet ruleSet, RelStore relStore) {
+        functionEnter(rCxt, "ruleSolver(%s, %s, %s)", pattern, rule, input);
+        //rCxt.out().flush();
+        Iterator<Binding> iter = ruleEvalWorker(rCxt, depth, input, pattern, rule, ruleSet, relStore);
+        iter = functionExit(rCxt, iter, "ruleSolver(%s, %s, %s)", pattern, rule, input);
+        return iter;
+    }
+
+    private static Iterator<Binding> ruleEvalWorker(RuleExecCxt rCxt, int depth, Binding input, Rel pattern0, Rule rule, RuleSet ruleSet, RelStore relStore) {
+        // Ground the query
+        Rel pattern1 = Sub.substitute(input, pattern0);
+        // Mapping to rule vars (assumes no variable name clash - a varaible in the
+        // rule bode, not in the head, that is teh same name as in the query.
+
         Binding mgu = MGU.mgu(pattern1, rule.getHead());
-        if ( rCxt.debug() )
-            rCxt.out().println("MGU: "+mgu);
         if ( mgu == null )
             return null;
         Rel pattern2 = MGU.applyMGU(mgu, pattern1);
-        if ( ! compatible(rule, pattern2) )
-            return null;
-        // Start is the head binding.
-        //XXX Input and mgu
-        // Need combine input and mgu.
 
-        Iterator<Binding> chain = Iter.singleton(input);
+        Iterator<Binding> chain = Iter.singleton(BindingFactory.root());
 
         for ( Rel relBody_ : rule.getBody() ) {
-            if ( rCxt.debug() ) rCxt.out().println("Body: "+relBody_);
             Rel relBody = Sub.substitute(mgu, relBody_);
-            if ( rCxt.debug() ) rCxt.out().println("Body: "+relBody);
-            chain = Iter.flatMap(chain, binding->solver(null, depth+1, binding, relBody, ruleSet, relStore));
-            if ( rCxt.debug() ) {
-                rCxt.out().flush();
-                chain = Iter.materialize(chain); // rCxt.debug()
-            }
+            chain = Iter.flatMap(chain, binding->solver(rCxt, depth+1, binding, relBody, ruleSet, relStore));
+            if ( rCxt.trace() )
+                chain = Iter.materialize(chain);
         }
 
-        if ( rCxt.debug() )
-            chain = RulesLib.debug(rCxt.out(), depth, "Rule chain", chain);
-        // Rename from rule variable names to pattern variable names.
-        // XXX Ignore ?x ?x
-        // Rewrite version.
+        // Now covert the rule body outcome to the variables of the pattern.
+        // XXX This needs cleaner code.
 
-        Rel relHead = Sub.substitute(mgu, rule.getHead());
-        Function<Var,Var> headProject = mapRelFromTo(relHead, pattern2);
+        Function<Var,Node> headProject = mapRelFromTo(rCxt, rule.getHead(), pattern1);
         Function<Binding, Binding> resultMapper = b1 -> {
-            BindingBuilder b2 = BindingFactory.create(input);
-            // @@ Binding.forEach(BiConsumer)
-            b1.forEach((v,n)->{
-                Var v2 = headProject.apply(v);
-                if ( v2 != null )
-                    b2.add(v2, n);
-            });
-            return b2.build();
+            BindingBuilder builder = BindingFactory.create(b1);
+            Iterator<Var> vIter = mgu.vars();
+            for (; vIter.hasNext(); ) {
+                Var v = vIter.next();
+                Node n = mgu.get(v);
+                // XXX Clash? Implies non-unique naming?
+                if ( ! b1.contains(v) )
+                    builder.add(v,n);
+            }
+            Binding b2 = builder.build();
+            return b2;
         };
 
         chain = Iter.iter(chain).map(resultMapper);
-        // UGLY
-        //Better? Add to binding early?
-        chain = Iter.iter(chain).map(b->(new BindingBuilder(mgu)).addAll(b).build());
         return chain;
     }
 
@@ -184,12 +196,12 @@ public class BkdSolver {
      * create mapping from the first arg to the second arg.
      * This is also a projection (only dstRel vars will show up).
      * Returns null on "no mapping".
+     * @param mgu
      */
-    private static Function<Var,Var> mapRelFromTo(Rel srcRel, Rel dstRel) {
-        // MGU
+    private static Function<Var, Node> mapRelFromTo(RuleExecCxt rCxt, Rel srcRel, Rel dstRel) {
         // XXX Testable!
         // XXX Overkill : by number of slots version.
-        Map<Var, Var> mapping = new HashMap<>();
+        Map<Var, Node> mapping = new HashMap<>();
         if ( srcRel.len() != srcRel.len())
             throw new InternalErrorException(format("mapRelFromTo: %d / %d", srcRel.len() != dstRel.len()));
         int N = srcRel.len();
@@ -199,14 +211,13 @@ public class BkdSolver {
             Node src = srcRel.getTuple().get(i);
             Node dst = dstRel.getTuple().get(i);
             if ( Var.isVar(src) && Var.isVar(dst) ) {
-                mapping.put(Var.alloc(src), Var.alloc(dst));
+                mapping.put(Var.alloc(src), dst);
                 continue;
             }
-            if ( ! Var.isVar(src) && !Var.isVar(dst) )
-                continue;
-            throw new InternalErrorException(format("mapRelFromTo: tuple not compatible src=%s dst=%s", srcRel, dstRel));
+            if ( ! Var.isVar(src) && Var.isVar(dst) ) {
+                mapping.put(Var.alloc(dst), src);
+            }
         }
-        //System.rCxt.out().println(mapping+" "+srcRel+" -> "+dstRel);
         return v -> mapping.getOrDefault(v, null);
     }
 
@@ -267,9 +278,35 @@ public class BkdSolver {
     }
 
     /** Evaluate a pattern against ground data in a {@link RelStore}. */
-    public static Iterator<Binding> dataSolver(RuleExecCxt rCxt, Binding input, Rel pattern1, RelStore relStore) {
-        Iterator<Rel> iter = relStore.find(pattern1);
-        return RulesLib.bindings(iter, pattern1);
+    public static Iterator<Binding> dataSolver(RuleExecCxt rCxt, Binding input, Rel pattern, RelStore relStore) {
+        functionEnter(rCxt, "dataSolver(%s, %s)", pattern, input);
+
+        Iterator<Rel> iter1 = relStore.find(pattern);
+        Iterator<Binding> iter2 = RulesLib.bindings(iter1, pattern);
+
+        iter2 = functionExit(rCxt, iter2, "dataSolver(%s, %s)", pattern, input);
+        return iter2;
     }
+
+    private static void functionEnter(RuleExecCxt rCxt, String fmt, Object...args) {
+        if ( rCxt.trace() ) {
+            rCxt.out().printf("> "+fmt, args);
+            if ( !fmt.endsWith("\n") )
+                rCxt.out().println();
+            rCxt.out().incIndent();
+        }
+    }
+
+    private static <X> Iterator<X> functionExit(RuleExecCxt rCxt, Iterator<X> iter, String fmt, Object...args) {
+        if ( rCxt.trace() ) {
+            rCxt.out().decIndent();
+            rCxt.out().printf("< "+fmt, args);
+            if ( !fmt.endsWith("\n") )
+                rCxt.out().println();
+            iter = RulesLib.print(rCxt.out(), "  - ", iter);
+        }
+        return iter;
+    }
+
 }
 

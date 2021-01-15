@@ -48,8 +48,8 @@ public class RulesLib {
 
     /** RelStore.equals - unordered */
     public static boolean equals(RelStore relStore1, RelStore relStore2) {
-        Set<Rel> set1 = StreamOps.toSet(relStore1.all());
-        Set<Rel> set2 = StreamOps.toSet(relStore2.all());
+        Set<Rel> set1 = StreamOps.toSet(relStore1.stream());
+        Set<Rel> set2 = StreamOps.toSet(relStore2.stream());
         return set1.equals(set2);
     }
 
@@ -119,9 +119,11 @@ public class RulesLib {
         return Iter.iter(dataMatches).map(mapFunction).filter(Objects::nonNull);
     }
 
+
     /**
      * Create mapping function that converts a rel pattern to a binding, given an existing parent.
-     * The function returns null is no bindings.
+     * The created function returns null if no bindings because of an attempt to bind twice with different values.
+     * e.g. Pattern r(?x, ?x) and data atom r(1,2) -- {@code ?x} can not be bound consistently.
      */
     public static Function<Rel, Binding> mapper(Rel pattern, Binding parent) {
         int N = pattern.len();
@@ -237,6 +239,29 @@ public class RulesLib {
     static {
         out.setFlushOnNewline(true);
     }
+
+    public static <X> Iterator<X> print(IndentedWriter out, Iterator<X> iter) {
+        return print(out, null, iter);
+    }
+
+    public static <X> Iterator<X> print(IndentedWriter out, String prefix, Iterator<X> iter) {
+        String prefixStr = (prefix == null ) ? "" : prefix;
+
+        if ( iter == null ) {
+            out.printf("%s%s\n",prefixStr, "Null");
+            return iter;
+        }
+
+        List<X> c = Iter.toList(iter);
+
+        if ( c.isEmpty() )
+            out.printf("%s%s\n",prefixStr, "Empty");
+        else
+            c.forEach(b->out.printf("%s%s\n", prefixStr, b));
+        return c.iterator();
+    }
+
+    // XXX Phase out debug()
 
     public static Iterator<Binding> debug(String label, Iterator<Binding> iter) {
         return debug(out, -1, label, iter);

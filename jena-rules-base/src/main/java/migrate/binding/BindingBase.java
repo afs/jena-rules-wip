@@ -60,6 +60,7 @@ abstract public class BindingBase implements Binding
         //parent.addChild((BindingBase)this);
     }
 
+    @Override
     public Binding getParent() { return parent; }
 
     /** Iterate over all the names of variables. */
@@ -177,6 +178,11 @@ abstract public class BindingBase implements Binding
     // Do one level of binding
     public void format1(StringBuffer sbuff)
     {
+        if ( isEmpty() ) {
+            sbuff.append("()");
+            return;
+        }
+
         String sep = "";
         for ( Iterator<Var> iter = vars1(); iter.hasNext(); )
         {

@@ -26,12 +26,13 @@ import java.util.stream.Stream;
 
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap ;
+import org.apache.jena.ext.com.google.common.collect.HashMultimap;
 import org.apache.jena.ext.com.google.common.collect.Multimap ;
 import org.seaborne.jena.rules.Rel ;
 import org.seaborne.jena.rules.RelStore ;
 
 /**
- * Simple {@link RelStore}, uses a Multimap of rule name to
+ * Simple {@link RelStore}, uses a Multimap of atom name to index.
  * Useful as an independent implementation for testing.
  */
 public class RelStoreSimple extends RelStoreBase {
@@ -41,7 +42,8 @@ public class RelStoreSimple extends RelStoreBase {
     }
 
     static class Builder implements RelStoreBuilder {
-        private Multimap<String,Rel> store = ArrayListMultimap.create();
+        //private Multimap<String,Rel> store = ArrayListMultimap.create();
+        private Multimap<String,Rel> store = HashMultimap.create();
 
         @Override
         public Builder add(Rel rel) {
@@ -118,7 +120,7 @@ public class RelStoreSimple extends RelStoreBase {
     }
 
     @Override
-    public Stream<Rel> all() {
+    public Stream<Rel> stream() {
         return store.values().stream();
     }
 }

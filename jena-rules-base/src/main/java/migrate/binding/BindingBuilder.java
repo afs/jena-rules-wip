@@ -85,10 +85,12 @@ public class BindingBuilder {
         //throw new InternalErrorException("Inconsistent internal state");
     }
 
-    public BindingBuilder() { this(null, -1); }
+    /** Create via {@link BindingFactory#create()} */
+    /*package*/ BindingBuilder() { this(noParent); }
 
-    public BindingBuilder(Binding parent) {
-        this(parent, -1);
+    /** Create via {@link BindingFactory#create(Binding)} */
+    /*package*/ BindingBuilder(Binding parent) {
+        setParent(parent);
     }
 
     public BindingBuilder(Binding parent, int size) {
@@ -189,6 +191,11 @@ public class BindingBuilder {
         return null;
     }
 
+    public Node getOrSame(Var var) {
+        Node x = get(var);
+        return x == null ? var : x;
+    }
+
     public boolean contains(Var var) {
         Objects.requireNonNull(var);
         if ( map != null )
@@ -221,7 +228,7 @@ public class BindingBuilder {
 
         if ( parent != null && UNIQUE_NAMES_CHECK && parent.contains(var) )
             throw new ARQInternalErrorException("Attempt to reassign parent variable '"+var+
-                                                "' from '"+FmtUtils.stringForNode(get(var))+
+                                                "' from '"+FmtUtils.stringForNode(parent.get(var))+
                                                 "' to '"+FmtUtils.stringForNode(node)+"'");
         if ( parentOnly )
             return;
@@ -261,7 +268,7 @@ public class BindingBuilder {
             return new Binding2(parent, var1, node1, var2, node2);
         if ( var1 != null )
             return new Binding1(parent, var1, node1);
-        return new Binding0(noParent);
+        return new Binding0(parent);
     }
 
     @Override
@@ -269,14 +276,14 @@ public class BindingBuilder {
         if ( map != null )
             return map.toString();
         if ( var4 != null )
-            return format("%s=>%s %s=>%s %s=>%s %s=>%s", var1, node1, var2, node2, var3, node3, var4, node4);
+            return format("%s=>%s %s=>%s %s=>%s %s=>%s -> %s", var1, node1, var2, node2, var3, node3, var4, node4, parent);
         if ( var3 != null )
-            return format("%s=>%s %s=>%s %s=>%s", var1, node1, var2, node2, var3, node3);
+            return format("%s=>%s %s=>%s %s=>%s -> %s", var1, node1, var2, node2, var3, node3, parent);
         if ( var2 != null )
-            return format("%s=>%s %s=>%s", var1, node1, var2, node2);
+            return format("%s=>%s %s=>%s -> %s", var1, node1, var2, node2, parent);
         if ( var1 != null )
-            return format("%s=>%s", var1, node1);
-        return "<empty>";
+            return format("%s=>%s -> %s", var1, node1, parent);
+        return "<empty> -> "+parent;
 
     }
 }

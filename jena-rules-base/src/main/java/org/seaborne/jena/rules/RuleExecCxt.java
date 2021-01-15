@@ -23,12 +23,21 @@ import org.apache.jena.atlas.io.IndentedWriter;
 public class RuleExecCxt {
     public static RuleExecCxt global = new RuleExecCxt();
 
-    private boolean DEBUG = false;
-    private IndentedWriter out = IndentedWriter.stdout;
+    private IndentedWriter out = IndentedWriter.clone(IndentedWriter.stdout);
+
+
+    public boolean DEBUG = false;
+    /** Development : debug details */
+    public boolean debug() { return DEBUG; }
+
+    /** Trace rules evaluated. */
+    public boolean TRACE = false;
 
     public RuleExecCxt() {}
 
-    public boolean debug() { return DEBUG; }
+    /** Application; trace rule execution */
+    public boolean trace() { return TRACE; }
+
     public IndentedWriter out() { return out; }
 }
 

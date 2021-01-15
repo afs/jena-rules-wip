@@ -25,27 +25,29 @@ import org.seaborne.jena.rules.*;
 
 public abstract class RulesEngineFwd implements RulesEngine {
 
-    protected abstract RelStore doForReal();
+    protected abstract RelStore generateInferred();
 
     protected final RelStore data;
+    protected final RelStore inferred;
     protected final RelStore materialized;
     protected final RuleSet rules;
 
     protected RulesEngineFwd(RelStore data, RuleSet rules) {
         this.data = data;
         this.rules = rules;
-        materialized = doForReal();
+        this.inferred = generateInferred();
+        this.materialized = RelStoreFactory.combine(data, inferred);
     }
 
     @Override
     public Stream<Binding> solve(Rel query) {
-        Stream<Rel> matches = stream().filter(r -> RuleOps.provides(r, query));
+        Stream<Rel> matches = materialized.stream().filter(r -> RuleOps.provides(r, query));
         return RulesLib.bindings(matches, query);
     }
 
     @Override
     public Stream<Rel> stream() {
-        return materialized.all();
+        return inferred.stream();
     }
 
     @Override

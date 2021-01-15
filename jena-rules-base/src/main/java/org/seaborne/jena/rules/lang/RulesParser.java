@@ -31,24 +31,22 @@ import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
-import org.seaborne.jena.rules.Rel;
-import org.seaborne.jena.rules.RelStore;
-import org.seaborne.jena.rules.Rule;
-import org.seaborne.jena.rules.RuleSet;
+import org.seaborne.jena.rules.*;
 import org.seaborne.jena.rules.lang.parser.javacc.ParseException;
 import org.seaborne.jena.rules.lang.parser.javacc.RulesJavacc;
 import org.seaborne.jena.rules.lang.parser.javacc.TokenMgrError;
+import org.seaborne.jena.rules.store.RelStoreBuilder;
 
 /**
  * Syntax:<br/>
  * <pre>
  *   fact(...).
- *   head(...) <- body .
+ *   head(...) &lt;- body .
  * </pre>
  * where <tt>body</tt> is a number of atoms (class {@link Rel}).
  * Rule clause terms can be named or unnamed.
  * <pre>
- *     (:s :p ?o) <- (:s :q1 ?z ) (?z :q2 ?o) .
+ *     (:s :p ?o) &lt;- (:s :q1 ?z ) (?z :q2 ?o) .
  * <pre>
  *
  */
@@ -75,7 +73,7 @@ public class RulesParser {
         return parseRules(strings);
     }
 
-    // Multiple rules.
+    // Multiple rules, one string per rule.
     public static RuleSet parseRules(String ... strings) {
         StringBuilder sb = new StringBuilder();
         for ( String s : strings ) {
@@ -84,7 +82,7 @@ public class RulesParser {
                 continue;
             }
             sb.append(s);
-            if ( ! s.matches("\\.\s*$") )
+            if ( ! s.matches("\\\\.\\s*$") )
                 sb.append(" .");
             sb.append("\n");
         }
@@ -96,6 +94,10 @@ public class RulesParser {
         RulesJavacc parser = new RulesJavacc(reader);
         Rule rule = parse$(parser, RIOT.getContext(), RulesJavacc::parseRule, null);
         return rule;
+    }
+
+    public static Rel parseRel(String string) {
+        return parseAtom(string);
     }
 
     public static Rel parseAtom(String string) {
@@ -110,6 +112,16 @@ public class RulesParser {
         RulesJavacc parser = new RulesJavacc(reader);
         return parse$(parser, RIOT.getContext(), RulesJavacc::parseData, null);
     }
+
+    public static RelStore data(String...facts) {
+        RelStoreBuilder builder = RelStoreFactory.create();
+        for ( String s : facts) {
+            Rel rel = parseRel(s);
+            builder.add(rel);
+        }
+        return builder.build();
+    }
+
 
     private static <X> X parse$(RulesJavacc parser, Context context, ParserAction<X> action, String baseURI) {
         ParserProfile profile = new ParserProfileStd(RiotLib.factoryRDF(),

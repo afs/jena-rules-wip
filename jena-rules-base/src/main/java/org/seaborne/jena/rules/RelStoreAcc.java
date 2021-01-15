@@ -38,10 +38,12 @@ public interface RelStoreAcc extends RelStore {
     public void add(Rel rel);
 
     public default void add(RelStore data) {
-        data.all().forEach(this::add);
+        data.stream().forEach(this::add);
     }
 
     public void delete(Rel rel);
+
+    public void clear();
 
     public default void removeAll(Rel rel) {
         List<Rel> x = Iter.toList(find(rel));

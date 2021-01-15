@@ -1,13 +1,17 @@
 package org.seaborne.jena.rules.api;
 
+import java.util.stream.Stream;
+
+import migrate.binding.Binding;
+import migrate.binding.Sub;
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.atlas.lib.IRILib;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.sparql.util.Context;
-import org.seaborne.jena.rules.RulesEngine;
-import org.seaborne.jena.rules.RulesException;
-import org.seaborne.jena.rules.RuleSet;
+import org.seaborne.jena.rules.*;
 import org.seaborne.jena.rules.lang.RulesParser;
+import org.seaborne.jena.rules.store.RelStoreBuilder;
+import org.seaborne.jena.rules.store.RelStoreSimple;
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -28,10 +32,24 @@ import org.seaborne.jena.rules.lang.RulesParser;
  */
 
 public class Rules {
+
+    // XXX Javadoc
+
+    private static RuleExecCxt globalRuleExecContext = RuleExecCxt.global;
+
     private static Context globalRuleContext = dftContext();
 
     public static Context getContext() {
         return globalRuleContext;
+    }
+
+    /** Evaluate and return results as a {@link RelStore}. */
+    public static RelStore eval(RelStore data, RuleSet ruleSet, EngineType engineType, Rel query) {
+        RelStoreBuilder storeBuilder = RelStoreSimple.create();
+        RulesEngine engine = RulesGraphBuilder.create(engineType, ruleSet, data);
+        Stream<Binding> iter1 = engine.solve(query);
+        iter1.map(b->Sub.substitute(b, query)).forEach(r->storeBuilder.add(r));
+        return storeBuilder.build();
     }
 
 //    public static Context setContext(Context context) {
@@ -47,28 +65,11 @@ public class Rules {
     }
 
     // ----
-    public static Builder create() { return new Builder(); }
+    public static RulesGraphBuilder create() { return new RulesGraphBuilder(); }
 
-    public static RulesEngine createEngine(EngineType type) {
-        switch (type) {
-            case FWD_NAIVE :
-            case FWD_NAIVE_JACOBI :
-                break;
-            case FWD_NAIVE_GUEASS_SEIDEL :
-                break;
-            case FWD_SEMINAIVE :
-                break;
-
-            case BKD_NON_RECURSIVE_SLD :
-                break;
-            case BKD_QSQI :
-                break;
-            case BKD_QSQR :
-                break;
-            default :
-                throw new RulesException("No such engine type: "+type);
-        }
-        throw new RulesException("Not implemented: "+type);
+    /** Create a new {@link RulesEngine}. */
+    public static RulesEngine create(EngineType type, RuleSet ruleSet, RelStore baseData) {
+        return RulesGraphBuilder.create(type, ruleSet, baseData);
     }
 
     /** Read file (or stdin) of rules */

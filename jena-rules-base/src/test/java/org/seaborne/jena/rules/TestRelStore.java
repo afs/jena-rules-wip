@@ -20,12 +20,12 @@ package org.seaborne.jena.rules;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.seaborne.jena.rules.lang.RulesParser;
 import org.seaborne.jena.rules.store.RelStoreAccSimple;
 import org.seaborne.jena.rules.store.RelStoreBuilder;
 import org.seaborne.jena.rules.store.RelStoreSimple;
 
 import static org.junit.Assert.*;
+import static org.seaborne.jena.rules.lang.RulesParser.parseAtom;
 
 public class TestRelStore {
     static String   data[] = {"name(:x, :p :o)", "rel(1,2)", "rel(2,3)"};
@@ -44,7 +44,7 @@ public class TestRelStore {
     public static void beforeClass() {
         RelStoreBuilder builder = RelStoreSimple.create();
         for ( String d : data ) {
-            Rel rel = RulesParser.parseAtom(d);
+            Rel rel = parseAtom(d);
             builder.add(rel);
         }
         relStore = builder.build();
@@ -53,7 +53,7 @@ public class TestRelStore {
     @Test
     public void relStore_01() {
         RelStoreAcc rs = createEmptyRelStore();
-        Rel rel = RulesParser.parseAtom("(:s :p :o)");
+        Rel rel = parseAtom("(:s :p :o)");
         rs.add(rel);
         assertFalse(rs.isEmpty());
         assertEquals(1,rs.size());
@@ -63,7 +63,7 @@ public class TestRelStore {
     @Test
     public void relStore_02() {
         RelStoreAcc rs = createEmptyRelStore();
-        Rel rel = RulesParser.parseAtom("(:s :p :o)");
+        Rel rel = parseAtom("(:s :p :o)");
         rs.add(rel);
         assertFalse(rs.isEmpty());
         rs.delete(rel);
@@ -76,7 +76,7 @@ public class TestRelStore {
     @Test
     public void relStore_access_01() {
         RelStore rs = getRelStore();
-        Rel rel = RulesParser.parseAtom("(1,2)");
+        Rel rel = parseAtom("(1,2)");
         assertFalse(rs.contains(rel));
         assertFalse(rs.matches(rel));
     }
@@ -84,7 +84,7 @@ public class TestRelStore {
     @Test
     public void relStore_access_02() {
         RelStore rs = getRelStore();
-        Rel rel = RulesParser.parseAtom("rel(1,9)");
+        Rel rel = parseAtom("rel(1,9)");
         assertFalse(rs.contains(rel));
         assertFalse(rs.matches(rel));
     }
@@ -92,7 +92,7 @@ public class TestRelStore {
     @Test
     public void relStore_access_03() {
         RelStore rs = getRelStore();
-        Rel rel = RulesParser.parseAtom("(1,_)");
+        Rel rel = parseAtom("(1,_)");
         assertFalse(rs.contains(rel));
         assertFalse(rs.matches(rel));
     }
@@ -100,7 +100,7 @@ public class TestRelStore {
     @Test
     public void relStore_access_04() {
         RelStore rs = getRelStore();
-        Rel rel = RulesParser.parseAtom("rel(1,_)");
+        Rel rel = parseAtom("rel(1,_)");
         assertFalse(rs.contains(rel));
         assertTrue(rs.matches(rel));
     }
@@ -108,7 +108,7 @@ public class TestRelStore {
     @Test
     public void relStore_access_05() {
         RelStore rs = getRelStore();
-        Rel rel = RulesParser.parseAtom("rel(1,?x)");
+        Rel rel = parseAtom("rel(1,?x)");
         assertFalse(rs.contains(rel));
         assertTrue(rs.matches(rel));
     }
@@ -116,7 +116,7 @@ public class TestRelStore {
     @Test
     public void relStore_access_06() {
         RelStore rs = getRelStore();
-        Rel rel = RulesParser.parseAtom("rel(?x,2)");
+        Rel rel = parseAtom("rel(?x,2)");
         assertFalse(rs.contains(rel));
         assertTrue(rs.matches(rel));
     }

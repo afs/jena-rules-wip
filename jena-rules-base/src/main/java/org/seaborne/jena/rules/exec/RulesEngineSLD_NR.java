@@ -19,15 +19,15 @@
 package org.seaborne.jena.rules.exec;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import migrate.binding.Binding;
+import migrate.binding.Sub;
 import org.apache.jena.atlas.iterator.Iter;
-import org.seaborne.jena.rules.Rel;
-import org.seaborne.jena.rules.RelStore;
-import org.seaborne.jena.rules.RuleSet;
-import org.seaborne.jena.rules.RulesEngine;
+import org.seaborne.jena.rules.*;
 import org.seaborne.jena.rules.api.EngineType;
+import org.seaborne.jena.rules.store.RelStoreBuilder;
 
 /** Non-recursive SLR Reolution */
 public class RulesEngineSLD_NR extends RulesEngineBkd {
@@ -43,12 +43,18 @@ public class RulesEngineSLD_NR extends RulesEngineBkd {
 
     @Override
     public Stream<Rel> stream() {
-        return null;
+        return rules.asList().stream().flatMap(r->{
+            Rel query = r.getHead();
+            Stream<Binding> matches = solve(query);
+            return matches.map(binding->Sub.substitute(binding, query)).filter(Objects::nonNull);
+        });
     }
 
     @Override
     public RelStore materialize() {
-        return null;
+        RelStoreBuilder builder = RelStoreFactory.create();
+        Stream.concat(data.stream(), stream()).forEach(builder::add);
+        return builder.build();
     }
 
     @Override

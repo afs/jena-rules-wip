@@ -20,6 +20,7 @@ package org.seaborne.jena.rules.naive;
 
 import org.seaborne.jena.rules.*;
 import org.seaborne.jena.rules.api.EngineType;
+import org.seaborne.jena.rules.store.RelStore2;
 
 /**
  * The <a href="">naïve</a> algorithm, done very naively. Hopefully, so simple it is easy
@@ -50,9 +51,10 @@ public class RuleEngineNaive extends RulesEngineFwd {
     //   Combine generated facts during the loop.
 
     @Override
-    protected RelStore doForReal() {
-        RelStoreAcc generation = RelStoreFactory.createAcc();
-        generation.add(data);
+    protected RelStore generateInferred() {
+        RelStoreAcc inferred = RelStoreFactory.createAcc();
+        // Keep as two separate RelStores so we can track what is added.
+        RelStore both = new RelStore2(data, inferred);
 
         int i = 0;
         while(true) {
@@ -61,31 +63,40 @@ public class RuleEngineNaive extends RulesEngineFwd {
                 rCxt.out().printf("N: Round %d\n", i);
             // Accumulator for this round.
             RelStoreAcc acc = RelStoreFactory.createAcc();
-            rules.asList().forEach(rule->{
+            boolean changeHappened = false;
+            for ( Rule rule: rules ) {
                 if ( rCxt.debug() )
                     rCxt.out().println("==== "+rule);
-                RelStore data =
-                        GaussSeidel
-                        // Algorithm: Gauss-Seidel (propagate early)
-                        ? RelStoreFactory.combine(generation, acc)
-                        // Algorithm: Jacobi (propagate last round)
-                        : generation;
-                RulesLib.evalOne(rCxt, generation, acc, rule);
+                // Jacobi - inferred is updated at end of round
+                // GaussSeidel - inferred is updated after each rule.
+//                RelStore data =
+//                        GaussSeidel
+//                        // Algorithm: Gauss-Seidel (propagate early)
+//                        ? RelStoreFactory.combine(generation, acc)
+//                        // Algorithm: Jacobi (propagate last round)
+//                        : generation;
+                RulesLib.evalOne(rCxt, both, acc, rule);
+                changeHappened = changeHappened | ! acc.isEmpty();
                 if ( rCxt.debug() )
                     rCxt.out().println("Step => "+acc);
-
-            });
+                if ( GaussSeidel ) {
+                    inferred.add(acc);
+                    acc.clear();
+                }
+            } // End of rule loop.
             if ( rCxt.debug() )
                 rCxt.out().println("Acc  => "+acc);
 
             // Changes?
-            if ( acc.isEmpty() )
+            if ( ! changeHappened )
                 // No change - finished.
-                return generation.freeze();
-            generation.add(acc);
+                break;
+            if ( ! GaussSeidel )
+                inferred.add(acc);
             if ( rCxt.debug() )
-                rCxt.out().println("New  => "+generation);
+                rCxt.out().println("New  => "+inferred);
         }
+        return inferred.freeze();
     }
 }
 

@@ -41,12 +41,12 @@ import org.seaborne.jena.rules.store.RelStoreSimple;
  * Syntax:<br/>
  * <pre>
  *   fact(...).
- *   head(...) <- body .
+ *   head(...) &lt;- body .
  * </pre>
  * where <tt>body</tt> is a number of terms (class {@link Rel}).
  * Rule clause terms can be named or unnamed.
  * <pre>
- *     (:s :p ?o) <- (:s :q1 ?z ) (?z :q2 ?o) .
+ *     (:s :p ?o) &lt;- (:s :q1 ?z ) (?z :q2 ?o) .
  * <pre>
  *
  */
@@ -65,7 +65,7 @@ public class RuleParser0 {
     public static Rule parseRule(String x) {
         // fact(,,,).
         // head(...) <- body .
-    
+
         // rel{0,1} <- rel{0,} ...
         if ( ! x.contains("<-") && ! x.contains(":-")) {
             Tokenizer tok = TokenizerText.fromString(x);
@@ -88,12 +88,12 @@ public class RuleParser0 {
         z[0] = z[0].trim();
         if ( z[0].isEmpty() )
             throw new RuleParseException("No head to rule");
-    
+
         Rel head = parseRel(z[0]);
         Tokenizer tok = TokenizerText.fromString(z[1]);
         List<Rel> body = new ArrayList<>();
         boolean first = true;
-    
+
         while(tok.hasNext()) {
             Token peekToken = tok.peek();
             if ( peekToken == null || peekToken.getType() == TokenType.EOF )
@@ -102,7 +102,7 @@ public class RuleParser0 {
                 tok.next();
                 break;
             }
-    
+
             if ( ! first )
                 skipComma(tok);
             else
@@ -110,7 +110,7 @@ public class RuleParser0 {
             Rel r = parseRel(tok);
             body.add(r);
         }
-    
+
         return new Rule(head, body);
     }
 

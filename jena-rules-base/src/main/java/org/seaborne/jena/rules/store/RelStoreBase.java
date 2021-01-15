@@ -84,7 +84,7 @@ public abstract class RelStoreBase implements RelStore {
     /** Get all the Rels matching a name*/
     @Override
     public Stream<Rel> get(String relName) {
-        return all().filter(r->r.getName().equals(relName));
+        return stream().filter(r->r.getName().equals(relName));
     }
 
     /** Does this RelStore have any rels of a given name? */
@@ -95,12 +95,12 @@ public abstract class RelStoreBase implements RelStore {
 
     @Override
     public boolean isEmpty() {
-        return !all().findAny().isPresent();
+        return !stream().findAny().isPresent();
     }
 
     @Override
     public long size() {
-        return all().count();
+        return stream().count();
     }
 
     @Override
@@ -116,7 +116,7 @@ public abstract class RelStoreBase implements RelStore {
     @Override
     public String toString() {
         StringJoiner sj = new StringJoiner(" . ");
-        all().forEach(r -> sj.add(r.toString()));
+        stream().forEach(r -> sj.add(r.toString()));
         return sj.toString();
     }
 

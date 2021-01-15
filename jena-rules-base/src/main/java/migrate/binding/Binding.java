@@ -29,6 +29,9 @@ public interface Binding //extends org.apache.jena.sparql.engine.binding.Binding
 {
     public static final Binding noParent = null;
 
+    // XXX ??? Hide somehow?
+    public Binding getParent();
+
     /** Iterate over all variables of this binding. */
     public Iterator<Var> vars();
 

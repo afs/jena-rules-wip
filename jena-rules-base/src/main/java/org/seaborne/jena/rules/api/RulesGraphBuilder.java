@@ -30,35 +30,39 @@ import org.seaborne.jena.rules.exec.RulesGraph;
 import org.seaborne.jena.rules.naive.RuleEngineNaive;
 import org.seaborne.jena.rules.store.RelStoreGraph;
 
-public class Builder {
+/**
+ * Builder for an rules-backed graph.
+ */
+public class RulesGraphBuilder {
     private Context context = null;
     private Graph baseGraph;
     private RuleSet ruleSet;
     private EngineType engineType;
 
-    public Builder() {}
+    /** Use {@link Rules#create()} */
+    RulesGraphBuilder() {}
 
-    public Builder set(Symbol symbol, Object value) {
+    public RulesGraphBuilder set(Symbol symbol, Object value) {
         ensureContext();
         return this;
     }
 
-    public Builder baseGraph(Graph graph) {
+    public RulesGraphBuilder baseGraph(Graph graph) {
         this.baseGraph = graph;
         return this;
     }
 
-    public Builder rules(RuleSet ruleSet) {
+    public RulesGraphBuilder rules(RuleSet ruleSet) {
         this.ruleSet = ruleSet;
         return this;
     }
 
-    public Builder rules(String filename) {
+    public RulesGraphBuilder rules(String filename) {
         this.ruleSet = Rules.rules(filename);
         return this;
     }
 
-    public Builder system(EngineType type) {
+    public RulesGraphBuilder system(EngineType type) {
         this.engineType = type;
         return this;
     }
@@ -73,7 +77,15 @@ public class Builder {
         if ( cxt == null )
             context = Rules.getContext();
 
-        EngineType type = (this.engineType == null) ? this.engineType : EngineType.BKD_NON_RECURSIVE_SLD;
+        EngineType type = (this.engineType != null) ? this.engineType : EngineType.BKD_NON_RECURSIVE_SLD;
+        RelStore edb = new RelStoreGraph(baseGraph);
+        RulesEngine engine = create(type, ruleSet, edb);
+        Graph graph = new RulesGraph(baseGraph, engine);
+        return graph;
+    }
+
+    /** Create a new {@link RulesEngine}. */
+    public static RulesEngine create(EngineType type, RuleSet ruleSet, RelStore baseData) {
         RulesEngine.Factory factory = null;
         switch(type) {
             case BKD_NON_RECURSIVE_SLD :
@@ -95,14 +107,9 @@ public class Builder {
 
         if (factory == null )
             throw new RulesException("No factory for "+type);
-
-        RelStore edb = new RelStoreGraph(baseGraph);
-        RulesEngine engine = factory.build(edb, ruleSet);
-        Graph graph = new RulesGraph(baseGraph, engine);
-        return graph;
+        RulesEngine engine = factory.build(baseData, ruleSet);
+        return engine;
     }
-
-    //private static
 
     private void ensureContext() {
         if ( context == null )

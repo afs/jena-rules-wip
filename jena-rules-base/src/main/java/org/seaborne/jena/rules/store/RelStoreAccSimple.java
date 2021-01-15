@@ -104,6 +104,11 @@ public class RelStoreAccSimple extends RelStoreBase implements RelStoreAcc {
     }
 
     @Override
+    public void clear() {
+        store.clear();
+    }
+
+    @Override
     public void delete(Rel rel) {
         //checkUpdatable(()->"delete("+rel+")") ;
         store.remove(rel.getName(), rel);
@@ -131,7 +136,7 @@ public class RelStoreAccSimple extends RelStoreBase implements RelStoreAcc {
     }
 
     @Override
-    public Stream<Rel> all() {
+    public Stream<Rel> stream() {
         return store.values().stream();
     }
 }

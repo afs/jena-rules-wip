@@ -23,9 +23,11 @@ import java.util.stream.Stream;
 
 import migrate.binding.Binding;
 import migrate.binding.Sub;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.graph.impl.GraphMatcher;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.graph.GraphWrapper;
 import org.apache.jena.util.iterator.ExtendedIterator;
@@ -53,9 +55,9 @@ public class RulesGraph extends GraphWrapper {
 
     @Override
     public ExtendedIterator<Triple> find(Node s, Node p, Node o) {
-        Node sq = queryNode(s, "sq");
-        Node pq = queryNode(p, "pq");
-        Node oq = queryNode(o, "oq");
+        Node sq = queryNode(s, "?s");
+        Node pq = queryNode(p, "?p");
+        Node oq = queryNode(o, "?o");
 
         Rel query = new Rel("", sq, pq, oq);
         Stream<Binding> matches = rulesEngine.solve(query);
@@ -78,13 +80,29 @@ public class RulesGraph extends GraphWrapper {
 
     @Override
     public boolean contains(Node s, Node p, Node o) {
-        return get().contains(s, p, o);
+        ExtendedIterator<Triple> iter = find(s, p, o);
+        try {
+            return iter.hasNext();
+        } finally {
+            iter.close();
+        }
     }
 
     @Override
     public boolean contains(Triple t) {
-        return get().contains(t);
+        return contains(t.getSubject(), t.getPredicate(), t.getObject());
     }
+
+    @Override
+    public boolean isIsomorphicWith(Graph g) {
+        return g != null && GraphMatcher.equals( this, g );
+    }
+
+    @Override
+    public int size() {
+        return (int)(Iter.count(find()));
+    }
+
 
     // Updates.
 

@@ -50,7 +50,7 @@ public class RuleEngineNaive2 extends RulesEngineFwd {
     private static  RuleExecCxt rCxt = new RuleExecCxt();
 
     @Override
-    protected RelStore doForReal() {
+    protected RelStore generateInferred() {
         RelStoreAcc generation = RelStoreFactory.createAcc();
         generation.add(data);
         RelStore accLast = null ;

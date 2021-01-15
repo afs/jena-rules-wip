@@ -24,13 +24,21 @@ package org.seaborne.jena.rules.api;
 // Algorithm: Gauss-Seidel
 public enum EngineType {
     // Default navive (used for tests).
-    FWD_NAIVE
-    , FWD_NAIVE_JACOBI
-    , FWD_NAIVE_GUEASS_SEIDEL
-    , FWD_SEMINAIVE
-    , BKD_NON_RECURSIVE_SLD
-    , BKD_QSQR
-    , BKD_QSQI
-//    , MAGIC
+    FWD_NAIVE("Naive")
+    , FWD_NAIVE_JACOBI("Naive (Jacobi)")
+    , FWD_NAIVE_GUEASS_SEIDEL("Naive (GUASS_SEIDEL)")
+    , FWD_SEMINAIVE("Seminaive")
+    , BKD_NON_RECURSIVE_SLD("SLD (Non-recursive)")
+    , BKD_QSQR("QSQR")
+    , BKD_QSQI("QSQI")
+//  , MAGIC("MagicSet")
+    ;
 
+    private final String displayName;
+
+    private EngineType(String string) { this.displayName = string; }
+
+    public String displayName() {
+        return displayName;
     }
+}

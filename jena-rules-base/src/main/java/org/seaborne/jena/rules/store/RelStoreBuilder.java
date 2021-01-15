@@ -26,7 +26,7 @@ import org.seaborne.jena.rules.RelStore;
 public interface RelStoreBuilder {
 
     public default RelStoreBuilder add(RelStore relStore) {
-        relStore.all().forEach(this::add);
+        relStore.stream().forEach(this::add);
         return this;
     }
 

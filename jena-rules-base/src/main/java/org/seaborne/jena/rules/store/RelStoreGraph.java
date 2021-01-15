@@ -44,7 +44,7 @@ public class RelStoreGraph extends RelStoreBase {
     }
 
     @Override
-    public Stream<Rel> all() {
+    public Stream<Rel> stream() {
         ExtendedIterator<Triple> iter = graph.find();
         ExtendedIterator<Rel> rels = iter.mapWith(Rel::fromTriple);
         return Iter.asStream(rels);

@@ -30,6 +30,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 
 public class MGU {
+
     /*
      * "Logic Programming and Databases" p85 "FUNCTION MGU" algorithm is actually buggy.
      *
@@ -140,6 +141,7 @@ public class MGU {
 //                continue;
 //            }
 
+            // Order matters here? Or both mappings?
             if ( isVar(x2) ) {
                 // mguAdd not needed?
                 boolean isOK = mguAdd(map, Var.alloc(x2), x1);
@@ -335,4 +337,95 @@ public class MGU {
         }
         return n.equals(node);
     }
+
+    // ---
+    /**
+     * @implSpec
+     * Taken from: https://www.cs.ubc.ca/~poole/aibook/html/ArtInt_287.html
+     * <pre>
+        select and remove x=y from E
+            if (y is not identical to x) then
+                if (x is a variable) then
+                    replace x with y everywhere in E and S
+                    S←{x/y}∪S
+                else if (y is a variable) then
+                    replace y with x everywhere in E and S
+                    S←{y/x}∪S
+                else if (x is f(x1 ,...,xn) and y is f(y1 ,...,yn) then
+                    E←E∪{x1 = y1 ,..., xn =yn }
+                else
+                    return ⊥
+     * </pre>
+     *
+     */
+
+    // Returns the left-to-right mapping biased MGU.
+    // i.e. var-var mappings are from right var to left var
+    // i.e. output is in LHS namespace.
+    public static Binding mguAlg2(Rel rel1, Rel rel2) {
+        Objects.requireNonNull(rel1);
+        Objects.requireNonNull(rel2);
+        if ( rel1.len() != rel2.len() )
+            return null;
+        if ( ! rel1.getName().equals(rel2.getName()) )
+            return null;
+        int N = rel1.len();
+
+        BindingBuilder map = BindingFactory.create();
+
+        // The first step. E is these two Node[] and this does the first loop iteration.
+        Node[] t1 = new Node[N];
+        rel1.getTuple().copyInto(t1);
+        Node[] t2 = new Node[N];
+        rel2.getTuple().copyInto(t2);
+
+        // For E, we use t1 and t2 already expanded.
+        for ( int i = 0 ; i < N ; i++ ) {
+            Node x = t1[i];
+            Node y = t2[i];
+            // Already replaced? We did a forward sweep.
+            // Else could(?):
+//            if ( Var.isVar(x) )
+//                x = map.getOrSame(Var.alloc(x));
+//            if ( Var.isVar(y) )
+//                y = map.getOrSame(Var.alloc(y));
+            // which does not need the tuple copy.
+            // Experiment.
+            if ( x.equals(y) )
+                continue;
+            if ( Var.isVar(x) ) {
+                //replace x with y everywhere in E and S
+                // ???? y first?
+                replace(t1,i,x,y);
+                replace(t2,i,x,y);
+                //S←{x/y}∪S
+                // ** Do we need to check the range of the map for x?
+                // What about 2 pass?
+                map.set(Var.alloc(x), y);
+                continue;
+            }
+            if ( Var.isVar(y) ) {
+                //replace y with x everywhere in E and S
+                // In E
+                replace(t1,i,y,x);
+                replace(t2,i,y,x);
+                //S←{y/x}∪S
+                // ** Do we need to check the range of the map for y?
+                map.set(Var.alloc(y), x);
+                //map.replace
+                continue;
+            }
+            return null;
+        }
+        return map.build();
+    }
+
+    private static void replace(Node[] t, int from, Node x, Node y) {
+        for ( int i = from ; i < t.length ; i++ ) {
+            Node n = t[i];
+            if ( n.equals(x) )
+                t[i] = y;
+        }
+    }
+
 }

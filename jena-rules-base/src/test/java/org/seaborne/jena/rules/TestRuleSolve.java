@@ -19,6 +19,9 @@
 package org.seaborne.jena.rules;
 
 import static org.junit.Assert.fail;
+import static org.seaborne.jena.rules.RuleTestLib.data;
+import static org.seaborne.jena.rules.RuleTestLib.query;
+import static org.seaborne.jena.rules.RuleTestLib.ruleSet;
 
 import java.util.Iterator;
 
@@ -26,12 +29,27 @@ import migrate.binding.Binding;
 import migrate.binding.Sub;
 import org.apache.jena.atlas.iterator.Iter;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+import org.seaborne.jena.rules.api.EngineType;
+import org.seaborne.jena.rules.api.Rules;
 import org.seaborne.jena.rules.exec.BkdSolver;
-import org.seaborne.jena.rules.lang.RulesParser;
-import org.seaborne.jena.rules.store.RelStoreBuilder;
-import org.seaborne.jena.rules.store.RelStoreSimple;
 
-public class TestSolve {
+/**
+ * Tests of rule matching features, comparing to expected answers.
+ */
+@RunWith(Parameterized.class)
+public class TestRuleSolve {
+
+    @Parameters(name = "{index}: {0}")
+    public static Iterable<Object[]> tests() { return RuleTestLib.allEngines(); }
+
+    final private EngineType underTest;
+
+    public TestRuleSolve(String testName, EngineType engineType) {
+        underTest = engineType;
+    }
 
     // Basics
     @Test public void solve_01() { test("r(1)", "", "r(1)", "r(1)"); }
@@ -51,54 +69,42 @@ public class TestSolve {
 
     private void test(String dataStr, String rulesStr, String queryStr, String result) {
         RelStore data = data(dataStr);
-        RuleSet ruleSet = rules(rulesStr);
+        RuleSet ruleSet = ruleSet(rulesStr);
+//        RuleSet ruleSet0 = ruleSet(rulesStr);
+//        RuleSet ruleSet = Renamer.rename("vvv", ruleSet0);
+
         Rel query = query(queryStr);
 
         RelStore expected = data(result);
-        RelStore actual = eval(data, ruleSet, query);
-        if ( RelStore.equals(expected, actual) )
-                return;
+        RelStore actual = Rules.eval(data, ruleSet, underTest, query);
+        boolean testResult = RelStore.equals(expected, actual);
+        if ( testResult )
+            return;
 
-        //BkdSolver.DEBUG = true;
-        Iterator<Binding> iter = BkdSolver.solver(query, ruleSet, data);
-        System.out.println("Query = "+query);
-//        System.out.println("== Data ==");
-//        System.out.println(data.toString());
-        System.out.println("== Rules ==");
-        System.out.println(ruleSet.toString());
-        System.out.println("== Result ==");
+        // ---- Test fail.
+        // -- Debug
+        System.out.printf("D:%s R:%s Q:%s -> %s\n",dataStr, rulesStr, queryStr, result);
+        try {
+            Iterator<Binding> iter = BkdSolver.solver(query, ruleSet, data);
+            System.out.println("Query = "+query);
+    //        System.out.println("== Data ==");
+    //        System.out.println(data.toString());
+            System.out.println("== Rules ==");
+            System.out.println(ruleSet.toString());
+            System.out.println("== Result ==");
 
-        if ( iter.hasNext() ) {
-            //Binding b = iter.next();
-            Iter.map(iter, b->Sub.substitute(b, query)).forEachRemaining(System.out::println);
-        } else
-            System.out.println("EMPTY");
+            if ( iter.hasNext() ) {
+                Iter.map(iter, b->Sub.substitute(b, query)).forEachRemaining(System.out::println);
+            } else
+                System.out.println("EMPTY");
 
-        System.out.println();
+            System.out.println();
 
-        String message = "Expected: < "+expected+" > : Got: < "+actual+" >";
-        fail(message);
-    }
-
-    static RelStore eval(RelStore data, RuleSet ruleSet, Rel query) {
-        RelStoreBuilder builder = RelStoreSimple.create();
-        Iterator<Binding> iter1 = BkdSolver.solver(query, ruleSet, data);
-        Iter.iter(iter1).map(b->Sub.substitute(b, query)).forEach(r->builder.add(r));
-        return builder.build();
-    }
-
-    private static RelStore data(String dataStr) {
-        if ( dataStr == null )
-            return RelStoreFactory.empty();
-        return RulesParser.parseData(dataStr);
-    }
-
-    private static RuleSet rules(String ruleStr) {
-        return RulesParser.parseRuleSet(ruleStr);
-    }
-
-    private Rel query(String queryStr) {
-        return RulesParser.parseAtom(queryStr);
+            String message = "Expected: < "+expected+" > : Got: < "+actual+" >";
+            fail(message);
+        } finally {
+            RuleExecCxt.global.DEBUG = false;
+        }
     }
 }
 

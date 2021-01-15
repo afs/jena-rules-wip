@@ -26,13 +26,12 @@ import org.seaborne.jena.rules.Rel;
 import org.seaborne.jena.rules.RelStore;
 
 /**
- * A RelStore of 2 RelStores - assumed to be disjoint.
- * Additions go to the first/left store.
+ * Read-only view of 2 RelStores.
+ * Changes made directly on the underlying RelStores will be reglected in this view.
  */
 public class RelStore2 implements RelStore {
 
     private RelStore store1;
-    // Anti-store for store1 for deletes? Makes store2 read-only.
     private RelStore store2;
 
     public RelStore2(RelStore store1, RelStore store2) {
@@ -40,44 +39,9 @@ public class RelStore2 implements RelStore {
         this.store2 = store2 ;
     }
 
-//    @Override
-//    public void setWritable(boolean allowUpdate) {
-//        store1.setWritable(allowUpdate);
-//    }
-//
-//    @Override
-//    public boolean isUpdateable() {
-//        return store1.isUpdateable();
-//    }
-//
-//    @Override
-//    public void add(Rel rel) {
-//        if ( store1.contains(rel) )
-//            return ;
-//        if ( store2.contains(rel) )
-//            return ;
-//        store1.add(rel);
-//    }
-//
-//    @Override
-//    public void add(RelStore data) {
-//        data.all().forEach(this::add);
-//    }
-//
-//    @Override
-//    public void delete(Rel rel) {
-//        store1.delete(rel);
-//        store2.delete(rel);
-//    }
-//
-//    @Override
-//    public void removeAll(Rel rel) {
-//        List<Rel> x = Iter.toList(find(rel));
-//        x.forEach((r)->delete(r));
-//    }
-
     @Override
     public Iterator<Rel> find(Rel rel) {
+        // Whether to suppress duplicates.
         Iterator<Rel> x1 = store1.find(rel);
         Iterator<Rel> x2 = store2.find(rel);
         return Iter.concat(x1,  x2);
@@ -105,8 +69,8 @@ public class RelStore2 implements RelStore {
     }
 
     @Override
-    public Stream<Rel> all() {
-        return Stream.concat(store1.all(), store2.all());
+    public Stream<Rel> stream() {
+        return Stream.concat(store1.stream(), store2.stream());
     }
 
     @Override

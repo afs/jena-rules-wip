@@ -57,24 +57,24 @@ public interface RelStore {
 
     public long size();
 
-    public Stream<Rel> all();
+    public Stream<Rel> stream();
 
     /** Set equals */
     public static boolean equals(RelStore rs1, RelStore rs2) {
-        Set<Rel> set1 = rs1.all().collect(Collectors.toSet());
-        Set<Rel> set2 = rs2.all().collect(Collectors.toSet());
+        Set<Rel> set1 = rs1.stream().collect(Collectors.toSet());
+        Set<Rel> set2 = rs2.stream().collect(Collectors.toSet());
         return set1.equals(set2);
     }
 
     public static String toMultiLineString(RelStore relStore) {
         StringJoiner sj = new StringJoiner("\n + ", "++ ", "");
-        relStore.all().forEach(r -> sj.add(r.toString()));
+        relStore.stream().forEach(r -> sj.add(r.toString()));
         return sj.toString();
     }
 
     public static void print(PrintStream out, RelStore relStore) {
         boolean first = true;
-        relStore.all().forEach(r->{
+        relStore.stream().forEach(r->{
             out.print("+ " );
             out.println(r);
         });

@@ -27,7 +27,10 @@ import org.junit.runners.Suite;
     //, TestMGU.class
     , TestRelStore.class
     , TestDependencyGraph.class
-    , TestSolve.class
+    , TestRuleSolve.class
+    , TestRuleQuery.class
+    , TestRuleGraph.class
+    , TestRuleEngine.class
 })
 
 public class TS_RulesBase { }
