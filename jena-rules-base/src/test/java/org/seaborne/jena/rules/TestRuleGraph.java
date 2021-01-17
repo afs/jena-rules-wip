@@ -35,9 +35,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.seaborne.jena.rules.api.RulesGraphBuilder;
-import org.seaborne.jena.rules.api.EngineType;
-import org.seaborne.jena.rules.api.Rules;
 import org.seaborne.jena.rules.lang.RulesParser;
 
 /**

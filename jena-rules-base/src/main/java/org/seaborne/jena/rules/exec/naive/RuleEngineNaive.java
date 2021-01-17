@@ -16,11 +16,16 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules.naive;
+package org.seaborne.jena.rules.exec.naive;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 import org.seaborne.jena.rules.*;
-import org.seaborne.jena.rules.api.EngineType;
+import org.seaborne.jena.rules.exec.RuleOps;
 import org.seaborne.jena.rules.store.RelStore2;
+import org.seaborne.jena.rules.store.RelStoreAcc;
+import org.seaborne.jena.rules.store.RelStoreAccSimple;
 
 /**
  * The <a href="">naïve</a> algorithm, done very naively. Hopefully, so simple it is easy
@@ -52,7 +57,7 @@ public class RuleEngineNaive extends RulesEngineFwd {
 
     @Override
     protected RelStore generateInferred() {
-        RelStoreAcc inferred = RelStoreFactory.createAcc();
+        RelStoreAcc inferred = new RelStoreAccSimple();
         // Keep as two separate RelStores so we can track what is added.
         RelStore both = new RelStore2(data, inferred);
 
@@ -62,7 +67,7 @@ public class RuleEngineNaive extends RulesEngineFwd {
             if ( rCxt.debug() )
                 rCxt.out().printf("N: Round %d\n", i);
             // Accumulator for this round.
-            RelStoreAcc acc = RelStoreFactory.createAcc();
+            Collection<Rel> acc = new HashSet<>();
             boolean changeHappened = false;
             for ( Rule rule: rules ) {
                 if ( rCxt.debug() )
@@ -75,7 +80,7 @@ public class RuleEngineNaive extends RulesEngineFwd {
 //                        ? RelStoreFactory.combine(generation, acc)
 //                        // Algorithm: Jacobi (propagate last round)
 //                        : generation;
-                RulesLib.evalOne(rCxt, both, acc, rule);
+                RuleOps.evalOne(rCxt, both, acc, rule);
                 changeHappened = changeHappened | ! acc.isEmpty();
                 if ( rCxt.debug() )
                     rCxt.out().println("Step => "+acc);

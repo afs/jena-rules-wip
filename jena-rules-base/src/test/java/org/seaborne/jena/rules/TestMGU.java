@@ -35,6 +35,7 @@ import org.apache.jena.riot.tokens.TokenizerText;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.sse.SSE;
 import org.junit.Test;
+import org.seaborne.jena.rules.exec.MGU;
 import org.seaborne.jena.rules.lang.RuleParseException;
 import org.seaborne.jena.rules.lang.RulesParser;
 

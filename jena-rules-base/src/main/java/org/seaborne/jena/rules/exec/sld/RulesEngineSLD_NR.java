@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules.exec;
+package org.seaborne.jena.rules.exec.sld;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -26,10 +26,9 @@ import migrate.binding.Binding;
 import migrate.binding.Sub;
 import org.apache.jena.atlas.iterator.Iter;
 import org.seaborne.jena.rules.*;
-import org.seaborne.jena.rules.api.EngineType;
 import org.seaborne.jena.rules.store.RelStoreBuilder;
 
-/** Non-recursive SLR Reolution */
+/** Non-recursive SLR Resolution */
 public class RulesEngineSLD_NR extends RulesEngineBkd {
 
     public static RulesEngine.Factory factory = RulesEngineSLD_NR::new;
@@ -43,7 +42,7 @@ public class RulesEngineSLD_NR extends RulesEngineBkd {
 
     @Override
     public Stream<Rel> stream() {
-        return rules.asList().stream().flatMap(r->{
+        return rules.rules().stream().flatMap(r->{
             Rel query = r.getHead();
             Stream<Binding> matches = solve(query);
             return matches.map(binding->Sub.substitute(binding, query)).filter(Objects::nonNull);

@@ -30,9 +30,9 @@ public class RelStoreFactory {
         return RelStoreSimple.create();
     }
 
-    public static RelStoreAcc createAcc() {
-        return new RelStoreAccSimple();
-    }
+//    public static RelStoreAcc createAcc() {
+//        return new RelStoreAccSimple();
+//    }
 
     /** Create a {@link RelStoreBuilder} that is suitable for temporary working data. */
     public static RelStoreBuilder createMem() {

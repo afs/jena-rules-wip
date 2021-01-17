@@ -20,6 +20,7 @@ package org.seaborne.jena.rules;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.seaborne.jena.rules.store.RelStoreAcc;
 import org.seaborne.jena.rules.store.RelStoreAccSimple;
 import org.seaborne.jena.rules.store.RelStoreBuilder;
 import org.seaborne.jena.rules.store.RelStoreSimple;

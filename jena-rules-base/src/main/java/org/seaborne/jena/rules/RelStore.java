@@ -26,19 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface RelStore {
-    // Maybe RelStore -> Map of "Rels", all Rels of the same name
-
-//    public default void setReadOnly() { setWritable(false); }
-//    public void setWritable(boolean allowUpdate);
-//
-//    public default boolean isReadonly() { return ! isUpdateable();}
-//    public boolean isUpdateable();
-//
-//    public void add(Rel rel);
-//    public void add(RelStore data);
-//
-//    public void delete(Rel rel);
-//    public void removeAll(Rel rel);
 
     public Iterator<Rel> find(Rel rel);
 

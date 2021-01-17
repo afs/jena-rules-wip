@@ -27,8 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.seaborne.jena.rules.api.RulesGraphBuilder;
-import org.seaborne.jena.rules.api.EngineType;
+import org.seaborne.jena.rules.exec.RuleOps;
 import org.seaborne.jena.rules.lang.RulesParser;
 
 /** Rule engine testing - does not cover {@link RulesEngine#solve}.
@@ -77,13 +76,13 @@ public class TestRuleEngine {
 
         List<Rel> streamSet = engine.stream().collect(Collectors.toList());
         RelStore store = RelStoreFactory.create().add(streamSet).build();
-        assertTrue(RulesLib.equals(inferredData, store));
+        assertTrue(RuleOps.equals(inferredData, store));
    }
 
     @Test public void materialize1() {
         RulesEngine engine = RulesGraphBuilder.create(underTest, ruleSet, baseData);
         RelStore store = engine.materialize();
-        assertTrue(RulesLib.equals(resultsData, store));
+        assertTrue(RuleOps.equals(resultsData, store));
     }
 }
 

@@ -18,10 +18,7 @@
 
 package org.seaborne.jena.rules.exec;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.jena.graph.Node;
@@ -30,6 +27,10 @@ import org.seaborne.jena.rules.Rel;
 import org.seaborne.jena.rules.Rule;
 import org.seaborne.jena.rules.RuleSet;
 
+/**
+ * Rename collections of rules so that they contain only unique names for variables
+ * across the whole collection.
+ */
 public class Renamer {
 
 //    private final AtomicInteger idx;
@@ -41,25 +42,25 @@ public class Renamer {
 //        idx = new AtomicInteger(i);
 //    }
 
-    public static RuleSet rename(String base, RuleSet ruleSet) {
-        return rename(base, new HashMap<>(), 0, ruleSet);
+    public static List<Rule> rename(String base, List<Rule> rules) {
+        return rename(base, new HashMap<>(), 0, rules);
     }
 
-    public static RuleSet rename(String base, Map<Rule, Map<Var, Var>> ruleSetMap, RuleSet ruleSet) {
-        return rename(base, ruleSetMap, 0, ruleSet);
+    public static List<Rule> rename(String base, Map<Rule, Map<Var, Var>> ruleSetMap, List<Rule> rules) {
+        return rename(base, ruleSetMap, 0, rules);
     }
 
-    public static RuleSet rename(String base, Map<Rule, Map<Var, Var>> ruleSetMap, int start, RuleSet ruleSet) {
+    public static List<Rule> rename(String base, Map<Rule, Map<Var, Var>> ruleSetMap, int start, List<Rule> rules) {
         AtomicInteger idx = new AtomicInteger(start);
-        int RN = ruleSet.size();
+        int RN = rules.size();
         List<Rule> x = new ArrayList<>(RN);
 
         RuleSet.Builder b = RuleSet.newBuilder();
-        ruleSet.forEach(rule->{
+        rules.forEach(rule->{
             Rule rule1 = rename(base, ruleSetMap, idx, rule);
-            b.add(rule1);
+            x.add(rule1);
         });
-        return b.build();
+        return x;
     }
 
     private static Rule rename(String base, Map<Rule, Map<Var, Var>> ruleSetMap, AtomicInteger idx, Rule rule) {

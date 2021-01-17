@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 
 import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap;
 import org.apache.jena.ext.com.google.common.collect.Multimap;
+import org.seaborne.jena.rules.exec.RuleOps;
 
 /**
  * Rules dependency graph. The graph has vertices of rules and links being "depends

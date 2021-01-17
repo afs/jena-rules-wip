@@ -35,52 +35,6 @@ import org.seaborne.jena.rules.RelStore;
  */
 public abstract class RelStoreBase implements RelStore {
 
-//    private boolean readOnly = false;
-//    @Override
-//    public void setWritable(boolean allowUpdate) {
-//        this.readOnly = !allowUpdate;
-//    }
-//
-//    @Override
-//    public boolean isUpdateable() {
-//        return !readOnly;
-//    }
-//
-//    protected void checkUpdatable() {
-//        checkUpdatable(null);
-//    }
-//
-//    protected void checkUpdatable(Supplier<String> message) {
-//        if ( readOnly ) {
-//            String msg = "Attempt to update a read-only RelStore";
-//            if ( message != null )
-//                msg = msg+": "+message.get();
-//            throw new IllegalStateException(msg);
-//        }
-//    }
-
-//    @Override
-//    public abstract void add(Rel rel);
-//
-//    @Override
-//    public abstract void delete(Rel rel);
-//
-//    @Override
-//    public abstract Iterator<Rel> find(Rel rel);
-//
-//    @Override
-//    public void add(RelStore data) {
-//        checkUpdatable();
-//        data.all().forEach(this::add);
-//    }
-//
-//    @Override
-//    public void removeAll(Rel rel) {
-//        checkUpdatable();
-//        List<Rel> x = Iter.toList(find(rel));
-//        x.forEach((r) -> delete(r));
-//    }
-
     /** Get all the Rels matching a name*/
     @Override
     public Stream<Rel> get(String relName) {

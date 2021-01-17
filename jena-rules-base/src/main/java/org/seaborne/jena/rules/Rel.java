@@ -29,7 +29,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.sse.SSE;
 
 /**
- * Strictly : in datalog, this is a "Literal, but that is confusing for RDF,
+ * Strictly : in datalog, this is a "Literal", but that is confusing for RDF,
  * or "Atom", yet it is composite.
  */
 public class Rel  {

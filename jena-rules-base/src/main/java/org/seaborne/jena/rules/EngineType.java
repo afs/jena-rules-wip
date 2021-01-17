@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules.api;
+package org.seaborne.jena.rules;
 
 
 // Algorithm: Jacobi

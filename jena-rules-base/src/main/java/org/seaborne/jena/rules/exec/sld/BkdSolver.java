@@ -16,20 +16,28 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules.exec;
+package org.seaborne.jena.rules.exec.sld;
 
 import static java.lang.String.format;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.function.Function;
 
-import migrate.binding.*;
+import migrate.binding.Binding;
+import migrate.binding.BindingBuilder;
+import migrate.binding.BindingFactory;
+import migrate.binding.Sub;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.InternalErrorException;
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
 import org.seaborne.jena.rules.*;
+import org.seaborne.jena.rules.exec.MGU;
+import org.seaborne.jena.rules.exec.RuleOps;
 
 public class BkdSolver {
     // Solving.
@@ -54,10 +62,7 @@ public class BkdSolver {
      * Data is on argument {@code relStore}, rules in {@code ruleSet}.
      */
     public static Iterator<Binding> solver(Rel pattern, RuleSet ruleSet, RelStore relStore) {
-
-        // Rename away.
-        // XXX Better to do oncewhen rule set created the getHeadExec, getBodyExec.
-        ruleSet = Renamer.rename("V", ruleSet);
+        // Get the version of the rules that have unique variable names.
 
         RuleExecCxt rCxt = RuleExecCxt.global;
         if ( rCxt.trace() )
@@ -112,7 +117,7 @@ public class BkdSolver {
     }
 
     private static Iterator<Binding> ruleSetSolverWorker(RuleExecCxt rCxt, int depth, Binding input, Rel pattern1, RuleSet ruleSet, RelStore relStore) {
-        List<Rule> matchingRules = findCompatible(ruleSet, pattern1);
+        Collection<Rule> matchingRules = findCompatible(ruleSet, pattern1);
         if ( matchingRules.isEmpty() ) {
             return Iter.nullIterator();
         }
@@ -129,15 +134,11 @@ public class BkdSolver {
 
     /**
      * Find matching rules: A rule is compatible if it would contribute to the pattern.
-     *  Variable names are not considered.
+     * Uses the rewritten list of rules so variable names are unique across rules.
+     * Does not consider pattern of variables (e.g. "(?x ?x)").
      */
-    private static List<Rule> findCompatible(RuleSet ruleSet, Rel pattern) {
-        List<Rule> compat = new ArrayList<>();
-        for ( Rule rule: ruleSet.asList() ) {
-            if ( compatible(rule, pattern) )
-                compat.add(rule);
-        }
-        return compat;
+    private static Collection<Rule> findCompatible(RuleSet ruleSet, Rel pattern) {
+        return RuleOps.provides(pattern, ruleSet.execRules());
     }
 
     /** Resolve one rule. */
@@ -282,7 +283,7 @@ public class BkdSolver {
         functionEnter(rCxt, "dataSolver(%s, %s)", pattern, input);
 
         Iterator<Rel> iter1 = relStore.find(pattern);
-        Iterator<Binding> iter2 = RulesLib.bindings(iter1, pattern);
+        Iterator<Binding> iter2 = RuleOps.bindings(iter1, pattern);
 
         iter2 = functionExit(rCxt, iter2, "dataSolver(%s, %s)", pattern, input);
         return iter2;
@@ -303,7 +304,7 @@ public class BkdSolver {
             rCxt.out().printf("< "+fmt, args);
             if ( !fmt.endsWith("\n") )
                 rCxt.out().println();
-            iter = RulesLib.print(rCxt.out(), "  - ", iter);
+            iter = RuleOps.print(rCxt.out(), "  - ", iter);
         }
         return iter;
     }

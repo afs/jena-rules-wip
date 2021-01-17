@@ -21,7 +21,6 @@ package org.seaborne.jena.rules;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.seaborne.jena.rules.api.EngineType;
 import org.seaborne.jena.rules.lang.RulesParser;
 
 public class RuleTestLib {

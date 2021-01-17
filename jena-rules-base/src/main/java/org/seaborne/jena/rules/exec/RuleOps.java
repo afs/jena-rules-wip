@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package org.seaborne.jena.rules.exec;
 
 import static org.apache.jena.sparql.core.Var.isVar;
 
@@ -43,8 +43,9 @@ import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
 import org.apache.jena.sparql.engine.iterator.QueryIterTriplePattern;
+import org.seaborne.jena.rules.*;
 
-public class RulesLib {
+public class RuleOps {
 
     /** RelStore.equals - unordered */
     public static boolean equals(RelStore relStore1, RelStore relStore2) {
@@ -57,18 +58,8 @@ public class RulesLib {
 //        // DependencyGraph
 //    }
 
-//    public static Map<String,RelStore> slots(RuleSet rules) {
-//        Map<String,RelStore> work = new HashMap<>();
-//        List<String> names = rules.getHeadNames();
-//        names.stream().forEach(relName->{
-//            if ( ! work.containsKey(relName) )
-//                work.put(relName, RelStoreFactory.createMem());
-//        });
-//        return work;
-//    }
-
     /** Evaluate one rule using EDB 'data' and putting changes into 'acc' */
-    public static void evalOne(RuleExecCxt rCxt, RelStore data, RelStoreAcc acc, Rule rule) {
+    public static void evalOne(RuleExecCxt rCxt, RelStore data, Collection<Rel> acc, Rule rule) {
         List<Rel> body = rule.getBody();
         if ( body.isEmpty() ) {
             // Assert head.
@@ -179,7 +170,7 @@ public class RulesLib {
         return bar;
     }
 
-    private static void emit(RuleExecCxt rCxt, RelStoreAcc acc, Rel fact, RelStore data) {
+    private static void emit(RuleExecCxt rCxt, Collection<Rel> acc, Rel fact, RelStore data) {
         if ( !fact.isConcrete() ) {
             if ( rCxt.debug() )
                 rCxt.out().println("Not concrete: "+fact);
@@ -299,6 +290,97 @@ public class RulesLib {
         out.flush();
         //iter = Iter.debug(iter);
         return iter;
+    }
+
+//    /**
+//     * Intensional rules = occurs in the head of a rule. Returns a set of Triples with
+//     * "canonical relations": ANY for variables.
+//     */
+//    public static Set<Rel> intensionalRelations(Collection<Rule> rules) {
+//        return heads(rules);
+//    }
+//
+//    private static Set<Rel> heads(Collection<Rule> rules) {
+//        return rules.stream().map(r -> r.getHead()).map(t -> unvar(t)).collect(Collectors.toSet());
+//    }
+//
+//    /** Extensional relationship = relation occurring only in the body of rules. */
+//    public static Set<Rel> extensionalRelations(Collection<Rule> rules) {
+//        Set<Rel> headRel = heads(rules);
+//        // Body rules filtered by head relationships.
+//        return canonicalBodyRelationships(rules).filter(t -> !headRel.contains(t)).collect(Collectors.toSet());
+//    }
+//
+//    /** The body relationships, with variables as ANY */
+//    private static Stream<Rel> canonicalBodyRelationships(Collection<Rule> rules) {
+//        return rules.stream().flatMap(r -> r.getBody().stream()).map(RuleOps::unvar);
+//    }
+//
+//    private static Function<Node, Node> fUnvar = (n) -> (n.isVariable() ? Node.ANY : n);
+//
+//    /** {@link Rel} with ANY, not variables. */
+//    public static Rel unvar(Rel r) {
+//        if ( r.getTuple().stream().allMatch(RuleOps::check) )
+//            return r ;
+//        // Tuple::map??
+//        List<Node> x = r.getTuple().stream().map(n->fUnvar.apply(n)).collect(Collectors.toList());
+//        return new Rel(r.getName(), TupleFactory.create(x));
+//    }
+//
+//    private static boolean check(Node node) {
+//        return Node.ANY.equals(node) || node.isConcrete();
+//    }
+//
+
+    /** Return the rules that have a head clause that provides the given relation. */
+    public static Collection<Rule> provides(Rel rel, Iterable<Rule> rules) {
+        List<Rule> array = new ArrayList<>();
+        // find all rules in the RuleSet that provide the rule
+        // XXX EFFICENCY NEEDED
+        for ( Rule r : rules ) {
+            if ( provides(rel, r.getHead()) ) {
+                array.add(r);
+            }
+        }
+        return array;
+    }
+
+    /**
+     * Does {@code target} help to solve {@code src}? True if the relation names
+     * match, the arities match, and arguments match.
+     */
+    public static boolean provides(Rel target, Rel src) {
+        Objects.requireNonNull(target);
+        Objects.requireNonNull(src);
+        if ( ! target.getName().equals(src.getName()) )
+            return false;
+        Tuple<Node> tTarget = target.getTuple();
+        Tuple<Node> tSrc = src.getTuple();
+        if ( tTarget.len() != tSrc.len() )
+            return false;
+        for ( int i = 0 ; i < tTarget.len() ; i++ ) {
+            Node targetNode = tTarget.get(i);
+            Node srcNode = tSrc.get(i);
+            if ( ! provides(targetNode, srcNode) )
+                return false;
+        }
+        return true;
+    }
+
+    /**
+     * Does {@code srcNode} (arg2) provide for {@code targetNode}.
+     * <ul>
+     * <li>Both variables.
+     * <li>Target is a variable and src is a constant
+     * <li>Target is a constant and src is a variable
+     * <li>Same constants
+     * </ul>
+     */
+    private static boolean provides(Node targetNode, Node srcNode) {
+        if ( targetNode.isVariable() || srcNode.isVariable() )
+            return true;
+        // Ground terms match.
+        return targetNode.equals(srcNode) ;
     }
 
 }

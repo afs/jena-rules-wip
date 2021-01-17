@@ -30,10 +30,9 @@ import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap ;
 import org.apache.jena.ext.com.google.common.collect.Multimap ;
 import org.seaborne.jena.rules.Rel ;
 import org.seaborne.jena.rules.RelStore ;
-import org.seaborne.jena.rules.RelStoreAcc;
 
 /**
- * Simple {@link RelStore}, uses a Multimap of rule name to
+ * Simple mutable {@link RelStore}, uses a Multimap of rule name to
  * Useful as an independent implementation for testing.
  */
 public class RelStoreAccSimple extends RelStoreBase implements RelStoreAcc {

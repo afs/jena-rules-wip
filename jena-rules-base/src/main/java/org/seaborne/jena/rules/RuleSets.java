@@ -22,7 +22,7 @@ import org.seaborne.jena.rules.lang.RulesParser;
 
 public class RuleSets {
 
-    /** RDFS, without axioms */
+    /** RDFS, without axioms. */
     public static RuleSet rulesRDFSjenaMin() {
         return rules(
             // Domain and range
@@ -50,7 +50,7 @@ public class RuleSets {
         return RulesParser.rules(xs);
     }
 
-    /** RDFS, without axioms, or subCLass/subproperty of self. */
+    /** RDFS, without axioms, or subClass/subproperty of self. */
     public static RuleSet rulesRDFSbasic() {
         return rules(
             ""

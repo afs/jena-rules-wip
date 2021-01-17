@@ -27,10 +27,12 @@ import java.util.stream.Stream;
 
 import org.apache.jena.atlas.lib.CollectionUtils;
 import org.apache.jena.atlas.lib.StreamOps;
+import org.seaborne.jena.rules.exec.Renamer;
+import org.seaborne.jena.rules.exec.RuleOps;
 
 public class RuleSet implements Iterable<Rule>{
     private final List<Rule> rules ;
-    private final List<Rule> unvarRules;
+    private final List<Rule> execRules;
 
     public static class Builder {
         private final List<Rule> accRules =  new ArrayList<>() ;
@@ -55,7 +57,7 @@ public class RuleSet implements Iterable<Rule>{
 
         public RuleSet build() {
             List<Rule> rules = new ArrayList<>(this.accRules);
-            return new RuleSet(rules);
+            return new RuleSet(rules, Renamer.rename("v", rules));
         }
     }
 
@@ -66,16 +68,26 @@ public class RuleSet implements Iterable<Rule>{
     public static RuleSet create(Rule ... rules) {
         return new Builder().add(rules).build();
     }
+//
+//    private RuleSet(Collection<Rule> rules) {
+//        this(rules, Renamer.rename("v", rules));
+//    }
 
-    private RuleSet(List<Rule> rules) {
-        this.rules = Collections.unmodifiableList(new ArrayList<>(rules));
-        this.unvarRules = Collections.unmodifiableList
-            (rules.stream().sequential()
-             .map(r -> unvar(r))
-             .collect(Collectors.toList()) );
+    private RuleSet(List<Rule> rules, List<Rule> execRules) {
+        this.rules = rules;
+        this.execRules = execRules;
     }
 
-    public List<Rule> asList() {
+    /**
+     * Return a list of rules where the variables are unique across rules.
+     * This is required for some algorithms.
+     * This list aligns with the return from {@link #rules()} method.
+     */
+    public List<Rule> execRules() {
+        return execRules;
+    }
+
+    public List<Rule> rules() {
         return rules;
     }
 
@@ -123,19 +135,17 @@ public class RuleSet implements Iterable<Rule>{
         return stream().map(r -> r.getHead().getName()).collect(toList()) ;
     }
 
-    /** Intensional rules = occurs in the head of a rule.
-     * Returns a set of Triples with "canonical relations": ANY for variables.
-     */
-    public Set<Rel> getIntensional() {
-        //Re-unvars
-        return RuleOps.intensionalRelations(rules) ;
-    }
-
-    /** Extensional relationship = relation occurring only in the body of rules.*/
-    public Collection<Rel> getExtensional() {
-        //Re-unvars
-        return RuleOps.extensionalRelations(rules) ;
-    }
+//    /** Intensional rules = occurs in the head of a rule.
+//     * Returns a set of Triples with "canonical relations": ANY for variables.
+//     */
+//    public Set<Rel> getIntensional() {
+//        return RuleOps.intensionalRelations(rules) ;
+//    }
+//
+//    /** Extensional relationship = relation occurring only in the body of rules.*/
+//    public Collection<Rel> getExtensional() {
+//        return RuleOps.extensionalRelations(rules) ;
+//    }
 
 //    /** Rules that has concrete predicate that is also in some rule body.
 //     * These rules may trigger other rules.
@@ -145,56 +155,6 @@ public class RuleSet implements Iterable<Rule>{
 //        Stream<Node> bodyReln = stream().flatMap(r->r.getBody().stream()).map(t->t.getPredicate());
 //        return bodyReln.filter(headReln::contains).collect(toSet()) ;
 //    }
-//
-//    //NEEDS REWRITE
-//
-//    /** for each head predicate, the rule path of the loop (this is not equivalence classes) */
-//    public Map<Node, List<List<Rule>>> loopsChains() {
-//        // Inefficient.
-//        Collection<Node> loops = loops();
-//        Map<Node, List<List<Rule>>> results = new HashMap<>();
-//        loops.forEach(n->{
-//            Set<Node> visited = new HashSet<>();
-//            List<List<Rule>> chain = followChain(visited, n);
-//            results.put(n, chain);
-//        }) ;
-//        return results;
-//    }
-//
-//    private List<List<Rule>> followChain(Set<Node> visited, Node predicate) {
-//        //System.err.println("followChain p="+SSE.str(predicate)) ;
-//        List<Rule> heads = rules.stream().filter(r-> predicate.equals(r.getHead().getPredicate()) ).collect(toList());
-//        System.err.println("heads="+heads) ;
-//        List<List<Rule>> chains = new ArrayList<>();
-//        chains.add(heads);
-//        heads.forEach(r->{
-//            List<List<Rule>> chainsForRule = followChain(visited, r);
-//            chains.addAll(chainsForRule);
-//        }) ;
-//        return chains;
-//    }
-//
-//    private List<List<Rule>> followChain(Set<Node> visited, Rule rule) {
-//        //System.err.println("followChain r="+rule);
-//        // May branch!
-//        List<List<Rule>> chains = new ArrayList<>();
-//        for(Rel t: rule.getBody()) {
-//            Node p = t.getPredicate();
-//            if ( visited.contains(p) )
-//                continue;
-//            visited.add(p);
-//            List<List<Rule>> x = followChain(visited, p) ;
-//            if ( x.size() > 1 )
-//                // Clone and branch.s
-//                System.err.println("Warning branching chain: "+t);
-//            chains.addAll(x);
-//        }
-//        return chains ;
-//    }
-
-    public Collection<Rule> getAsUnvar() {
-        return unvarRules;
-    }
 
     //public void forEach(Consumer<? super Rule> action) { rules.forEach(action); }
 
@@ -220,10 +180,10 @@ public class RuleSet implements Iterable<Rule>{
         return sj.toString();
     }
 
-    // Convert a rule to use "any", not named variables.
-    private Rule unvar(Rule r) {
-        Rel h2 = RuleOps.unvar(r.getHead());
-        List<Rel> b2 = r.getBody().stream().map(RuleOps::unvar).collect(Collectors.toList());
-        return new Rule(h2, b2);
-    }
+//    // Convert a rule to use "any", not named variables.
+//    private Rule unvar(Rule r) {
+//        Rel h2 = RuleOps.unvar(r.getHead());
+//        List<Rel> b2 = r.getBody().stream().map(RuleOps::unvar).collect(Collectors.toList());
+//        return new Rule(h2, b2);
+//    }
 }

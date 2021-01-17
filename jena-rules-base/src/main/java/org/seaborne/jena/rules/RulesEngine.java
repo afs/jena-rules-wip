@@ -21,7 +21,6 @@ package org.seaborne.jena.rules;
 import java.util.stream.Stream;
 
 import migrate.binding.Binding;
-import org.seaborne.jena.rules.api.EngineType;
 
 public interface RulesEngine {
 

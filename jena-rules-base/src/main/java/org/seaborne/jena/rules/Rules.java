@@ -1,4 +1,4 @@
-package org.seaborne.jena.rules.api;
+package org.seaborne.jena.rules;
 
 import java.util.stream.Stream;
 
@@ -8,7 +8,6 @@ import org.apache.jena.atlas.io.IO;
 import org.apache.jena.atlas.lib.IRILib;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.sparql.util.Context;
-import org.seaborne.jena.rules.*;
 import org.seaborne.jena.rules.lang.RulesParser;
 import org.seaborne.jena.rules.store.RelStoreBuilder;
 import org.seaborne.jena.rules.store.RelStoreSimple;
@@ -72,7 +71,7 @@ public class Rules {
         return RulesGraphBuilder.create(type, ruleSet, baseData);
     }
 
-    /** Read file (or stdin) of rules */
+    /** Read a file of files. Use filename "-" for stdin. */
     public static RuleSet rules(String filename) {
         String baseIRI = null;
         if ( ! filename.equals("-") )

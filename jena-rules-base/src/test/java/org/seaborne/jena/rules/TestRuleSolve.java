@@ -32,9 +32,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.seaborne.jena.rules.api.EngineType;
-import org.seaborne.jena.rules.api.Rules;
-import org.seaborne.jena.rules.exec.BkdSolver;
+import org.seaborne.jena.rules.exec.sld.BkdSolver;
 
 /**
  * Tests of rule matching features, comparing to expected answers.

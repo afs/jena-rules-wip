@@ -16,43 +16,23 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules.naive;
+package org.seaborne.jena.rules.exec.sld;
 
-import java.util.stream.Stream;
+import org.seaborne.jena.rules.RelStore;
+import org.seaborne.jena.rules.RuleExecCxt;
+import org.seaborne.jena.rules.RuleSet;
+import org.seaborne.jena.rules.RulesEngine;
 
-import migrate.binding.Binding;
-import org.seaborne.jena.rules.*;
+public abstract class RulesEngineBkd implements RulesEngine {
 
-public abstract class RulesEngineFwd implements RulesEngine {
-
-    protected abstract RelStore generateInferred();
+    protected static RuleExecCxt rCxt = RuleExecCxt.global;
 
     protected final RelStore data;
-    protected final RelStore inferred;
-    protected final RelStore materialized;
     protected final RuleSet rules;
 
-    protected RulesEngineFwd(RelStore data, RuleSet rules) {
+    protected RulesEngineBkd(RelStore data, RuleSet rules) {
         this.data = data;
         this.rules = rules;
-        this.inferred = generateInferred();
-        this.materialized = RelStoreFactory.combine(data, inferred);
-    }
-
-    @Override
-    public Stream<Binding> solve(Rel query) {
-        Stream<Rel> matches = materialized.stream().filter(r -> RuleOps.provides(r, query));
-        return RulesLib.bindings(matches, query);
-    }
-
-    @Override
-    public Stream<Rel> stream() {
-        return inferred.stream();
-    }
-
-    @Override
-    public RelStore materialize() {
-        return materialized;
     }
 }
 

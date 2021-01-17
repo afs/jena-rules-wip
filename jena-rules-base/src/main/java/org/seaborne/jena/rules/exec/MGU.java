@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package org.seaborne.jena.rules.exec;
 
 import static org.apache.jena.sparql.core.Var.isVar;
 
@@ -28,6 +28,7 @@ import migrate.binding.BindingFactory;
 import migrate.binding.Sub;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
+import org.seaborne.jena.rules.Rel;
 
 public class MGU {
 

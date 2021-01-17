@@ -16,18 +16,13 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules.api;
+package org.seaborne.jena.rules;
 
 import org.apache.jena.graph.Graph;
 import org.apache.jena.sparql.util.Context;
-import org.apache.jena.sparql.util.Symbol;
-import org.seaborne.jena.rules.RelStore;
-import org.seaborne.jena.rules.RuleSet;
-import org.seaborne.jena.rules.RulesEngine;
-import org.seaborne.jena.rules.RulesException;
-import org.seaborne.jena.rules.exec.RulesEngineSLD_NR;
 import org.seaborne.jena.rules.exec.RulesGraph;
-import org.seaborne.jena.rules.naive.RuleEngineNaive;
+import org.seaborne.jena.rules.exec.naive.RuleEngineNaive;
+import org.seaborne.jena.rules.exec.sld.RulesEngineSLD_NR;
 import org.seaborne.jena.rules.store.RelStoreGraph;
 
 /**
@@ -42,10 +37,12 @@ public class RulesGraphBuilder {
     /** Use {@link Rules#create()} */
     RulesGraphBuilder() {}
 
-    public RulesGraphBuilder set(Symbol symbol, Object value) {
-        ensureContext();
-        return this;
-    }
+//    /** Set an option in the context */
+//    public RulesGraphBuilder set(Symbol symbol, Object value) {
+//        ensureContext();
+//        context.set(symbol, value);
+//        return this;
+//    }
 
     public RulesGraphBuilder baseGraph(Graph graph) {
         this.baseGraph = graph;
@@ -76,7 +73,7 @@ public class RulesGraphBuilder {
         Context cxt = context;
         if ( cxt == null )
             context = Rules.getContext();
-
+        // XXX Context
         EngineType type = (this.engineType != null) ? this.engineType : EngineType.BKD_NON_RECURSIVE_SLD;
         RelStore edb = new RelStoreGraph(baseGraph);
         RulesEngine engine = create(type, ruleSet, edb);

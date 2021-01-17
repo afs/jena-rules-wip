@@ -16,22 +16,15 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules.exec;
+module org.seaborne.jena.rules {
+    exports org.seaborne.jena.rules;
+    exports migrate.binding;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.seaborne.jena.rules.Rel;
-
-public abstract class V {
-    public enum Op { AND, OR }
-    List<V> elts = new ArrayList<V>();
-
-    public void add(Rel rel) {
-    }
-
-    public void add(V elt) {
-        elts.add(elt);
-    }
+    requires transitive org.apache.jena.arq;
+    requires transitive org.apache.jena.base;
+    requires transitive org.apache.jena.core;
+    requires transitive org.apache.jena.iri;
+    requires transitive org.apache.jena.ext.com.google;
+    requires transitive org.apache.jena.shacl;
+    requires org.slf4j;
 }
-

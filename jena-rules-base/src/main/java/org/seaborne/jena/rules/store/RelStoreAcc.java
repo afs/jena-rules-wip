@@ -16,11 +16,14 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package org.seaborne.jena.rules.store;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.jena.atlas.iterator.Iter;
+import org.seaborne.jena.rules.Rel;
+import org.seaborne.jena.rules.RelStore;
 
 /** Mutable {@link RelStore} */
 public interface RelStoreAcc extends RelStore {
@@ -36,6 +39,10 @@ public interface RelStoreAcc extends RelStore {
     public boolean isUpdateable();
 
     public void add(Rel rel);
+
+    public default void add(Collection<Rel> data) {
+        data.stream().forEach(this::add);
+    }
 
     public default void add(RelStore data) {
         data.stream().forEach(this::add);
