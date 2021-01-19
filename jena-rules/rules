@@ -1,0 +1,6 @@
+#!/bin/bash
+
+CP="$(jena CP)"
+CP="target/classes:target/test-classes:$CP"
+
+exec java -cp "$CP" org.seaborne.jena.rules.cmds.rules "$@"
