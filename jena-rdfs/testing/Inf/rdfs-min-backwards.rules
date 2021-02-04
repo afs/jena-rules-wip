@@ -1,0 +1,46 @@
+-> table(rdfs:subClassOf).
+-> table(rdfs:subPropertyOf).
+
+# RDFS with no axioms
+# Subclass, subproperty range and domain only.
+# Backwards rules.
+
+# RDFS with no axioms
+# Subclass, subproperty range and domain only.
+
+[rdfs2:  (?x rdf:type ?c) <- (?x ?p ?y), (?p rdfs:domain ?c) ]
+
+[rdfs3:  (?y rdf:type ?c) <- (?x ?p ?y), (?p rdfs:range ?c) ]
+
+[rdfs5a: (?a rdfs:subPropertyOf ?c) <- 
+	     (?a rdfs:subPropertyOf ?b) , notEqual(?a, ?b) , 
+	     (?b rdfs:subPropertyOf ?c) , notEqual(?b, ?c) , notEqual(?a, ?c) ]
+
+# [rdfs5b: (?a rdfs:subPropertyOf ?a) <- (?a rdf:type rdf:Property) ]
+
+[rdfs6:  (?a ?q ?b) <- (?a ?p ?b), (?p rdfs:subPropertyOf ?q) , notEqual(?p,?q) ]
+
+# [rdfs7:  (?a rdfs:subClassOf ?a) <- (?a rdf:type rdfs:Class) ]
+
+[rdfs8:  (?a rdfs:subClassOf ?c) <- 
+	     (?a rdfs:subClassOf ?b) , notEqual(?a, ?b) ,
+             (?b rdfs:subClassOf ?c) , notEqual(?b, ?c) , notEqual(?a, ?c) ]
+
+[rdfs9:  (?a rdf:type ?y) <- (?x rdfs:subClassOf ?y),  notEqual(?x,?y) , (?a rdf:type ?x) ]
+
+# Ways classes can be mentioned.
+# rdf:type      rdfs:range  rdfs:Class
+# rdfs:domain   rdfs:range  rdfs:Class
+# rdfs:range    rdfs:range  rdfs:Class
+# These replace (rdfs:range rdfs:range rdfs:Class) which combines with 
+# rdfs7: (?a rdf:type rdfs:Class) ]
+
+[rdfsX2: (?T rdfs:subClassOf ?T )  <- (?a rdf:domain ?T ) ]
+
+[rdfsX3: (?T rdfs:subClassOf ?T )  <- (?a rdf:range ?T ) ]
+
+[rdfsX4: (?a rdfs:subClassOf ?a )  <- (?a rdfs:subClassOf ?b ) , notEqual(?a,?b) ]
+[rdfsX5: (?b rdfs:subClassOf ?b )  <- (?a rdfs:subClassOf ?b ) , notEqual(?a,?b) ]
+
+[rdfsX6: (?a rdfs:subPropertyOf ?a ) <- (?a rdfs:subPropertyOf ?b ) , notEqual(?a,?b) ]
+[rdfsX7: (?b rdfs:subPropertyOf ?b ) <- (?a rdfs:subPropertyOf ?b ) , notEqual(?a,?b) 
