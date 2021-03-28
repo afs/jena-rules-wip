@@ -21,19 +21,19 @@ package org.seaborne.jena.rules.exec;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import migrate.binding.Binding;
-import migrate.binding.Sub;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.graph.impl.GraphMatcher;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.graph.GraphWrapper;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.util.iterator.WrappedIterator;
 import org.seaborne.jena.rules.Rel;
 import org.seaborne.jena.rules.RulesEngine;
+import org.seaborne.jena.rules.Sub;
 
 public class RulesGraph extends GraphWrapper {
 

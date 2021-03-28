@@ -21,10 +21,10 @@ package org.seaborne.jena.rules.cmds;
 import java.io.IOException;
 import java.io.InputStream;
 
-import jena.cmd.CmdGeneral;
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.atlas.lib.IRILib;
+import org.apache.jena.cmd.CmdGeneral;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.shacl.vocabulary.SHACL;
 import org.apache.jena.sys.JenaSystem;

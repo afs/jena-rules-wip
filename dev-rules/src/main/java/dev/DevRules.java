@@ -25,16 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import migrate.binding.Binding;
-import migrate.binding.Sub;
 import org.apache.jena.atlas.lib.StreamOps;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.sse.SSE;
 import org.seaborne.jena.rules.*;
-import org.seaborne.jena.rules.cmds.rules;
 import org.seaborne.jena.rules.exec.MGU;
 import org.seaborne.jena.rules.exec.Renamer;
 import org.seaborne.jena.rules.lang.RulesParser;
@@ -78,47 +77,21 @@ public class DevRules {
      *
      * { ?s ?p ?o } <= { ?s ?p ?o . FILTER ( ?o = 5 ) }
      *
-     * { ?s :p ?o1 . ?s :p ?o2 } <- [ ?s ?o1 ?o2 ] <- { ?s ?p ?o . FILTER ( ?o = 5 ) . BIND(2 AS ?o1) . BIND (3 AS ?o3) }
+     * { :s :p1 ?o1 . :s :p2 ?o2 .} <- [ ?o1 ?o2 ] <- { :s ?p ?o . FILTER ( ?o = 5 ) . BIND(1 AS ?o1) . BIND(4 AS ?o2) }
      *
      * BIND in result?
      * Rule -> result -> bind -> triples.
      * Rule -> result :: datalog
      * Output rules: not part of solving.
      * (?s ?p ?o) -> { BIND ... ?s ?p ?o }
-     *
      */
 
     public static void main(String...a) {
-        rules.main("rules.txt");
-        //main0();
+        //rules.main("rules.txt");
+        main0();
     }
 
     public static void main0(String...a) {
-
-        if ( false )
-        {
-            // TestRuleGraph.query_two_rules*
-            // Check for rules run.
-
-            String relStoreStr = "(:s :p :x) (:x :q :o)";
-            RelStore baseData = RulesParser.parseData(relStoreStr);
-            RuleSet ruleSet = RulesParser.rules(
-                "(?s1 :r ?o1) <- (?s1 :q ?o1)",
-                "(?s2 :r ?o2) <- (?s2 :p ?o2)",
-                "(:X :P :Z) <- (?s3 :r ?x) (?x :r ?o3)");
-            String queryStr = "(:X :P :Z)";
-            //String queryStr = "(?a ?b ?c)";
-
-            Rel queryRel = RulesParser.parseAtom(queryStr);
-
-//            //RuleExecCxt.global.TRACE = true ;
-//            execAsQuery(relStoreStr, ruleSetStr, EngineType.FWD_NAIVE, queryStr);
-            //RuleExecCxt.global.TRACE = true ;
-            execAsQuery(baseData, ruleSet, EngineType.BKD_NON_RECURSIVE_SLD, queryRel);
-
-            System.out.println("DONE");
-            System.exit(0);
-        }
 
         if ( true )
         {
@@ -147,63 +120,25 @@ public class DevRules {
             RelStore m = engine.materialize();
             m.stream().forEach(System.out::println);
             System.out.println("DONE");
-            System.exit(0);
+            //System.exit(0);
+            System.out.println();
         }
 
+        // execAsGraph
+        if ( true )
+        {
+            Graph baseGraph = SSE.parseGraph("(graph (:s :p :x) (:x :q :o))");
+            //Graph baseGraph = SSE.parseGraph("(graph)");
+            RuleSet ruleSet = RulesParser.rules("(:X :P :Z) <-");
 
-//        if ( true )
-//        {
-//            // TestRuleGraph.query_two_rules* as query
-//            // Check for rules run.
-//
-//            String relStoreStr = "";
-//            RelStore baseData = RulesParser.parseData(relStoreStr);
-//            RuleSet ruleSet = RulesParser.rules(
-//                "(:s :p :x)"
-//                );
-//            //String queryStr = "(:X :P :Z)";
-//            // VARIABLES IN ANSWER.
-//            String queryStr = "(?a ?b ?c)";
-//
-//            Rel queryRel = RulesParser.parseAtom(queryStr);
-//
-//            //RuleExecCxt.global.TRACE = true ;
-//            execAsQuery(baseData, ruleSet, EngineType.FWD_NAIVE, queryRel);
-//            System.out.println("------------");
-//            RuleExecCxt.global.TRACE = true ;
-//            execAsQuery(baseData, ruleSet, EngineType.BKD_NON_RECURSIVE_SLD, queryRel);
-//
-//            System.out.println("DONE");
-//            System.exit(0);
-//        }
-//
-//        if ( true )
-//        {   // TestRuleQuery.query99
-//            // Need constants in rule to set query.
-//            RelStore baseData = RulesParser.parseData("(:s :p :o)");
-//            RuleSet ruleSet = RulesParser.rules("(:s :q ?o) <- (:s :p ?o)");
-//            Rel queryRel = RulesParser.parseAtom("(?a ?b ?c)");
-//            RuleExecCxt.global.DEBUG = true ;
-//            execAsQuery(baseData, ruleSet, EngineType.BKD_NON_RECURSIVE_SLD, queryRel);
-//            System.out.println("DONE");
-//            System.exit(0);
-//        }
-//
-//        // execAsGraph
-//        if ( false )
-//        {
-//            Graph baseGraph = SSE.parseGraph("(graph (:s :p :x) (:x :q :o))");
-//            //Graph baseGraph = SSE.parseGraph("(graph)");
-//            RuleSet ruleSet = RulesParser.rules("(:X :P :Z) <-");
-//
-//            String queryTripleStr = "(:X :P ?A)";
-//            Triple queryTriple = SSE.parseTriple(queryTripleStr);
-//            //RuleExecCxt.global.DEBUG = true ;
-//            execAsGraph(baseGraph, ruleSet, EngineType.BKD_NON_RECURSIVE_SLD, queryTriple);
-//
-//            System.out.println("DONE");
-//            System.exit(0);
-//        }
+            String queryTripleStr = "(:X :P ?A)";
+            Triple queryTriple = SSE.parseTriple(queryTripleStr);
+            //RuleExecCxt.global.DEBUG = true ;
+            execAsGraph(baseGraph, ruleSet, EngineType.BKD_NON_RECURSIVE_SLD, queryTriple);
+
+            System.out.println("DONE");
+            System.exit(0);
+        }
 
         System.out.println("** NOTHING **");
         System.exit(0);
@@ -262,8 +197,6 @@ public class DevRules {
 //        RelStore actual = Rules.eval(data, ruleSet, , query);
 //        System.out.println(actual);
     }
-
-
 
     // ---- Exec functions
 

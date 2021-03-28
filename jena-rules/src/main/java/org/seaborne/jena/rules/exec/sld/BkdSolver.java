@@ -26,10 +26,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 
-import migrate.binding.Binding;
-import migrate.binding.BindingBuilder;
-import migrate.binding.BindingFactory;
-import migrate.binding.Sub;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.InternalErrorException;
 import org.apache.jena.atlas.lib.tuple.Tuple;
@@ -175,7 +174,7 @@ public class BkdSolver {
 
         Function<Var,Node> headProject = mapRelFromTo(rCxt, rule.getHead(), pattern1);
         Function<Binding, Binding> resultMapper = b1 -> {
-            BindingBuilder builder = BindingFactory.create(b1);
+            BindingBuilder builder = Binding.builder(b1);
             Iterator<Var> vIter = mgu.vars();
             for (; vIter.hasNext(); ) {
                 Var v = vIter.next();

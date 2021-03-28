@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package migrate.binding;
+package org.seaborne.jena.rules;
 
 import static java.util.stream.Collectors.toList;
 
@@ -25,11 +25,9 @@ import java.util.List;
 import org.apache.jena.atlas.lib.tuple.TupleFactory;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
-import org.apache.jena.graph.Node_Triple;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Var;
-import org.seaborne.jena.rules.Rel;
-import org.seaborne.jena.rules.Rule;
+import org.apache.jena.sparql.engine.binding.Binding;
 
 public class Sub {
 
@@ -44,7 +42,7 @@ public class Sub {
 
     /** Substitute for variables in a {@link Rel} */
     public static Rel substitute(Binding binding, Rel rel) {
-        // XXX Don't create new object if no change. 
+        // XXX Don't create new object if no change.
         if ( binding.isEmpty() )
             return rel;
         int N = rel.getTuple().len();
@@ -66,7 +64,7 @@ public class Sub {
         if ( node.isConcrete() )
             return node;
         // Node_Triple with variables.
-        Triple triple = Node_Triple.triple(node);
+        Triple triple = node.getTriple();
         Node s = triple.getSubject();
         Node p = triple.getPredicate();
         Node o = triple.getObject();

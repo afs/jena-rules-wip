@@ -20,11 +20,10 @@ package dev;
 
 import java.util.Objects;
 
-import migrate.binding.Binding;
-import migrate.binding.BindingBuilder;
-import migrate.binding.BindingFactory;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.seaborne.jena.rules.Rel;
 
 public class RelMap {
@@ -65,7 +64,7 @@ public class RelMap {
         if ( ! rel1.getName().equals(rel2.getName()) )
             return null;
         int N = rel1.len();
-        BindingBuilder builder = BindingFactory.create();
+        BindingBuilder builder = Binding.builder();
 
         for ( int i = 0 ; i < N ; i++ ) {
             Node n1 = rel1.get(i);

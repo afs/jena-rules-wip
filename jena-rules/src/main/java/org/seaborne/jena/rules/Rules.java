@@ -2,11 +2,10 @@ package org.seaborne.jena.rules;
 
 import java.util.stream.Stream;
 
-import migrate.binding.Binding;
-import migrate.binding.Sub;
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.atlas.lib.IRILib;
 import org.apache.jena.graph.Graph;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.util.Context;
 import org.seaborne.jena.rules.lang.RulesParser;
 import org.seaborne.jena.rules.store.RelStoreSimple;

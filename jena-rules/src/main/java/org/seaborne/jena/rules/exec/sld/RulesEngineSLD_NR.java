@@ -22,9 +22,8 @@ import java.util.Iterator;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import migrate.binding.Binding;
-import migrate.binding.Sub;
 import org.apache.jena.atlas.iterator.Iter;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.seaborne.jena.rules.*;
 
 /** Non-recursive SLR Resolution */

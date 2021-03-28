@@ -25,9 +25,8 @@ import static org.seaborne.jena.rules.RuleTestLib.ruleSet;
 
 import java.util.Iterator;
 
-import migrate.binding.Binding;
-import migrate.binding.Sub;
 import org.apache.jena.atlas.iterator.Iter;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

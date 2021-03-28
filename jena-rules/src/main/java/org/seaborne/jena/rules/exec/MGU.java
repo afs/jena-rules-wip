@@ -22,13 +22,12 @@ import static org.apache.jena.sparql.core.Var.isVar;
 
 import java.util.Objects;
 
-import migrate.binding.Binding;
-import migrate.binding.BindingBuilder;
-import migrate.binding.BindingFactory;
-import migrate.binding.Sub;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.seaborne.jena.rules.Rel;
+import org.seaborne.jena.rules.Sub;
 
 public class MGU {
 
@@ -89,7 +88,7 @@ public class MGU {
         if ( ! rel1.getName().equals(rel2.getName()) )
             return null;
         int N = rel1.len();
-        BindingBuilder map = BindingFactory.create();
+        BindingBuilder map = Binding.builder();
         // Constants
         for ( int i = 0 ; i < N ; i++ ) {
             Node n1 = rel1.get(i);
@@ -171,7 +170,7 @@ public class MGU {
         if ( ! rel1.getName().equals(rel2.getName()) )
             return null;
         int N = rel1.len();
-        BindingBuilder map = BindingFactory.create();
+        BindingBuilder map = Binding.builder();
         for ( int i = 0 ; i < N ; i++ ) {
             Node n1 = rel1.get(i);
             Node n2 = rel2.get(i);
@@ -218,7 +217,7 @@ public class MGU {
         }
 
         // Fixup.
-        map.vars().forEachRemaining(v->{
+        map.vars1().forEachRemaining(v->{
             Node n = map.get(v);
             if ( Var.isVar(n) ) {
                 Node n2 = map.get(Var.alloc(n));
@@ -238,7 +237,7 @@ public class MGU {
         if ( ! rel1.getName().equals(rel2.getName()) )
             return null;
         int N = rel1.len();
-        BindingBuilder map = BindingFactory.create();
+        BindingBuilder map = Binding.builder();
         for ( int i = 0 ; i < N ; i++ ) {
             Node n1 = rel1.get(i);
             Node n2 = rel2.get(i);
@@ -264,7 +263,7 @@ public class MGU {
         }
 
         // Fixup A.
-        map.vars().forEachRemaining(v->{
+        map.vars1().forEachRemaining(v->{
             Node n = map.get(v);
             if ( Var.isVar(n) ) {
                 Node n2 = map.get(Var.alloc(n));
@@ -285,7 +284,7 @@ public class MGU {
         if ( ! rel1.getName().equals(rel2.getName()) )
             return null;
         int N = rel1.len();
-        BindingBuilder map = BindingFactory.create();
+        BindingBuilder map = Binding.builder();
         for ( int i = 0 ; i < N ; i++ ) {
             Node n1 = rel1.get(i);
             Node n2 = rel2.get(i);
@@ -372,7 +371,7 @@ public class MGU {
             return null;
         int N = rel1.len();
 
-        BindingBuilder map = BindingFactory.create();
+        BindingBuilder map = Binding.builder();
 
         // The first step. E is these two Node[] and this does the first loop iteration.
         Node[] t1 = new Node[N];

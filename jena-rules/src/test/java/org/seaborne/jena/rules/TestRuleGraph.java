@@ -25,11 +25,10 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.stream.Stream;
 
-import migrate.binding.Binding;
-import migrate.binding.Sub;
 import org.apache.jena.atlas.lib.StreamOps;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.sse.SSE;
 import org.junit.Test;
 import org.junit.runner.RunWith;

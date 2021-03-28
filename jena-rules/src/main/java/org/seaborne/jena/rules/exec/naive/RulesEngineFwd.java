@@ -20,7 +20,7 @@ package org.seaborne.jena.rules.exec.naive;
 
 import java.util.stream.Stream;
 
-import migrate.binding.Binding;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.seaborne.jena.rules.*;
 import org.seaborne.jena.rules.exec.RuleOps;
 

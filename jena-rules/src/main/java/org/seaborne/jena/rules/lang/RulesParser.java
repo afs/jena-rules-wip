@@ -23,6 +23,9 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
+import org.apache.jena.irix.IRIs;
+import org.apache.jena.irix.IRIx;
+import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.riot.RIOT;
 import org.apache.jena.riot.system.*;
 import org.apache.jena.shacl.vocabulary.SHACL;
@@ -132,9 +135,11 @@ public class RulesParser {
     }
 
     private static <X> X parse$(RulesJavacc parser, Context context, ParserAction<X> action, String baseURI, PrefixMap prefixMap) {
+        IRIx base = (baseURI!=null) ? IRIs.reference(baseURI) : null;
+        IRIxResolver resolver = IRIxResolver.create(base).resolve(true).allowRelative(false).build();
         ParserProfile profile = new ParserProfileStd(RiotLib.factoryRDF(),
                                                      ErrorHandlerFactory.errorHandlerStd,
-                                                     IRIResolver.create(baseURI),
+                                                     resolver,
                                                      prefixMap,
                                                      context, false, false);
         parser.setProfile(profile);

@@ -23,9 +23,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.function.BiFunction;
 
-import migrate.binding.Binding;
-import migrate.binding.BindingBuilder;
-import migrate.binding.BindingFactory;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.graph.Node;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.tokens.Token;
@@ -158,7 +157,7 @@ public class TestMGU {
         if ( outcome == null )
             return null;
         Tokenizer tok = TokenizerText.fromString(outcome);
-        BindingBuilder builder = BindingFactory.create();
+        BindingBuilder builder = Binding.builder();
         if ( ! tok.hasNext() )
             throw exception("No token") ;
         parseBinding(tok, builder);

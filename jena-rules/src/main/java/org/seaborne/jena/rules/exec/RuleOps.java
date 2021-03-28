@@ -24,10 +24,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import migrate.binding.Binding;
-import migrate.binding.BindingBuilder;
-import migrate.binding.BindingFactory;
-import migrate.binding.Sub;
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.StreamOps;
@@ -41,6 +37,9 @@ import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingBuilder;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
 import org.apache.jena.sparql.engine.iterator.QueryIterTriplePattern;
 import org.seaborne.jena.rules.*;
@@ -121,7 +120,7 @@ public class RuleOps {
         // Do as much work outside the function as possible.
         Tuple<Node> patternTuple = pattern.getTuple();
         Tuple<Var> vars = map(patternTuple, n -> (Var.isVar(n))?Var.alloc(n):null);
-        BindingBuilder b = BindingFactory.create(parent);
+        BindingBuilder b = Binding.builder(parent);
 
         Function<Rel, Binding> m = r->{
             b.reset();
@@ -194,7 +193,7 @@ public class RuleOps {
 
     // RulesLib.mapper except immediate.
     private static Binding solutions(Rel rel, Binding input, Rel match) {
-        BindingBuilder soln = BindingFactory.create(input);
+        BindingBuilder soln = Binding.builder(input);
         int N = rel.getTuple().len();
         for(int i = 0 ; i < N ;i++ ) {
             Node x = rel.getTuple().get(i);
