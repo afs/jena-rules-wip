@@ -15,7 +15,7 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf_rdfs.engine;
+package org.seaborne.jena.inf_rdfs.zero;
 
 import java.util.Objects;
 import java.util.Set;
@@ -26,6 +26,8 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_Node;
+
+// [RDFS] Delete
 
 /**
  * Apply a fixed set of inference rules to a triple.
@@ -39,10 +41,10 @@ import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_Node;
  * <li>rdfs:domain</li>
  * <li>rdfs:range</li>
  * </ul>
- * Usage: {@link #process(Node, Node, Node)}, which calls an action ({@link StreamTriple})
+ * Usage: {@link #process(Node, Node, Node)}, which calls an action ({@code Consumer<Triple>})
  */
 
-public class StreamInfEngineRDFS {
+public class StreamInfEngineRDFS_0 {
     // Core of streaming
     // Needed? Library-isz?
 
@@ -59,9 +61,9 @@ public class StreamInfEngineRDFS {
     static final Node rdfsRange         = RDFS.range.asNode();
 
     private final SetupRDFS_Node setup;
-    private final StreamTriple delivery;
+    private final Consumer<Triple> delivery;
 
-    public StreamInfEngineRDFS(SetupRDFS_Node state, StreamTriple delivery) {
+    private StreamInfEngineRDFS_0(SetupRDFS_Node state, Consumer<Triple> delivery) {
         this.setup = Objects.requireNonNull(state);
         this.delivery = Objects.requireNonNull(delivery);
     }
@@ -73,8 +75,8 @@ public class StreamInfEngineRDFS {
         infer(triple.getSubject(), triple.getPredicate(), triple.getObject());
     }
 
-    public static void process(SetupRDFS_Node state, Node s, Node p, Node o, Consumer<Triple> action) {}
-    public void process(Node s, Node p, Node o, Consumer<Triple> action) {}
+//    public static void process(SetupRDFS_Node state, Node s, Node p, Node o, Consumer<Triple> action) {}
+//    public void process(Node s, Node p, Node o, Consumer<Triple> action) {}
 
     public void process(Node s, Node p, Node o) {
         // Output original.
@@ -108,7 +110,7 @@ public class StreamInfEngineRDFS {
     }
 
     protected void output(Triple triple) {
-        delivery.triple(triple);
+        delivery.accept(triple);
     }
 
     // Rule extracts from Jena's RDFS rules etc/rdfs.rules

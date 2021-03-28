@@ -26,8 +26,10 @@ import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.util.FileUtils;
-/** Test graphs that calculate on-demand */
+/** Test graphs  */
 public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
+    // [RDFS] As parameterized tests
+
     static final String DIR = "testing/Inf";
     static final String DATA_FILE = DIR+"/rdfs-data.ttl";
     static final String VOCAB_FILE = DIR+"/rdfs-vocab.ttl";
@@ -41,7 +43,7 @@ public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
         data = RDFDataMgr.loadGraph(DATA_FILE);
         infGraph = createRulesGraph(data, vocab, RULES_FILE);
     }
-    
+
     /** Create a Jena-rules backed graph */
     protected static Graph createRulesGraph(Graph data, Graph vocab, String rulesFile) {
         try {
@@ -54,11 +56,11 @@ public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
     }
 
     @Override
-    final 
+    final
     protected Graph getReferenceGraph() {
         return infGraph;
     }
-    
+
     @Override
     protected String getReferenceLabel() {
         return "InfGraph";

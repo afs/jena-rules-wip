@@ -17,55 +17,51 @@
 
 package org.seaborne.jena.inf_rdfs;
 
+import java.util.function.Consumer;
+
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFWrapper;
 import org.apache.jena.sparql.core.Quad;
-import org.seaborne.jena.inf_rdfs.engine.StreamInfEngineRDFS;
-import org.seaborne.jena.inf_rdfs.engine.StreamTriple;
-import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_Node;
+import org.seaborne.jena.inf_rdfs.engine.ApplyRDFS;
+import org.seaborne.jena.inf_rdfs.engine.Mappers;
 
 /**
  * A {@link StreamRDF} that applies RDFS to the stream.
  * <p>
- * It receive triples and quads (incoming because this is a StreamRDF);
- * applies RDFS;
- * output to the StreamRDF provided.
- * Stream output may include duplicates.
- * <p>
- *
+ * It receive triples and quads (incoming because this is a {@link StreamRDF}),
+ * applies RDFS,
+ * and outputs to the StreamRDF provided.
+ * The output stream may include duplicates.
  */
-public class InferenceStreamRDFS extends StreamRDFWrapper {
-    private final SetupRDFS_Node  rdfsSetup;
-    private final StreamInfEngineRDFS rdfs;
+public class InfStreamRDFS extends StreamRDFWrapper {
+    private final SetupRDFS<Node>     rdfsSetup;
+    private final ApplyRDFS<Node, Triple> rdfs;
     private final boolean includeInput = true;
 
     private Node currentGraph;
 
-
-    public InferenceStreamRDFS(final StreamRDF output, SetupRDFS_Node rdfsSetup) {
+    public InfStreamRDFS(final StreamRDF output, SetupRDFS<Node> rdfsSetup) {
         super(output);
         this.rdfsSetup = rdfsSetup;
-        this.rdfs = new StreamInfEngineRDFS(rdfsSetup, dest);
+        ApplyRDFS.Output<Node> proc = (s,p,o)->output.triple(Triple.create(s,p,o));
+        this.rdfs = new ApplyRDFS<>(rdfsSetup, Mappers.mapperNode, proc, proc);
     }
 
-    /**
-     * Handle triple.
-     */
-    private final StreamTriple dest = triple -> {
+    /** Triple output function. Send to StreamRDF. */
+    private final Consumer<Triple> dest = triple -> {
         if ( currentGraph == null )
             super.triple(triple);
         else
             super.quad(Quad.create(currentGraph, triple));
     };
-
     @Override
     public void triple(Triple triple) {
         if ( includeInput )
             super.triple(triple);
         currentGraph = null;
-        rdfs.process(triple.getSubject(), triple.getPredicate(), triple.getObject());
+        rdfs.infer(triple.getSubject(), triple.getPredicate(), triple.getObject());
     }
 
     @Override
@@ -74,7 +70,7 @@ public class InferenceStreamRDFS extends StreamRDFWrapper {
             super.quad(quad);
         // "currentGraph" passes through to RDFS output in dest(triple).
         currentGraph = quad.getGraph();
-        rdfs.process(quad.getSubject(), quad.getPredicate(), quad.getObject());
+        rdfs.infer(quad.getSubject(), quad.getPredicate(), quad.getObject());
         currentGraph = null;
     }
 }

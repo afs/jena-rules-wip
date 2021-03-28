@@ -18,27 +18,25 @@
 
 package org.seaborne.jena.inf_rdfs;
 
-import org.apache.jena.graph.Graph;
-public class TestGraphSplitRDFS extends AbstractTestGraphRDFS {
-    private Graph testGraph = null;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphWrapper;
 
-    public TestGraphSplitRDFS(){
-        testGraph = InfFactory.graphRDFS(data, vocab);
+public class DatasetGraphRDFS extends DatasetGraphWrapper {
+
+    public DatasetGraphRDFS(DatasetGraph dsg) {
+        super(dsg);
     }
 
-    @Override
-    protected boolean removeVocabFromReferenceResults() {
-        return true;
-    }
+//    containsGraph(Node)
+//    getDefaultGraph()
+//    getUnionGraph()
+//    getGraph(Node)
+//    listGraphNodes()
 
-    @Override
-    protected Graph getTestGraph() {
-        return testGraph;
-    }
-
-    @Override
-    protected String getTestLabel() {
-        return "Split data,vocab";
-    }
-
+//    find()
+//    find(Quad)
+//    find(Node, Node, Node, Node)
+//    findNG(Node, Node, Node, Node)
+//    contains(Quad)
+//    contains(Node, Node, Node, Node)
 }

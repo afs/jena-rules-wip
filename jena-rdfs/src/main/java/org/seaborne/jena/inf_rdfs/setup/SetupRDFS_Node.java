@@ -18,6 +18,7 @@
 package org.seaborne.jena.inf_rdfs.setup;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+
 /** RDFS setup in Node space */
 public class SetupRDFS_Node extends BaseSetupRDFS<Node> {
 

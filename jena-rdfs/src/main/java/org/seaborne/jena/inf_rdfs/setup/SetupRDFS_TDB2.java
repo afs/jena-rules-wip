@@ -34,19 +34,18 @@ public class SetupRDFS_TDB2 extends BaseSetupRDFS<NodeId>{
     }
 
     public SetupRDFS_TDB2(Graph vocab, DatasetGraph dsg, boolean incDerivedDataRDFS) {
-        
         super(vocab, incDerivedDataRDFS);
         this.dsgtdb =  TDBInternal.getDatasetGraphTDB(dsg);
         if ( dsgtdb == null )
             throw new IllegalArgumentException("Not a TDB2 DatasetGraph");
         this.nodetable = dsgtdb.getTripleTable().getNodeTupleTable().getNodeTable();
     }
-    
+
     @Override
     protected NodeId fromNode(Node node) {
         NodeId n = nodetable.getNodeIdForNode(node);
         if ( NodeId.isDoesNotExist(n) )
-            throw new TDBException("Called to provide a NodeId for a Node not in the dataset: "+n); 
+            throw new TDBException("Called to provide a NodeId for a Node not in the dataset: "+n);
         return n;
     }
 }

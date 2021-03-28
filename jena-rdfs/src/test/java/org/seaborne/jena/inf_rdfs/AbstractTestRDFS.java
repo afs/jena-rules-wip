@@ -21,11 +21,12 @@ import static org.seaborne.jena.inf_rdfs.engine.InfGlobal.rdfType;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.jena.atlas.io.IO;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.ListUtils;
 import org.apache.jena.atlas.lib.SetUtils;
 import org.apache.jena.graph.Graph;
@@ -115,15 +116,21 @@ public abstract class AbstractTestRDFS {
     protected void test(Node s, Node p, Node o) {
         Graph refGraph = getReferenceGraph();
         List<Triple> x0 = refGraph.find(s,p,o).toList();
+//        out.println("Data 1");
+//        x0 = print(out, x0);
+//        out.println("---");
+
         if ( removeVocabFromReferenceResults() )
             x0 = InfGlobal.removeRDFS(x0);
+
         List<Triple> x1 = findInTestGraph(s,p,o);
+
         boolean b = ListUtils.equalsUnordered(x0, x1);
         if ( ! b ) {
             out.println("Expected: find("+s+", "+p+", "+o+")");
-            print(out, x0);
+            x0 = print(out, x0);
             out.println("Got ("+getTestLabel()+"):");
-            print(out, x1);
+            x1 = print(out, x1);
             out.println();
             //out.println("Diff:");
             //printDiff(out, x0, x1);
@@ -133,7 +140,9 @@ public abstract class AbstractTestRDFS {
     }
 
     protected List<Triple> findInTestGraph(Node s, Node p, Node o) {
-        return getTestGraph().find(s,p,o).toList();
+        return getTestGraph()
+                .find(s,p,o)
+                .toList();
     }
 
     protected static Graph createRDFSGraph(Model data, Model vocab) {
@@ -174,16 +183,18 @@ public abstract class AbstractTestRDFS {
         out.println();
     }
 
-    static protected void print(PrintStream out, Collection<Triple> x) {
-        print(out, "  ", x);
+    static List<Triple> print(PrintStream out, List<Triple> x) {
+        return print(out, "  ", x);
     }
 
-    static protected void print(PrintStream out, String leader, Collection<Triple> x) {
-        if ( x.isEmpty() )
+    static List<Triple> print(PrintStream out, String leader, List<Triple> x) {
+        List<Triple> list = Iter.toList(x.iterator());
+
+        if ( list.isEmpty() )
             out.println(leader+"<empty>");
         else
-            x.stream().forEach(triple -> {out.println(leader+triple) ; });
+            list.stream().forEach(triple -> {out.println(leader+triple) ; });
+        return list;
     }
-
 }
 

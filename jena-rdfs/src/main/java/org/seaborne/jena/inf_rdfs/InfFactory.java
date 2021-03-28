@@ -17,9 +17,9 @@
 
 package org.seaborne.jena.inf_rdfs;
 import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.system.StreamRDF;
-import org.seaborne.jena.inf_rdfs.engine.SetupRDFS;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_Node;
 
 /** Factory for interference-related classes. */
@@ -40,7 +40,7 @@ public class InfFactory {
     }
 
     /** Create an {@link SetupRDFS} */
-    public static SetupRDFS_Node setupRDF(Graph vocab, boolean incDerivedDataRDFS) {
+    public static SetupRDFS<Node> setupRDF(Graph vocab, boolean incDerivedDataRDFS) {
         return new SetupRDFS_Node(vocab, incDerivedDataRDFS);
     }
 
@@ -49,7 +49,7 @@ public class InfFactory {
     //   split A-box, T-box but with derived RDFS from data
     // are not supported.
 
-    public static Graph graphRDFS(Graph data, SetupRDFS_Node setup) {
+    public static Graph graphRDFS(Graph data, SetupRDFS<Node> setup) {
         return new GraphRDFS(data, setup);
     }
 
@@ -65,7 +65,7 @@ public class InfFactory {
     }
 
     /** Expand a stream of RDF using RDFS */
-    public static StreamRDF infRDFS(StreamRDF data, SetupRDFS_Node setup) {
-        return new InferenceStreamRDFS(data, setup);
+    public static StreamRDF infRDFS(StreamRDF data, SetupRDFS<Node> setup) {
+        return new InfStreamRDFS(data, setup);
     }
 }

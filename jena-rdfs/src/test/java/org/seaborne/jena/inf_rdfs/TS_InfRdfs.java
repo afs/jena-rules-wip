@@ -25,6 +25,7 @@ import org.junit.runners.Suite;
     , TestGraphCombinedRDFS.class
     , TestExpandCombinedRDFS.class
     , TestExpandSplitRDFS.class
+    , TestInfStreamRDFS.class
 })
 
 public class TS_InfRdfs { }

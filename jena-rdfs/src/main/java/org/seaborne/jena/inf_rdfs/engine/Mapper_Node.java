@@ -16,34 +16,43 @@
  * limitations under the License.
  */
 
-package migrate.binding;
+package org.seaborne.jena.inf_rdfs.engine;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 
-/** Iterator of 1 objects */
-class Itr1<X> implements Iterator<X> {
-    // Same as Iter.singletonIterator but named for tracking and development usage.
-    private int idx;
-    private final X elt1;
-    Itr1(X x1) {
-        idx = 0;
-        elt1 = Objects.requireNonNull(x1);
+public class Mapper_Node implements MapperX<Node, Triple> {
+    static MapperX<Node, Triple> mapperSingleton = new Mapper_Node();
+
+    private Mapper_Node() {}
+
+    @Override
+    public Node fromNode(Node n) {
+        return n;
     }
 
     @Override
-    public boolean hasNext() {
-        return idx < 1;
+    public Node toNode(Node x) {
+        return x;
     }
 
     @Override
-    public X next() {
-        idx++;
-        if ( idx == 1 ) return elt1;
-        throw new NoSuchElementException();
+    public Node subject(Triple triple) {
+        return triple.getSubject();
     }
 
     @Override
-    public void remove() { throw new UnsupportedOperationException("Itr1.remove"); }
+    public Node predicate(Triple triple) {
+        return triple.getPredicate();
+    }
+
+    @Override
+    public Node object(Triple triple) {
+        return triple.getObject();
+    }
+
+    @Override
+    public Triple create(Node s, Node p, Node o) {
+        return Triple.create(s, p, o);
+    }
 }

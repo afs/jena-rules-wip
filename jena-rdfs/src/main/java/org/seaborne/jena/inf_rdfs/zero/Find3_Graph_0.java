@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf_rdfs.engine;
+package org.seaborne.jena.inf_rdfs.zero;
 
 import static org.seaborne.jena.inf_rdfs.engine.InfGlobal.rdfType;
 import static org.seaborne.jena.inf_rdfs.engine.InfGlobal.rdfsDomain;
@@ -34,18 +34,20 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.util.iterator.NullIterator;
+import org.seaborne.jena.inf_rdfs.engine.MatchGraph;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_Node;
 
-public class Find3_Graph implements StreamGraph<Triple, Node> {
+public class Find3_Graph_0 implements MatchGraph<Node, Triple> {
     private final Graph graph;
     private final SetupRDFS_Node setup;
-    public Find3_Graph(SetupRDFS_Node setup, Graph graph) {
+
+    public Find3_Graph_0(SetupRDFS_Node setup, Graph graph) {
         this.setup = setup;
         this.graph = graph;
     }
 
     @Override
-    public Stream<Triple> find(Node s, Node p, Node o) {
+    public Stream<Triple> match(Node s, Node p, Node o) {
         // Quick route to conversion.
         return find2(s,p,o);
     }
@@ -102,6 +104,7 @@ public class Find3_Graph implements StreamGraph<Triple, Node> {
     private Stream<Triple> find_subproperty(Node subject, Node predicate, Node object) {
         // Find with subproperty
         // We assume no subproperty of rdf:type
+
         Set<Node> predicates = setup.getSubProperties(predicate);
         if ( predicates == null || predicates.isEmpty() )
             return sourceFind(subject, predicate, object);
@@ -220,9 +223,6 @@ public class Find3_Graph implements StreamGraph<Triple, Node> {
 
     private Stream<Triple> find_ANY_ANY_ANY() {
         Stream<Triple> stream = sourceFind(Node.ANY, Node.ANY, Node.ANY);
-        // XXX Rewrite
-        //engine.process
-        // sequential.
         stream = inf(stream);
         if ( setup.includeDerivedDataRDFS() )
             stream = stream.distinct();
@@ -241,9 +241,8 @@ public class Find3_Graph implements StreamGraph<Triple, Node> {
         return stream;
     }
 
-    // Work round the fact can't write "setup" directly into applyInf (
-    private final StreamInfEngineRDFS engine(List<Triple> acc) {
-        return LibInf.engine(setup, acc);
+    private final ApplyRDFS_0 engine(List<Triple> acc) {
+        return new ApplyRDFS_0(setup, t->acc.add(t));
     }
 
     // Unlike LibInf.process, this is a fixed function create once when the class is instantiated.

@@ -15,7 +15,7 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf_rdfs.engine;
+package org.seaborne.jena.inf_rdfs;
 
 import java.util.Set;
 import org.apache.jena.graph.Node;

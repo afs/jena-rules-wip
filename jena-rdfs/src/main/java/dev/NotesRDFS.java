@@ -18,6 +18,33 @@
 package dev;
 
 public class NotesRDFS {
+    // Check and deal with:
+    // [RDFS]
+
+    // Remove _0's
+
+    // Replace.
+    // org.apache.jena.riot.process.inf
+
+    // Two engines:
+    //   Matcher (for find) : Find3_X
+    //   Streamer : StreamInEngine_X
+    //     SuperClass for holding setup + constants.
+    //     Or one engine_X
+
+    // Dataset, Find4.
+
+    // Review
+    //   Unnecessary Triple.create, other work.
+    //   Ca we use/share more between  StreamInf and Find3?
+
+    // StreamInf_X :: The expander.
+    //   Tests needed
+    // better than Find3 code? Unlikely but try pure StreamInfEngineRDFS/GraphRDFS
+
+    // OpExecutor version?
+
+
     // First - MVP - GraphRDFS working in Node space.
 
     // SetupRDFS - not <T>, have subclass to get that needed for Find3_X
@@ -25,7 +52,6 @@ public class NotesRDFS {
     // TODO: Other RDFS+
     //   rdfs:member
     //   list:member
-
 
      /* RDFS 3.0 / RDFS Plus /
      * http://www.w3.org/2009/12/rdf-ws/papers/ws31

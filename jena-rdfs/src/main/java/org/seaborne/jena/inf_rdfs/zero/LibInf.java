@@ -16,16 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf_rdfs.engine;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import org.apache.jena.graph.Triple;
-import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_Node;
+package org.seaborne.jena.inf_rdfs.zero;
 
 public class LibInf {
 //    /**
@@ -46,22 +37,4 @@ public class LibInf {
 //        engine.process(s, p, o);
 //    }
 
-    /**
-     * Create an {@link StreamInfEngineRDFS} that accumulates into {@code acc}.
-     */
-    public static StreamInfEngineRDFS engine(SetupRDFS_Node setup, Collection<Triple> acc) {
-        return new StreamInfEngineRDFS(setup, t->acc.add(t));
-    }
-
-    /**
-     * Create a function that maps a triple to a stream of triples (suitable for {@code Stream.flatMap}).
-     * Includes the original triple.
-     */
-    public static Function<Triple, Stream<Triple>> applyInf(SetupRDFS_Node setup) {
-        return triple-> {
-            List<Triple> x = new ArrayList<>();
-            engine(setup, x).process(triple);
-            return x.stream();
-        };
-    }
 }

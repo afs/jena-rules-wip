@@ -17,7 +17,7 @@
 
 package org.seaborne.jena.inf_rdfs;
 
-import java.util.Iterator;
+import java.util.stream.Stream;
 
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -25,22 +25,24 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.graph.GraphWrapper;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.util.iterator.WrappedIterator;
-import org.seaborne.jena.inf_rdfs.engine.Find3_Graph;
-import org.seaborne.jena.inf_rdfs.engine.SetupRDFS;
-import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_Node;
+import org.seaborne.jena.inf_rdfs.engine.Find3_Node;
+import org.seaborne.jena.inf_rdfs.engine.MatchGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
- * RDFS graph over a plain base graph.
+ * RDFS graph over a base graph.
  */
 public class GraphRDFS extends GraphWrapper {
     private static Logger log = LoggerFactory.getLogger(GraphRDFS.class);
-    private Find3_Graph fGraph;
-    private SetupRDFS<Node> setup;
-    public GraphRDFS(Graph graph, SetupRDFS_Node setup) {
+    private final MatchGraph<Node, Triple> source;
+    private final SetupRDFS<Node> setup;
+
+    public GraphRDFS(Graph graph, SetupRDFS<Node> setup) {
         super(graph);
         this.setup = setup;
-        this.fGraph = new Find3_Graph(setup, graph);
+        this.source = new Find3_Node(setup, graph);
+        //this.source = new Find3_Graph_0(setup, graph);
     }
 
     @Override
@@ -50,53 +52,17 @@ public class GraphRDFS extends GraphWrapper {
 
     @Override
     public ExtendedIterator<Triple> find(Node s, Node p, Node o) {
-        Iterator<Triple> iter = fGraph.find(s, p, o).iterator();
-        return WrappedIterator.create(iter);
+        Stream<Triple> stream = source.match(s, p, o);
+        ExtendedIterator<Triple> iter = WrappedIterator.ofStream(stream);
+        return iter;
     }
 
-    // This is a read-only RDFS "view".
-
-//
-//
-//    // Transactions.
-//
-//    // Contains
-//
-//    // isEmpty
-//
-//    // size (!!)
-//
-//    private boolean isSetup = false;
-//    private void change(Triple t) {}
-//    private void checkSetup() {
-//        //this.setup = new setup;
-//    }
-//
-// implements GraphWithPerform
-//    @Override
-//    public void performAdd(Triple t) {
-//        change(t);
-//        super.add(t);
-//    }
-//
-//    @Override
-//    public void performDelete(Triple t) {
-//        change(t);
-//        super.delete(t);
-//    }
-//
-//    @Override
-//    public void remove(Node s, Node p, Node o) {
-//        // Decompose.
-//        // Execute on base.
-//        super.remove(s, p, o);
-//    }
-//
-//    @Override
-//    public int size() {
-//        // Report the size of the underlying graph.
-//        return super.size();
-//    }
+    @Override
+    public int size() {
+        // Report the size of the underlying graph.
+        // Even better, don't ask.
+        return super.size();
+    }
 
     @Override
     public boolean dependsOn(Graph other) {

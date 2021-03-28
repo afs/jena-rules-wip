@@ -16,48 +16,11 @@
  * limitations under the License.
  */
 
-package migrate.binding;
-
-import java.util.Iterator;
-import java.util.Map;
+package org.seaborne.jena.inf_rdfs.engine;
 
 import org.apache.jena.graph.Node;
-import org.apache.jena.sparql.core.Var;
+import org.apache.jena.graph.Triple;
 
-/**
- * Implement {@link Binding} with a {@link Map}.
- */
-public class BindingOverMap extends BindingBase {
-
-    private final Map<Var, Node> map;
-
-    /*package*/BindingOverMap(Binding parent, Map<Var, Node> map) {
-        super(parent);
-        this.map = map;
-    }
-
-    @Override
-    protected Iterator<Var> vars1() {
-        return map.keySet().iterator();
-    }
-
-    @Override
-    protected boolean contains1(Var var) {
-        return map.containsKey(var);
-    }
-
-    @Override
-    protected Node get1(Var var) {
-        return map.get(var);
-    }
-
-    @Override
-    protected int size1() {
-        return map.size();
-    }
-
-    @Override
-    protected boolean isEmpty1() {
-        return map.isEmpty();
-    }
+public class Mappers {
+    public static MapperX<Node, Triple> mapperNode = Mapper_Node.mapperSingleton;
 }

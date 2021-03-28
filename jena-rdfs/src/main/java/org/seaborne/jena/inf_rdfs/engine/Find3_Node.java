@@ -16,36 +16,35 @@
  * limitations under the License.
  */
 
-package migrate.binding;
+package org.seaborne.jena.inf_rdfs.engine;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Objects;
+import java.util.stream.Stream;
 
-/** Iterator of 2 objects */
-class Itr2<X> implements Iterator<X> {
-    private int idx;
-    private final X elt1;
-    private final X elt2;
-    Itr2(X x1, X x2) {
-        idx = 0;
-        elt1 = Objects.requireNonNull(x1);
-        elt2 = Objects.requireNonNull(x2);
+import org.apache.jena.atlas.iterator.Iter;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.util.iterator.ExtendedIterator;
+import org.seaborne.jena.inf_rdfs.SetupRDFS;
+
+public class Find3_Node extends Find3_X<Node, Triple> {
+
+    private final Graph graph;
+
+    public Find3_Node(SetupRDFS<Node> setup, Graph graph) {
+        super(setup, Mappers.mapperNode);
+        this.graph = graph;
     }
 
     @Override
-    public boolean hasNext() {
-        return idx < 2;
+    public Stream<Triple> sourceFind(Node s, Node p, Node o) {
+        ExtendedIterator<Triple> iter = graph.find(s,p,o);
+        Stream<Triple> stream = Iter.asStream(iter);
+        return stream;
     }
 
     @Override
-    public X next() {
-        idx++;
-        if ( idx == 1 ) return elt1;
-        if ( idx == 2 ) return elt2;
-        throw new NoSuchElementException();
+    protected boolean contains(Node s, Node p, Node o) {
+        return graph.contains(s, p, o);
     }
-
-    @Override
-    public void remove() { throw new UnsupportedOperationException("Itr2.remove"); }
 }

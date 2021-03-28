@@ -16,33 +16,19 @@
  * limitations under the License.
  */
 
-package migrate.binding;
+package org.seaborne.jena.inf_rdfs.engine;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import org.apache.jena.graph.Node;
 
-/** Iterator of 0 objects */
-class Itr0<X> implements Iterator<X> {
-    // Same as Iter.nullIterator but named for tracking and development usage.
-    static Itr0<?> NULL = new Itr0<>();
-    @SuppressWarnings("unchecked")
-    public static <T> Iterator<T> itr0() {
-        return (Itr0<T>)NULL;
-    }
+public interface MapperX<X,T> {
+    public abstract X fromNode(Node n);
+    public abstract Node toNode(X x);
 
-    Itr0() {
-    }
+    //public abstract X graph(T tuple);
+    public abstract X subject(T tuple);
+    public abstract X predicate(T tuple);
+    public abstract X object(T tuple);
 
-    @Override
-    public boolean hasNext() {
-        return false;
-    }
+    public abstract T create(X s, X p, X o);
 
-    @Override
-    public X next() {
-        throw new NoSuchElementException();
-    }
-
-    @Override
-    public void remove() { throw new UnsupportedOperationException("Itr0.remove"); }
 }

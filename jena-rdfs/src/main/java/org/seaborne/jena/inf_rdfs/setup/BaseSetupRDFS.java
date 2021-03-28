@@ -17,19 +17,24 @@
 
 package org.seaborne.jena.inf_rdfs.setup;
 import java.util.*;
+
+import org.apache.jena.atlas.lib.InternalErrorException;
 import org.apache.jena.atlas.lib.StrUtils;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.*;
+import org.apache.jena.riot.other.G;
 import org.apache.jena.riot.other.Transitive;
+//import org.apache.jena.riot.other.Transitive;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.tdb2.store.NodeId;
-import org.seaborne.jena.inf_rdfs.engine.SetupRDFS;
+import org.seaborne.jena.inf_rdfs.SetupRDFS;
+import org.seaborne.jena.inf_rdfs.engine.InfGlobal;
 
 /**
- * Core datastructures needed for RDFS.
+ * Core datastructures needed for RDFS for one vocabulary.
  * To be general, this is in {@code <X>} space (e.g. {@link Node}, {@link NodeId}).
  */
 public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
@@ -59,6 +64,7 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
          "PREFIX  xsd:    <http://www.w3.org/2001/XMLSchema#>",
          "PREFIX  owl:    <http://www.w3.org/2002/07/owl#>",
          "PREFIX skos:    <http://www.w3.org/2004/02/skos/core#>");
+
 //    protected BaseInfSetupRDFS(Graph vocab) {
 //        this(vocab, false);
 //    }
@@ -67,16 +73,30 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
         includeDerivedDataRDFS$ = incDerivedDataRDFS;
         vocabGraph = vocab;
 
-        // Find super classes - uses property paths
-        exec("SELECT ?x ?y { ?x rdfs:subClassOf+ ?y }", vocab, superClasses, subClasses );
-        //execTransitive(vocab, InfGlobal.rdfsSubClassOf, superClasses, subClasses);
-        // Find properties
-        exec("SELECT ?x ?y { ?x rdfs:subPropertyOf+ ?y }", vocab, superProperties, subProperties);
-        //execTransitive(vocab, InfGlobal.rdfsSubPropertyOf, superProperties, subProperties );
+        // Calculate a different way and see if the answers are the same.
+        // [RDFS]
+        final boolean CHECK = true;
+
+        // Find super/sub classes
+        execTransitive(vocab, InfGlobal.rdfsSubClassOf, superClasses, subClasses);
+        if ( CHECK )
+            execCheck("rdfs:subClassOf+", vocab, superClasses, subClasses);
+
+        // Find super/sub properties
+        execTransitive(vocab, InfGlobal.rdfsSubPropertyOf, superProperties, subProperties);
+        if( CHECK )
+            execCheck("rdfs:subPropertyOf+", vocab, superProperties, subProperties);
+
         // Find domain
-        exec("SELECT ?x ?y { ?x rdfs:domain ?y }", vocab, propertyDomain, domainToProperty);
+        execSingle(vocab, InfGlobal.rdfsDomain, propertyDomain, domainToProperty);
+        if( CHECK )
+            execCheck("rdfs:domain", vocab, propertyDomain, domainToProperty);
+
         // Find range
-        exec("SELECT ?x ?y { ?x rdfs:range ?y }", vocab, propertyRange, rangeToProperty);
+        execSingle(vocab, InfGlobal.rdfsRange, propertyRange, rangeToProperty);
+        if ( CHECK )
+            execCheck("rdfs:range", vocab, propertyRange, rangeToProperty);
+
         // All mentioned classes
         classes.addAll(superClasses.keySet());
         classes.addAll(subClasses.keySet());
@@ -92,8 +112,19 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
         addKeysToValues(subPropertiesInc);
     }
 
+    protected abstract X fromNode(Node node);
+
+    private void execCheck(String path, Graph vocab, Map<X, Set<X>> supers, Map<X, Set<X>> subs) {
+        Map<X, Set<X>> mSupers         = new HashMap<>();
+        Map<X, Set<X>> mSubs           = new HashMap<>();
+        String queryString = "SELECT ?x ?y { ?x "+path+" ?y }";
+        exec(queryString, vocab, mSupers, mSubs);
+        if ( ! mSupers.equals(supers) || ! mSubs.equals(subs) )
+            throw new InternalErrorException(path);
+    }
+
     /** Calculate super/sub mapping */
-    protected void execTransitive(Graph vocab, Node property, Map<X, Set<X>> superMap, Map<X, Set<X>> subMap) {
+    private void execTransitive(Graph vocab, Node property, Map<X, Set<X>> superMap, Map<X, Set<X>> subMap) {
         Map<Node, Collection<Node>> map = Transitive.transitive(vocab, property);
         map.forEach((n,c)->{
             c.forEach(nc->{
@@ -102,6 +133,17 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
                 put(superMap, a, b);
                 put(subMap, b, a);
             });
+        });
+    }
+
+    private void execSingle(Graph vocab, Node predicate, Map<X, Set<X>> propertyMap, Map<X, Set<X>> reversePropertyMap) {
+        G.find(vocab, Node.ANY, predicate, Node.ANY).forEach(t->{
+            Node s = t.getSubject();
+            Node o = t.getObject();
+            X a = fromNode(s);
+            X b = fromNode(o);
+            put(propertyMap, a, b);
+            put(reversePropertyMap, b, a);
         });
     }
 
@@ -118,26 +160,26 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
 
     private void exec(String qs, Graph graph, Map<X, Set<X>> multimap1, Map<X, Set<X>> multimap2) {
         Query query = QueryFactory.create(preamble + "\n" + qs, Syntax.syntaxARQ);
-        QueryExecution qexec = QueryExecutionFactory.create(query, DatasetGraphFactory.wrap(graph));
-        ResultSet rs = qexec.execSelect();
-        for ( ; rs.hasNext() ; ) {
-            Binding soln = rs.nextBinding();
-            Node x = soln.get(Var.alloc("x"));
-            Node y = soln.get(Var.alloc("y"));
-            X a = fromNode(x);
-            X b = fromNode(y);
-            put(multimap1, a, b);
-            put(multimap2, b, a);
+        try ( QueryExecution qexec = QueryExecutionFactory.create(query, DatasetGraphFactory.wrap(graph)) ) {
+            ResultSet rs = qexec.execSelect();
+            for ( ; rs.hasNext() ; ) {
+                Binding soln = rs.nextBinding();
+                Node x = soln.get(Var.alloc("x"));
+                Node y = soln.get(Var.alloc("y"));
+                X a = fromNode(x);
+                X b = fromNode(y);
+                put(multimap1, a, b);
+                put(multimap2, b, a);
+            }
         }
     }
 
-    /** Go from Node space to X space for a node that is in the RDFS vocabulary.
+    /**
+     * Go from Node space to X space for a node that is in the RDFS vocabulary.
      * This function is only passed Nodes that exist in the dataset.
      * Must not return null or "don't know".
-     * @param node
-     * @return
      */
-    protected abstract X fromNode(Node node);
+
     @Override
     public boolean includeDerivedDataRDFS() {
         return includeDerivedDataRDFS$;

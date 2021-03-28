@@ -18,6 +18,7 @@
 package dev;
 
 import static org.apache.jena.sparql.sse.SSE.str;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
@@ -47,9 +48,9 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.seaborne.jena.inf_rdfs.GraphRDFS;
 import org.seaborne.jena.inf_rdfs.InfFactory;
-import org.seaborne.jena.inf_rdfs.InferenceStreamRDFS;
+import org.seaborne.jena.inf_rdfs.InfStreamRDFS;
+import org.seaborne.jena.inf_rdfs.SetupRDFS;
 import org.seaborne.jena.inf_rdfs.engine.InfGlobal;
-import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_Node;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_TDB1;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_TDB2;
 
@@ -75,7 +76,6 @@ public class DevRDFS {
      * Do not make sense?
      * No vocab + include vocab infs
      * Include vocab + exclude vocab infs
-     *
      */
 
     /*
@@ -150,7 +150,7 @@ public class DevRDFS {
 //        RDFDataMgr.write(System.out, data, Lang.TTL);
         System.out.println("----");
 
-        SetupRDFS_Node setup = InfFactory.setupRDF(vocab.getGraph(), false);
+        SetupRDFS<Node> setup = InfFactory.setupRDF(vocab.getGraph(), false);
         Graph graph = InfFactory.graphRDFS(data.getGraph(), setup);
 
         Node n_a = SSE.parseNode(":a");
@@ -198,7 +198,7 @@ public class DevRDFS {
         Model data = RDFDataMgr.loadModel(DATA_FILE);
         String rules = FileUtils.readWholeFileAsUTF8(RULES_FILE);
         rules = rules.replaceAll("#[^\\n]*", "");
-        SetupRDFS_Node setup = InfFactory.setupRDF(vocab.getGraph(), false);
+        SetupRDFS<Node> setup = InfFactory.setupRDF(vocab.getGraph(), false);
         Reasoner reasoner = new GenericRuleReasoner(Rule.parseRules(rules));
         InfModel m = ModelFactory.createInfModel(reasoner, vocab, data);
         inf = m.getGraph();
@@ -236,10 +236,10 @@ public class DevRDFS {
         System.out.println("---- Expansion");
         // Expansion Graph
         Graph graphExpanded = Factory.createDefaultGraph();
-        SetupRDFS_Node setup = InfFactory.setupRDF(vocab.getGraph(), combined);
+        SetupRDFS<Node> setup = InfFactory.setupRDF(vocab.getGraph(), combined);
         StreamRDF stream = StreamRDFLib.graph(graphExpanded);
         // Apply inferences.
-        stream = new InferenceStreamRDFS(stream, setup);
+        stream = new InfStreamRDFS(stream, setup);
         sendToStream(data.getGraph(), stream);
         RDFDataMgr.write(System.out, graphExpanded, Lang.TTL);
     }

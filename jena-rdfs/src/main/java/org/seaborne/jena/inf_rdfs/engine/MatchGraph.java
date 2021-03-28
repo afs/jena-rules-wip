@@ -16,8 +16,10 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf_transitive;
+package org.seaborne.jena.inf_rdfs.engine;
 
-public class Here {
-    // Transitive
+import java.util.stream.Stream;
+
+public interface MatchGraph<X, T> {
+    Stream<T> match(X s, X p, X o);
 }

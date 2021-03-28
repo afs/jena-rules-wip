@@ -15,7 +15,7 @@
  *  information regarding copyright ownership.
  */
 
-package org.seaborne.jena.inf_rdfs.engine;
+package org.seaborne.jena.inf_rdfs.zero;
 
 //import java.util.Collection;
 //import java.util.HashSet;
@@ -26,7 +26,7 @@ package org.seaborne.jena.inf_rdfs.engine;
 //import org.apache.jena.graph.Node;
 //import org.apache.jena.graph.Triple;
 /** 
- * Apply an {@link StreamInfEngineRDFS} to various ways triples are grouped together. 
+ * Apply an {@link ApplyRDFS_0} to various ways triples are grouped together. 
  */
 public class LibInfRDFS {
 //    // XXX Needed??

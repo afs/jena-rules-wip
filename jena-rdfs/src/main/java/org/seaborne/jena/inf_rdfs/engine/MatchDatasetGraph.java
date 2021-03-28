@@ -20,7 +20,6 @@ package org.seaborne.jena.inf_rdfs.engine;
 
 import java.util.stream.Stream;
 
-interface StreamGraph<Y, X> {
-    // Stream?
-    Stream<Y> find(X s, X p, X o);
+public interface MatchDatasetGraph<X, T> {
+    Stream<T> match(X g, X s, X p, X o);
 }
