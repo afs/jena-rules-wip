@@ -28,7 +28,7 @@ import org.seaborne.jena.inf_rdfs.SetupRDFS;
  * Provides common constant terms and common accessor functions for triples/quads/tuples.
  */
 
-/*package*/ abstract class CxtInf<X,T> {
+/*package*/ class CxtInf<X,T> {
     public final X ANY;
     public final X rdfType;
     public final X rdfsSubClassOf;
@@ -49,16 +49,6 @@ import org.seaborne.jena.inf_rdfs.SetupRDFS;
         this.rdfsSubPropertyOf = mapper.fromNode(InfGlobal.rdfsSubPropertyOf);
     }
 
-    // Sort names
-    protected X fromNode(Node n)        { return mapper.fromNode(n); }
-    protected Node toNode(X x)          { return mapper.toNode(x); }
-
-    //private abstract X graph(T tuple);
-    protected X subject(T tuple)        { return mapper.subject(tuple); }
-    protected X predicate(T tuple)      { return mapper.predicate(tuple); }
-    protected X object(T tuple)         { return mapper.object(tuple); }
-    protected T create(X s, X p, X o)   { return mapper.create(s, p, o); }
-
     protected X any(X x) {
         return ( x == null ) ? ANY : x;
     }
@@ -70,7 +60,4 @@ import org.seaborne.jena.inf_rdfs.SetupRDFS;
     protected boolean isTerm(X x) {
         return !isANY(x);
     }
-
-
-
 }

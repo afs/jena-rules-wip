@@ -18,33 +18,44 @@
 
 package org.seaborne.jena.inf_rdfs.engine;
 
+import java.util.Iterator;
 import java.util.stream.Stream;
 
 import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.util.iterator.ExtendedIterator;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.Quad;
 import org.seaborne.jena.inf_rdfs.SetupRDFS;
 
-public class Find3_Node extends Find3_X<Node, Triple> {
+/**
+ * Find in one graph of a dataset.
+ */
 
-    private final Graph graph;
+public class InfFindQuad extends MatchRDFS<Node, Quad> {
 
-    public Find3_Node(SetupRDFS<Node> setup, Graph graph) {
-        super(setup, Mappers.mapperNode);
-        this.graph = graph;
+    private final DatasetGraph dsg;
+    private Node graph;
+
+    public InfFindQuad(SetupRDFS<Node> setup, Node g, DatasetGraph dsg) {
+        super(setup, Mappers.mapperQuad(g));
+        this.graph = g ;
+        this.dsg = dsg;
     }
 
     @Override
-    public Stream<Triple> sourceFind(Node s, Node p, Node o) {
-        ExtendedIterator<Triple> iter = graph.find(s,p,o);
-        Stream<Triple> stream = Iter.asStream(iter);
+    public Stream<Quad> sourceFind(Node s, Node p, Node o) {
+        Iterator<Quad> iter = dsg.find(graph, s,p,o);
+        Stream<Quad> stream = Iter.asStream(iter);
         return stream;
     }
 
     @Override
-    protected boolean contains(Node s, Node p, Node o) {
-        return graph.contains(s, p, o);
+    protected boolean sourceContains(Node s, Node p, Node o) {
+        return dsg.contains(graph, s, p, o);
+    }
+
+    @Override
+    protected Quad dstCcreate(Node s, Node p, Node o) {
+        return Quad.create(graph, s, p, o);
     }
 }

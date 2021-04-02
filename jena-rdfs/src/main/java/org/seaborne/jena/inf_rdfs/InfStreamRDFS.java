@@ -26,6 +26,7 @@ import org.apache.jena.riot.system.StreamRDFWrapper;
 import org.apache.jena.sparql.core.Quad;
 import org.seaborne.jena.inf_rdfs.engine.ApplyRDFS;
 import org.seaborne.jena.inf_rdfs.engine.Mappers;
+import org.seaborne.jena.inf_rdfs.engine.Output;
 
 /**
  * A {@link StreamRDF} that applies RDFS to the stream.
@@ -38,15 +39,18 @@ import org.seaborne.jena.inf_rdfs.engine.Mappers;
 public class InfStreamRDFS extends StreamRDFWrapper {
     private final SetupRDFS<Node>     rdfsSetup;
     private final ApplyRDFS<Node, Triple> rdfs;
+    private final Output<Node> outputTriple;
     private final boolean includeInput = true;
 
     private Node currentGraph;
+    private Output<Node> currentGraphOutput;
+    private ApplyRDFS<Node, Quad> rdfsQuad = null;
 
     public InfStreamRDFS(final StreamRDF output, SetupRDFS<Node> rdfsSetup) {
         super(output);
         this.rdfsSetup = rdfsSetup;
-        ApplyRDFS.Output<Node> proc = (s,p,o)->output.triple(Triple.create(s,p,o));
-        this.rdfs = new ApplyRDFS<>(rdfsSetup, Mappers.mapperNode, proc, proc);
+        outputTriple = (s,p,o)->output.triple(Triple.create(s,p,o));
+        this.rdfs = new ApplyRDFS<>(rdfsSetup, Mappers.mapperTriple());
     }
 
     /** Triple output function. Send to StreamRDF. */
@@ -60,17 +64,17 @@ public class InfStreamRDFS extends StreamRDFWrapper {
     public void triple(Triple triple) {
         if ( includeInput )
             super.triple(triple);
-        currentGraph = null;
-        rdfs.infer(triple.getSubject(), triple.getPredicate(), triple.getObject());
+        rdfs.infer(triple.getSubject(), triple.getPredicate(), triple.getObject(), outputTriple);
     }
 
     @Override
     public void quad(Quad quad) {
         if ( includeInput )
             super.quad(quad);
-        // "currentGraph" passes through to RDFS output in dest(triple).
-        currentGraph = quad.getGraph();
-        rdfs.infer(quad.getSubject(), quad.getPredicate(), quad.getObject());
-        currentGraph = null;
+        if ( currentGraph != quad.getGraph() ) {
+            currentGraph = quad.getGraph();
+            currentGraphOutput = (s,p,o)->Quad.create(currentGraph, s,p,o);
+        }
+        rdfs.infer(quad.getSubject(), quad.getPredicate(), quad.getObject(), currentGraphOutput);
     }
 }

@@ -29,6 +29,7 @@ import org.apache.jena.tdb.sys.TDBInternal;
 public class SetupRDFS_TDB1 extends BaseSetupRDFS<NodeId> {
     private final DatasetGraphTDB dsgtdb;
     private final NodeTable nodetable;
+
     public SetupRDFS_TDB1(Graph vocab, DatasetGraph dsg) {
         this(vocab, dsg, false);
     }

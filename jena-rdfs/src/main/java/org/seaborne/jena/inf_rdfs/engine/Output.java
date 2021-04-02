@@ -18,8 +18,6 @@
 
 package org.seaborne.jena.inf_rdfs.engine;
 
-import java.util.stream.Stream;
-
-public interface MatchDatasetGraph<X, T> {
-    Stream<T> match(X g, X s, X p, X o);
-}
+/** Deliver s, p, o */
+@FunctionalInterface
+public interface Output<X> { void action(X s, X p, X o); }

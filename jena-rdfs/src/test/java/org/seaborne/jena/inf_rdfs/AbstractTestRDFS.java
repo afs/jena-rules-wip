@@ -51,8 +51,6 @@ public abstract class AbstractTestRDFS {
     private static PrintStream      out = System.err;
     static Node node(String str) { return NodeFactory.createURI("http://example/"+str) ; }
 
-    // XXX Check this is coverage.
-
     @Test public void test_rdfs_01()        { test(node("a"), rdfType, null) ; }
     @Test public void test_rdfs_02()        { test(node("a"), rdfType, node("T2")) ; }
     @Test public void test_rdfs_03()        { test(null, rdfType, node("T2")) ; }
@@ -114,16 +112,12 @@ public abstract class AbstractTestRDFS {
     @Test public void test_rdfs_31()        { test(node("e"), node("r"), null) ; }
 
     protected void test(Node s, Node p, Node o) {
-        Graph refGraph = getReferenceGraph();
-        List<Triple> x0 = refGraph.find(s,p,o).toList();
-//        out.println("Data 1");
-//        x0 = print(out, x0);
-//        out.println("---");
+        List<Triple> x0 = findInGraph(getReferenceGraph(), s, p, o);
 
         if ( removeVocabFromReferenceResults() )
             x0 = InfGlobal.removeRDFS(x0);
 
-        List<Triple> x1 = findInTestGraph(s,p,o);
+        List<Triple> x1 = findInGraph(getTestGraph(), s, p, o);
 
         boolean b = ListUtils.equalsUnordered(x0, x1);
         if ( ! b ) {
@@ -139,10 +133,8 @@ public abstract class AbstractTestRDFS {
         Assert.assertTrue(getTestLabel(), b);
     }
 
-    protected List<Triple> findInTestGraph(Node s, Node p, Node o) {
-        return getTestGraph()
-                .find(s,p,o)
-                .toList();
+    protected List<Triple> findInGraph(Graph graph, Node s, Node p, Node o) {
+        return graph.find(s,p,o).toList();
     }
 
     protected static Graph createRDFSGraph(Model data, Model vocab) {
@@ -163,7 +155,7 @@ public abstract class AbstractTestRDFS {
         catch (IOException ex) { IO.exception(ex) ; return null ; }
     }
 
-    /** Indicate whether the vocabulary is visble in the answers */
+    /** Indicate whether the vocabulary is visible in the answers */
     protected abstract boolean removeVocabFromReferenceResults();
     /** Return the graph that gives the right answers */
     protected abstract Graph getReferenceGraph();
@@ -173,6 +165,7 @@ public abstract class AbstractTestRDFS {
     protected abstract String getReferenceLabel();
     /** Return a label for the graph under test */
     protected abstract String getTestLabel();
+
     static protected <X> void printDiff(PrintStream out, List<X> A, List<X> B) {
         A.stream().forEach(item -> out.println("1: "+item));
         B.stream().forEach(item -> out.println("2: "+item));

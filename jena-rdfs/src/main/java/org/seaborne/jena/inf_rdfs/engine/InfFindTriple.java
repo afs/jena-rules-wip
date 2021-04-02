@@ -18,41 +18,42 @@
 
 package org.seaborne.jena.inf_rdfs.engine;
 
+import java.util.stream.Stream;
+
+import org.apache.jena.atlas.iterator.Iter;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.util.iterator.ExtendedIterator;
+import org.seaborne.jena.inf_rdfs.SetupRDFS;
 
-public class Mapper_Node implements MapperX<Node, Triple> {
-    static MapperX<Node, Triple> mapperSingleton = new Mapper_Node();
+/**
+ * Find in one graph.
+ */
 
-    private Mapper_Node() {}
+public class InfFindTriple extends MatchRDFS<Node, Triple> {
 
-    @Override
-    public Node fromNode(Node n) {
-        return n;
+    private final Graph graph;
+
+    public InfFindTriple(SetupRDFS<Node> setup, Graph graph) {
+        super(setup, Mappers.mapperTriple());
+        this.graph = graph;
     }
 
     @Override
-    public Node toNode(Node x) {
-        return x;
+    public Stream<Triple> sourceFind(Node s, Node p, Node o) {
+        ExtendedIterator<Triple> iter = graph.find(s,p,o);
+        Stream<Triple> stream = Iter.asStream(iter);
+        return stream;
     }
 
     @Override
-    public Node subject(Triple triple) {
-        return triple.getSubject();
+    protected boolean sourceContains(Node s, Node p, Node o) {
+        return graph.contains(s, p, o);
     }
 
     @Override
-    public Node predicate(Triple triple) {
-        return triple.getPredicate();
-    }
-
-    @Override
-    public Node object(Triple triple) {
-        return triple.getObject();
-    }
-
-    @Override
-    public Triple create(Node s, Node p, Node o) {
+    protected Triple dstCcreate(Node s, Node p, Node o) {
         return Triple.create(s, p, o);
     }
 }

@@ -20,15 +20,12 @@ package org.seaborne.jena.inf_rdfs.engine;
 
 import org.apache.jena.graph.Node;
 
+/** Bridge between Node and X; 3-tuples and Triple/Quad */
 public interface MapperX<X,T> {
     public abstract X fromNode(Node n);
     public abstract Node toNode(X x);
 
-    //public abstract X graph(T tuple);
     public abstract X subject(T tuple);
     public abstract X predicate(T tuple);
     public abstract X object(T tuple);
-
-    public abstract T create(X s, X p, X o);
-
 }

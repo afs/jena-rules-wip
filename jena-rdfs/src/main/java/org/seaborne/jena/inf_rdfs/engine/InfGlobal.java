@@ -51,6 +51,9 @@ public class InfGlobal {
 
     private static Predicate<Triple> filterNotRDFS = filterRDFS.negate();
 
+    /**
+     * Remove triples with a predicate which is RDFS schema vocabulary.
+     */
     public static List<Triple> removeRDFS(List<Triple> x) {
         return StreamOps.toList(x.stream().filter(filterNotRDFS));
     }

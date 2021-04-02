@@ -58,6 +58,8 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
     private final Map<X, Set<X>> domainToProperty     = new HashMap<>();
     // Whether we include the RDFS data in the results (as if TBox (rules) and ABox (ground data) are one unit).
     private final boolean includeDerivedDataRDFS$;
+    private final boolean hasAnyRDFS;
+
     private static String preamble = StrUtils.strjoinNL
         ("PREFIX  rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
          "PREFIX  rdfs:   <http://www.w3.org/2000/01/rdf-schema#>",
@@ -75,7 +77,7 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
 
         // Calculate a different way and see if the answers are the same.
         // [RDFS]
-        final boolean CHECK = true;
+        final boolean CHECK = false;
 
         // Find super/sub classes
         execTransitive(vocab, InfGlobal.rdfsSubClassOf, superClasses, subClasses);
@@ -110,6 +112,8 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
         addKeysToValues(superPropertiesInc);
         deepCopyInto(subPropertiesInc, subProperties);
         addKeysToValues(subPropertiesInc);
+
+        hasAnyRDFS = hasClassDeclarations() || hasPropertyDeclarations() || hasRangeDeclarations() || hasDomainDeclarations();
     }
 
     protected abstract X fromNode(Node node);
@@ -241,6 +245,16 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
     }
 
     @Override
+    public boolean hasClassDeclarations() {
+        return ! subClasses.isEmpty();
+    }
+
+    @Override
+    public boolean hasPropertyDeclarations() {
+        return ! subProperties.isEmpty();
+    }
+
+    @Override
     public boolean hasRangeDeclarations() {
         return ! propertyRange.isEmpty();
     }
@@ -248,6 +262,11 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
     @Override
     public boolean hasDomainDeclarations() {
         return ! propertyDomain.isEmpty();
+    }
+
+    @Override
+    public boolean hasRDFS() {
+        return hasAnyRDFS;
     }
 
     @Override

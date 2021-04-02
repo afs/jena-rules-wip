@@ -16,10 +16,20 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf_rdfs.engine;
+package solver;
 
-import java.util.stream.Stream;
+import java.util.Iterator;
+import java.util.List;
 
-public interface MatchGraph<X, T> {
-    Stream<T> match(X s, X p, X o);
+import org.apache.jena.sparql.engine.iterator.Abortable;
+
+public class SolverLib {
+    public static <T> Iterator<T> makeAbortable(Iterator<T> iter, List<Abortable> killList)
+    {
+        if ( killList == null )
+            return iter;
+        IteratorAbortable<T> k = new IteratorAbortable<>(iter);
+        killList.add(k);
+        return k;
+    }
 }

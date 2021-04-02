@@ -25,8 +25,8 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.graph.GraphWrapper;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.util.iterator.WrappedIterator;
-import org.seaborne.jena.inf_rdfs.engine.Find3_Node;
-import org.seaborne.jena.inf_rdfs.engine.MatchGraph;
+import org.seaborne.jena.inf_rdfs.engine.InfFindTriple;
+import org.seaborne.jena.inf_rdfs.engine.MatchRDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,14 +35,13 @@ import org.slf4j.LoggerFactory;
  */
 public class GraphRDFS extends GraphWrapper {
     private static Logger log = LoggerFactory.getLogger(GraphRDFS.class);
-    private final MatchGraph<Node, Triple> source;
+    private final MatchRDFS<Node, Triple> source;
     private final SetupRDFS<Node> setup;
 
     public GraphRDFS(Graph graph, SetupRDFS<Node> setup) {
         super(graph);
         this.setup = setup;
-        this.source = new Find3_Node(setup, graph);
-        //this.source = new Find3_Graph_0(setup, graph);
+        this.source = new InfFindTriple(setup, graph);
     }
 
     @Override
@@ -55,6 +54,11 @@ public class GraphRDFS extends GraphWrapper {
         Stream<Triple> stream = source.match(s, p, o);
         ExtendedIterator<Triple> iter = WrappedIterator.ofStream(stream);
         return iter;
+    }
+
+    @Override
+    public Stream<Triple> stream(Node s, Node p, Node o) {
+        return source.match(s, p, o);
     }
 
     @Override

@@ -33,39 +33,61 @@ public interface SetupRDFS<T> {
      * Returns an empty set of there are no declared superclasses.
      */
     public Set<T> getSuperClasses(T elt);
+
     /** All super-types of an element, including the element itself */
     public Set<T> getSuperClassesInc(T elt);
+
     /** All sub-types of an element.  Does not include the element unless there is a cycle of length >1 */
     public Set<T> getSubClasses(T elt);
+
     /** All sub-types of an element, including the element itself */
     public Set<T> getSubClassesInc(T elt);
+
     /** All super-properties.  Does not include the property itself unless there is a cycle of length >1. */
     public Set<T> getSuperProperties(T elt);
+
     /** All super-properties including the property itself. */
     public Set<T> getSuperPropertiesInc(T elt);
+
     /** All sub-properties.  Does not include the property itself unless there is a cycle of length >1. */
     public Set<T> getSubProperties(T elt);
+
     /** All sub-properties including the property itself. */
     public Set<T> getSubPropertiesInc(T elt);
-    /** Does this setup have any range declarations? */
-    public boolean hasRangeDeclarations();
-    /** Does this setup have any domain declarations? */
-    public boolean hasDomainDeclarations();
+
     /** Get the range(s) of a property - only includes mentioned range types, not supertypes. */
     public Set<T> getRange(T elt);
+
     /** Get the domain(s) of a property - only includes mentioned domain types, not supertypes. */
     public Set<T> getDomain(T elt);
+
     /** Get the properties that directly mention 'type' as their range. */
     public Set<T> getPropertiesByRange(T elt);
+
     /** Get the properties that directly mention 'type' as their domain. */
     public Set<T> getPropertiesByDomain(T elt);
-    /** */
-    public boolean includeDerivedDataRDFS();
 
-//    /** Get the range(s) of a property including supertypes. */
-//    public Set<T> getRangeAll(T elt);
-//
-//    /** Get the domain(s) of a property including supertypes. */
-//    public Set<T> getDomainAll(T elt);
+    /** Does this setup have any class/subclass declarations? */
+    public boolean hasClassDeclarations();
+
+    /** Does this setup have any property/subproperty declarations? */
+    public boolean hasPropertyDeclarations();
+
+    /** Does this setup have any range declarations? */
+    public boolean hasRangeDeclarations();
+
+    /** Does this setup have any domain declarations? */
+    public boolean hasDomainDeclarations();
+
+    /** Does this setup have any RDFS? */
+    public boolean hasRDFS();
+
+    /**
+     * {@code incDerivedDataRDFS} causes the engine to look for RDFS relationships in the data
+     * as if TBox (rules) and ABox (ground data) are one unit.
+     * Set true if abox == tbox.
+     * Can choose false or true if abox != tbox.
+     */
+    public boolean includeDerivedDataRDFS();
 }
 

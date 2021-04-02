@@ -23,34 +23,56 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.seaborne.jena.inf_rdfs.SetupRDFS;
 
-/** WIP - Generalised */
-public abstract class Find3_X<X, T> extends CxtInf<X, T> implements MatchGraph<X, T> {
+/**
+ * Match a 3-tuple, which might have widlcards, applying a fixed set of inference rules.
+ * This class is the core machinery of matching data using an RDFS schema.
+ * This is inference on the A-Box (the data) with respect to a fixed T-Box
+ * (the vocabulary, ontology).
+ * <p>
+ * This class implements:
+ * <ul>
+ * <li>rdfs:subClassOf (transitive)</li>
+ * <li>rdfs:subPropertyOf (transitive)</li>
+ * <li>rdfs:domain</li>
+ * <li>rdfs:range</li>
+ * </ul>
+ *
+ * @see ApplyRDFS ApplyRDFS for the matching algorithm.
+ */
+public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
     private final Function<T,Stream<T>> applyInf;
 
-    public Find3_X(SetupRDFS<X> setup, MapperX<X,T> mapper) {
+    public MatchRDFS(SetupRDFS<X> setup, MapperX<X,T> mapper) {
         super(setup, mapper);
         this.applyInf = t-> {
+            // [RDFS]  Non-collecting stream engine. Replace?
             List<T> x = new ArrayList<>();
-            ApplyRDFS.Output<X> dest = (s,p,o) -> x.add(mapper.create(s,p,o));
-            ApplyRDFS<X, T> streamInf = new ApplyRDFS<>(setup, mapper, dest, dest);
-            // [RDFS] Non-collecting stream engine.
+            x.add(t);
+            Output<X> dest = (s,p,o) -> x.add(dstCcreate(s,p,o));
+            ApplyRDFS<X, T> streamInf = new ApplyRDFS<>(setup, mapper);
+            // [RDFS]
             // [RDFS] process(nc) or infer(exc)?
             //   process needed but infer+explicit current triple saves a create.
-            streamInf.process(mapper.subject(t), mapper.predicate(t), mapper.object(t));
+            streamInf.infer(mapper.subject(t), mapper.predicate(t), mapper.object(t), dest);
             return x.stream();
         };
     }
 
-    @Override
     public Stream<T> match(X s, X p, X o) { return matchWithInf(s, p ,o); }
 
-    protected abstract boolean contains(X s, X p, X o);
-
+    // Access data.
+    protected abstract boolean sourceContains(X s, X p, X o);
     protected abstract Stream<T> sourceFind(X s, X p, X o);
+    protected abstract T dstCcreate(X s, X p, X o);
+
+    protected final X subject(T tuple)        { return mapper.subject(tuple); }
+    protected final X predicate(T tuple)      { return mapper.predicate(tuple); }
+    protected final X object(T tuple)         { return mapper.object(tuple); }
 
     private Stream<T> matchWithInf(X _subject, X _predicate, X _object) {
         //log.info("find("+_subject+", "+_predicate+", "+_object+")");
@@ -107,35 +129,27 @@ public abstract class Find3_X<X, T> extends CxtInf<X, T> implements MatchGraph<X
         for ( X p : predicates ) {
             Stream<T> stream = sourceFind(subject, p, object);
             // Rewrite with predicate
-            stream = stream.map(tuple -> create(subject(tuple), predicate, object(tuple)) );
+            stream = stream.map(tuple -> dstCcreate(subject(tuple), predicate, object(tuple)) );
             tuples = Stream.concat(tuples, stream);
         }
         return tuples;
     }
 
-//    private Iterator<T> singletonIterator(X s, X p, X o) {
-//        return new SingletonIterator<>(create(s, p, o));
-//    }
-//
-//    private Iterator<T> nullIterator() {
-//        return new NullIterator<>();
-//    }
-
     private Stream<T> find_X_type_T(X subject, X object) {
-        if ( contains(subject, rdfType, object) )
-            return Stream.of(create(subject, rdfType, object));
+        if ( sourceContains(subject, rdfType, object) )
+            return Stream.of(dstCcreate(subject, rdfType, object));
         Set<X> types = new HashSet<>();
         accTypesRange(types, subject);
         if ( types.contains(object) )
-            return Stream.of(create(subject, rdfType, object));
+            return Stream.of(dstCcreate(subject, rdfType, object));
         accTypesDomain(types, subject);
         if ( types.contains(object) )
-            return Stream.of(create(subject, rdfType, object));
+            return Stream.of(dstCcreate(subject, rdfType, object));
         accTypes(types, subject);
         // expand supertypes
         types = superTypes(types);
         if ( types.contains(object) )
-            return Stream.of(create(subject, rdfType, object));
+            return Stream.of(dstCcreate(subject, rdfType, object));
         return Stream.empty();
     }
 
@@ -146,7 +160,7 @@ public abstract class Find3_X<X, T> extends CxtInf<X, T> implements MatchGraph<X
         accTypes(types, subject);
         // expand supertypes
         types = superTypes(types);
-        return types.stream().map( type -> create(subject, rdfType, type));
+        return types.stream().map( type -> dstCcreate(subject, rdfType, type));
     }
 
     private Stream<T> find_ANY_type_T(X type) {
@@ -160,9 +174,8 @@ public abstract class Find3_X<X, T> extends CxtInf<X, T> implements MatchGraph<X
     }
 
     private Stream<T> find_ANY_type_ANY() {
-        // Better?
+        // XXX Better?
         // Duplicates?
-        // XXX InferenceProcessorStreamRDFS as a stream
         Stream<T> stream = sourceFind(ANY, ANY, ANY);
         stream = infFilter(stream, null, rdfType, null);
         return stream;
@@ -224,14 +237,16 @@ public abstract class Find3_X<X, T> extends CxtInf<X, T> implements MatchGraph<X
     }
 
     private Stream<T> infFilter(Stream<T> stream, X subject, X predicate, X object) {
-        // XXX Rewrite ??
         stream = inf(stream);
-        if ( isTerm(predicate) )
-            stream = stream.filter(triple -> predicate(triple).equals(predicate));
-        if ( isTerm(object) )
-            stream = stream.filter(triple -> object(triple).equals(object));
-        if ( isTerm(subject) )
-            stream = stream.filter(triple -> subject(triple).equals(subject));
+        boolean check_s = isTerm(subject);
+        boolean check_p = isTerm(predicate);
+        boolean check_o = isTerm(object);
+        Predicate<T> filter = triple ->{
+            return (! check_s || subject(triple).equals(subject)) &&
+                   (! check_p || predicate(triple).equals(predicate)) &&
+                   (! check_o || object(triple).equals(object)) ;
+        };
+        stream = stream.filter(filter);
         return stream;
     }
 
@@ -243,7 +258,7 @@ public abstract class Find3_X<X, T> extends CxtInf<X, T> implements MatchGraph<X
     private void accInstances(Set<T> tuples, Set<X> types, X requestedType) {
         for ( X type : types ) {
             Stream<T> stream = sourceFind(ANY, rdfType, type);
-            stream.forEach(triple -> tuples.add(create(subject(triple), rdfType, requestedType)) );
+            stream.forEach(triple -> tuples.add(dstCcreate(subject(triple), rdfType, requestedType)) );
         }
     }
 
@@ -254,7 +269,7 @@ public abstract class Find3_X<X, T> extends CxtInf<X, T> implements MatchGraph<X
                 continue;
             predicates.forEach(p -> {
                 Stream<T> stream = sourceFind(ANY, p, ANY);
-                stream.forEach(triple -> tuples.add(create(subject(triple), rdfType, requestedType)) );
+                stream.forEach(triple -> tuples.add(dstCcreate(subject(triple), rdfType, requestedType)) );
             });
         }
     }
@@ -266,7 +281,7 @@ public abstract class Find3_X<X, T> extends CxtInf<X, T> implements MatchGraph<X
                 continue;
             predicates.forEach(p -> {
                 Stream<T> stream = sourceFind(ANY, p, ANY);
-                stream.forEach(triple -> tuples.add(create(object(triple), rdfType, requestedType)) );
+                stream.forEach(triple -> tuples.add(dstCcreate(object(triple), rdfType, requestedType)) );
             });
         }
     }

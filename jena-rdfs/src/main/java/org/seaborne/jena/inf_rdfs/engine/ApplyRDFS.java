@@ -17,13 +17,13 @@
 
 package org.seaborne.jena.inf_rdfs.engine;
 
-import java.util.Objects;
 import java.util.Set;
 
 import org.seaborne.jena.inf_rdfs.SetupRDFS;
 
 /**
  * Apply a fixed set of inference rules to a 3-tuple.
+ * This class is the core machinery of stream expansion of a data stream using an RDFS schema.
  * This is inference on the A-Box (the data) with respect to a fixed T-Box
  * (the vocabulary, ontology).
  * <p>
@@ -34,23 +34,16 @@ import org.seaborne.jena.inf_rdfs.SetupRDFS;
  * <li>rdfs:domain</li>
  * <li>rdfs:range</li>
  * </ul>
+ *
+ * @see MatchRDFS MatchRDFS for the matching algorithm.
  */
 
 public class ApplyRDFS<X, T> extends CxtInf<X,T>{
     // [RDFS] javadoc
     // Expanded in X space.
 
-    private final Output<X> deliveryProcessed;
-    private final Output<X> deliveryInferred;
-
-    public interface Output<X> { void action(X x1, X x2, X x3); }
-
-    public ApplyRDFS(SetupRDFS<X> setup, MapperX<X, T> mapper,
-                        Output<X> deliveryProcessed,
-                        Output<X> deliveryInferred) {
+    public ApplyRDFS(SetupRDFS<X> setup, MapperX<X, T> mapper) {
         super(setup, mapper);
-        this.deliveryProcessed = Objects.requireNonNull(deliveryProcessed);
-        this.deliveryInferred = Objects.requireNonNull(deliveryInferred);
     }
 
     // TODO: ?? Other RDFS+
@@ -58,31 +51,29 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
     //   list:member
 
     /**
-     * Process a triple - output the triple and any inferred triples. See
-     * {@link #infer} for just the inferred triples.
+     * Apply RDFS rules based on the 3-tuple.
+     * This does not include the triple itself unless it is inferred.
      */
-    public void process(X s, X p, X o) {
-        // Output original.
-        deliveryProcessed.action(s, p, o);
-        infer(s, p, o);
+    public void infer(T tuple, Output<X> out) {
+        infer(mapper.subject(tuple), mapper.predicate(tuple), mapper.object(tuple), out);
     }
 
     /**
-     * Apply RDFS rules based on the triple; do not include the triple itself. See
-     * {@link #process} for output of this triple and the inferred triples.
+     * Apply RDFS rules based on the 3-tuple.
+     * This does not include the triple itself unless it is inferred.
      */
-    public void infer(X s, X p, X o) {
+    public void infer(X s, X p, X o, Output<X> out) {
         // Inferred.
-        subClass(s, p, o);
-        subProperty(s, p, o);
+        subClass(s, p, o, out);
+        subProperty(s, p, o, out);
         // domain() and range() also go through subclass processing.
-        domain(s, p, o);
-        range(s, p, o);
+        domain(s, p, o, out);
+        range(s, p, o, out);
     }
 
     /** Any triple derived is sent to this method. */
-    private void derive(X s, X p, X o) {
-        deliveryInferred.action(s, p, o);
+    private void derive(X s, X p, X o, Output<X> out) {
+        out.action(s,p,o);
     }
 
     // Rule extracts from Jena's RDFS rules etc/rdfs.rules
@@ -91,21 +82,21 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs8: (?a rdfs:subClassOf ?b), (?b rdfs:subClassOf ?c) -> (?a rdfs:subClassOf ?c)]
      * [rdfs9: (?x rdfs:subClassOf ?y), (?a rdf:type ?x) -> (?a rdf:type ?y)]
      */
-    private void subClass(X s, X p, X o) {
+    private void subClass(X s, X p, X o, Output<X> out) {
         if ( p.equals(rdfType) ) {
             Set<X> x = setup.getSuperClasses(o);
-            x.forEach(c -> derive(s, rdfType, c));
+            x.forEach(c -> derive(s, rdfType, c, out));
             if ( setup.includeDerivedDataRDFS() ) {
-                subClass(o, rdfsSubClassOf, o);    // Recurse
+                subClass(o, rdfsSubClassOf, o, out);    // Recurse
             }
         }
         if ( setup.includeDerivedDataRDFS() && p.equals(rdfsSubClassOf) ) {
             Set<X> superClasses = setup.getSuperClasses(o);
-            superClasses.forEach(c -> derive(o, p, c));
+            superClasses.forEach(c -> derive(o, p, c, out));
             Set<X> subClasses = setup.getSubClasses(o);
-            subClasses.forEach(c -> derive(c, p, o));
-            derive(s, p, s);
-            derive(o, p, o);
+            subClasses.forEach(c -> derive(c, p, o, out));
+            derive(s, p, s, out);
+            derive(o, p, o, out);
         }
     }
 
@@ -113,20 +104,20 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs5a: (?a rdfs:subPropertyOf ?b), (?b rdfs:subPropertyOf ?c) -> (?a rdfs:subPropertyOf ?c)]
      * [rdfs6: (?a ?p ?b), (?p rdfs:subPropertyOf ?q) -> (?a ?q ?b)]
      */
-    private void subProperty(X s, X p, X o) {
+    private void subProperty(X s, X p, X o, Output<X> out) {
         Set<X> x = setup.getSuperProperties(p);
-        x.forEach(p2 -> derive(s, p2, o));
+        x.forEach(p2 -> derive(s, p2, o, out));
         if ( setup.includeDerivedDataRDFS() ) {
             if ( ! x.isEmpty() )
-                subProperty(p, rdfsSubPropertyOf, p);
+                subProperty(p, rdfsSubPropertyOf, p, out);
             if ( p.equals(rdfsSubPropertyOf) ) {
                 // ** RDFS extra
                 Set<X> superProperties = setup.getSuperProperties(o);
-                superProperties.forEach( c -> derive(o, p, c));
+                superProperties.forEach( c -> derive(o, p, c, out));
                 Set<X> subProperties = setup.getSubProperties(o);
-                subProperties.forEach(c -> derive(c, p, o));
-                derive(s, p, s);
-                derive(o, p, o);
+                subProperties.forEach(c -> derive(c, p, o, out));
+                derive(s, p, s, out);
+                derive(o, p, o, out);
             }
         }
     }
@@ -135,13 +126,13 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs2: (?p rdfs:domain ?c) -> [(?x rdf:type ?c) <- (?x ?p ?y)] ]
      * [rdfs9: (?x rdfs:subClassOf ?y), (?a rdf:type ?x) -> (?a rdf:type ?y)]
      */
-    final private void domain(X s, X p, X o) {
+    final private void domain(X s, X p, X o, Output<X> out) {
         Set<X> x = setup.getDomain(p);
         x.forEach(c -> {
-            derive(s, rdfType, c);
-            subClass(s, rdfType, c);
+            derive(s, rdfType, c, out);
+            subClass(s, rdfType, c, out);
             if ( setup.includeDerivedDataRDFS() )
-                derive(p, rdfsDomain, c);
+                derive(p, rdfsDomain, c, out);
         });
     }
 
@@ -149,14 +140,14 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs3: (?p rdfs:range ?c) -> [(?y rdf:type ?c) <- (?x ?p ?y)] ]
      * [rdfs9: (?x rdfs:subClassOf ?y), (?a rdf:type ?x) -> (?a rdf:type ?y)]
      */
-    final private void range(X s, X p, X o) {
+    final private void range(X s, X p, X o, Output<X> out) {
         // Range
         Set<X> x = setup.getRange(p);
         x.forEach(c -> {
-            derive(o, rdfType, c);
-            subClass(o, rdfType, c);
+            derive(o, rdfType, c, out);
+            subClass(o, rdfType, c, out);
             if ( setup.includeDerivedDataRDFS() )
-                derive(p, rdfsRange, c);
+                derive(p, rdfsRange, c, out);
         });
     }
 }

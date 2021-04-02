@@ -10,6 +10,8 @@ PREFIX : <http://example/>
 
 :b :p 123 .
 
+:c :q :z .
+
 ## :T rdfs:label "foo" .
 ## :T rdfs:subClassOf :TTT .
 ## 

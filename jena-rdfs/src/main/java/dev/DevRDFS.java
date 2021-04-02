@@ -20,46 +20,51 @@ package dev;
 import static org.apache.jena.sparql.sse.SSE.str;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.graph.*;
-import org.apache.jena.rdf.model.InfModel;
+import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.reasoner.Reasoner;
-import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
-import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.other.G;
 import org.apache.jena.riot.other.Transitive;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
+import org.apache.jena.riot.system.StreamRDFOps;
+import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.ExecutionContext;
+import org.apache.jena.sparql.engine.QueryIterator;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
+import org.apache.jena.sparql.engine.iterator.QueryIterRoot;
+import org.apache.jena.sparql.engine.main.QC;
+import org.apache.jena.sparql.engine.main.QueryEngineMain;
+import org.apache.jena.sparql.engine.main.QueryEngineMainQuad;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.sse.SSE;
+import org.apache.jena.sparql.util.QueryExecUtils;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.tdb2.DatabaseMgr;
-import org.apache.jena.util.FileUtils;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
-import org.seaborne.jena.inf_rdfs.GraphRDFS;
-import org.seaborne.jena.inf_rdfs.InfFactory;
-import org.seaborne.jena.inf_rdfs.InfStreamRDFS;
-import org.seaborne.jena.inf_rdfs.SetupRDFS;
+import org.seaborne.jena.inf_rdfs.*;
 import org.seaborne.jena.inf_rdfs.engine.InfGlobal;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_TDB1;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_TDB2;
+import solver.OpExecutorQuads;
+import solver.PatternMatchData;
 
 public class DevRDFS {
     static { LogCtl.setLogging(); }
 
     // Extract transitive closure code.
     // InferenceSetupRDFS
-
 
     // -------- OLD
 
@@ -69,52 +74,9 @@ public class DevRDFS {
     //   1 - check on load.
     //   2 - InfGlobal.removeRDFS needs to be better yet? based on data?
 
-    /* makes sense:
-     * No vocab + exclude vocab infs
-     * Include vocab + include vocab infs
-     *
-     * Do not make sense?
-     * No vocab + include vocab infs
-     * Include vocab + exclude vocab infs
-     */
-
-    /*
-     * QueryExecutionDSG etc over Graphs/DatasetGraphs
-     *
-     * Setup engine <X> -- abstract class with Node -> X function.
-     * StreamRDF versions of basic range/domain;
-     *   SubProperty -> R/D -> SubClass
-     *
-     * When to materialize? Recursive calls into the source.
-     * GraphRDFS (stream version) needs cleaning.
-     *
-     * coverage
-     * Duplicates in (? ? ?)combined due to subClassOf
-     *   Another rules file - RDFS graph without axioms.
-     *
-     * rdfs:member, list:member
-     */
-
-    // More tests
-    //   Coverage
-    //   find_X_rdfsSubClassOf_Y
-
-    // Tests for:
-    //   InfererenceProcessTriple
-    //   InferenceProcessStreamRDF
-    //   InfererenceProcessIteratorRDFS
-
-    // Test (D,V) , (D,-), (-, V), (D+V, D+V)
-    //   Mode D-extract-V.
-
-    // ANY_ANY_T - filter rdf:type and replace - no distinct needed.
-
-    // Use InfFactory.
-
     static Graph inf;
-    static Graph g_rdfs2;
-    static Graph g_rdfs3;
-    public static void main(String...argv) throws IOException {
+
+    private static void test() {
         Graph g = GraphFactory.createDefaultGraph();
         g.add(SSE.parseTriple("(:n1 :p :n2)"));
         g.add(SSE.parseTriple("(:n2 :p :n3)"));
@@ -125,45 +87,156 @@ public class DevRDFS {
 //        g.add(SSE.parseTriple("()"));
 //        g.add(SSE.parseTriple("()"));
 
-        //Multimap<Node, Node> x= TransitiveX.transitive(g, SSE.parseNode(":p"));
+        //Multimap<Node, Node> x = TransitiveX.transitive(g, SSE.parseNode(":p"));
         //x.keySet().forEach(k->System.out.printf("%s   %s\n", k,x.get(k)));
         Map<Node, Collection<Node>> x = Transitive.transitive(g, SSE.parseNode(":p"));
         x.forEach((k,v)->System.out.printf("%s   %s\n", k, v));
         System.out.println("DONE");
         System.exit(0);
+    }
 
+    public static void main(String...argv) throws IOException {
+        //matchData();System.exit(0);
+
+        sparql();
+        System.exit(0);
 
         //basic();
         //plain();
         expand();
     }
 
-    private static void basic() {
+    static String[] data = {
+         "(:g :S :p :x)"
+        ,"(:g1 :s1 :p :x)"
+        ,"(:g1 :x :p 'B')"
+        ,"(:g2 :s1 :p :x)"
+        ,"(:g2 :x :p 'C')"
+    };
+
+    private static void matchData() {
+        DatasetGraph dsg = DatasetGraphFactory.createTxnMem();
+        Arrays.stream(data).forEach(x->dsg.add(SSE.parseQuad(x)));
+        ExecutionContext execCxt = new ExecutionContext(null, dsg.getDefaultGraph(), dsg, null);
+        BasicPattern bgp = SSE.parseBGP("(bgp (?s ?p ?x) (?x ?q ?o))");
+
+        //Node gn = Quad.unionGraph;
+        Node gn = SSE.parseNode("?g");
+
+        //Check input with binding
+        Binding start = BindingFactory.binding(Var.alloc("g"), SSE.parseNode(":g2"));
+        //Binding start = BindingFactory.root();
+        QueryIterator input = QueryIterRoot.create(start, execCxt);
+        QueryIterator iter = PatternMatchData.execute(dsg, gn, bgp, input, null, execCxt);
+
+//        Iterator<Binding> iter = StageMatchData.access(BindingFactory.root(),
+//                                                       null, SSE.parseTriple("(?s ?p ?o)"),
+//                                                       null/*filter*/, true, execContext);
+        List<Binding> x = Iter.toList(iter);
+        if ( x.isEmpty() )
+            System.out.println("[ <empty> ]");
+        else {
+            StringJoiner sj = new StringJoiner("\n  ", "[\n  ", "\n]");
+            x.forEach(b->sj.add(b.toString()));
+            System.out.println(sj.toString());
+        }
+    }
+
+    private static void sparql() {
+        Node gn = NodeFactory.createURI("http://example/g");
         String DATA_FILE = "data.ttl";
         String VOCAB_FILE = "vocab.ttl";
-        System.out.println("---- Schema");
-        Model vocab = RDFDataMgr.loadModel(VOCAB_FILE);
-//        RDFDataMgr.write(System.out, vocab, Lang.TTL);
 
-        System.out.println("---- Data");
+        Model vocab = RDFDataMgr.loadModel(VOCAB_FILE);
         Model data = RDFDataMgr.loadModel(DATA_FILE);
+
+//        System.out.println("---- Schema");
+//        RDFDataMgr.write(System.out, vocab, Lang.TTL);
+//        System.out.println("---- Data");
 //        RDFDataMgr.write(System.out, data, Lang.TTL);
-        System.out.println("----");
+//        System.out.println("----");
 
         SetupRDFS<Node> setup = InfFactory.setupRDF(vocab.getGraph(), false);
-        Graph graph = InfFactory.graphRDFS(data.getGraph(), setup);
 
-        Node n_a = SSE.parseNode(":a");
-        Node n_T = SSE.parseNode(":T");
-        Node n_T2 = SSE.parseNode(":T2");
-        Node n_b = SSE.parseNode(":b");
+        if ( false )
+        {
+            System.out.println("Graph: find");
+            Graph graph = InfFactory.graphRDFS(data.getGraph(), setup);
+            Node n_a = SSE.parseNode(":a");
+            System.out.println(G.listSP(graph, n_a, RDF.Nodes.type));
+            //System.out.println("--");
+        }
 
-        Iter.print(graph.find(n_a, RDF.Nodes.type, null));
-        System.out.println("--");
-        Iter.print(graph.find(null, RDF.Nodes.type, n_T2));
-        System.out.println("--");
-        Iter.print(graph.find(n_b, RDF.Nodes.type, null));
-        System.out.println("----");
+        String PREFIX = "PREFIX : <http://example/>  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
+        //String qs = PREFIX+"\n"+"SELECT * { { ?s ?p ?o } UNION { GRAPH ?g {?s ?p ?o } } }";
+        String qs = PREFIX+"\n"+"SELECT * { :a rdf:type ?type}";
+        Query query = QueryFactory.create(qs);
+
+        //DatasetGraph dsg = DatasetGraphFactory.wrap(graph);
+        // Union?
+
+        boolean ALL = false;
+
+        if ( ALL )
+        {
+            System.out.println("-- Plain");
+            DatasetGraph dsg = DatasetGraphFactory.createTxnMem();
+            GraphUtil.addInto(dsg.getDefaultGraph(), data.getGraph());
+            //RDFDataMgr.write(System.out, dsg, Lang.TRIG);
+            QueryExecution qExec = QueryExecutionFactory.create(query, dsg);
+            QueryExecUtils.executeQuery(qExec);
+        }
+
+        if ( true )
+        {
+            System.out.println("-- Graph");
+            Graph g2 = new GraphRDFS(data.getGraph(), setup);
+            DatasetGraph dsg = DatasetGraphFactory.wrap(g2);
+            QueryExecution qExec = QueryExecutionFactory.create(query, dsg);
+            QueryExecUtils.executeQuery(qExec);
+        }
+
+        if ( ALL )
+        {
+            System.out.println("-- DatasetGraph, getGraph");
+            DatasetGraph dsg = DatasetGraphFactory.createTxnMem();
+            GraphUtil.addInto(dsg.getDefaultGraph(), data.getGraph());
+            // Context?
+            DatasetGraph dsgx = new DatasetGraphRDFS(dsg, setup);
+            QueryExecution qExec = QueryExecutionFactory.create(query, dsgx);
+            QueryExecUtils.executeQuery(qExec);
+        }
+
+        if ( true ) {
+            // Quad mode
+            QueryEngineMain.unregister();
+            QueryEngineMainQuad.register();
+            QC.setFactory(ARQ.getContext(), OpExecutorQuads::new);
+            //DatasetGraphRDFS.byGraph = false;
+        }
+
+        {
+            // Chooses OpExecutorQuads (when default)
+            System.out.println("-- DatasetGraph, find/4");
+            DatasetGraph dsg = DatasetGraphFactory.createTxnMem();
+            GraphUtil.addInto(dsg.getDefaultGraph(), data.getGraph());
+            DatasetGraph dsgx = new DatasetGraphRDFS(dsg, setup);
+            QueryExecution qExec = QueryExecutionFactory.create(query, dsgx);
+            QueryExecUtils.executeQuery(qExec);
+        }
+
+        {
+            // Chooses OpExecutorTDB1 -> getGraph unless context hides TDB1 dataset choice.
+            System.out.println("-- DatasetGraph, find/4, TDB/node");
+            DatasetGraph dsg = TDBFactory.createDatasetGraph();
+            GraphUtil.addInto(dsg.getDefaultGraph(), data.getGraph());
+
+            QC.setFactory(dsg.getContext(), OpExecutorQuads::new);
+
+            DatasetGraph dsgx = new DatasetGraphRDFS(dsg, setup);
+            QueryExecution qExec = QueryExecutionFactory.create(query, dsgx);
+            QueryExecUtils.executeQuery(qExec);
+        }
     }
 
     public static void mainTDB(String...argv) throws IOException {
@@ -186,30 +259,6 @@ public class DevRDFS {
         SetupRDFS_TDB2 setup2 = new SetupRDFS_TDB2(vocab.getGraph(), dsg2, false);
     }
 
-    public static void plain(String...argv) throws IOException {
-        String DIR = "testing/Inf";
-//        String DATA_FILE = DIR+"/rdfs-data.ttl";
-//        String VOCAB_FILE = DIR+"/rdfs-vocab.ttl";
-//        String RULES_FILE = DIR+"/rdfs-min.rules";
-        String DATA_FILE = "data.ttl";
-        String VOCAB_FILE = "vocab.ttl";
-        String RULES_FILE = DIR+"/rdfs-min.rules";
-        Model vocab = RDFDataMgr.loadModel(VOCAB_FILE);
-        Model data = RDFDataMgr.loadModel(DATA_FILE);
-        String rules = FileUtils.readWholeFileAsUTF8(RULES_FILE);
-        rules = rules.replaceAll("#[^\\n]*", "");
-        SetupRDFS<Node> setup = InfFactory.setupRDF(vocab.getGraph(), false);
-        Reasoner reasoner = new GenericRuleReasoner(Rule.parseRules(rules));
-        InfModel m = ModelFactory.createInfModel(reasoner, vocab, data);
-        inf = m.getGraph();
-        g_rdfs2 = new GraphRDFS(data.getGraph(), setup);
-        //g_rdfs3 = new GraphRDFS3(setup, data.getGraph());
-        //test(null, null, node("T2"));
-        test(node("T"), null, null );
-        // Expansion
-        //InferenceProcessorRDFS proc = new InferenceProcessorRDFS(setup);
-    }
-
     public static void expand() throws IOException {
         boolean combined = false;
         String DIR = "testing/Inf";
@@ -218,11 +267,11 @@ public class DevRDFS {
         String RULES_FILE = DIR+"/rdfs-min.rules";
         System.out.println("---- Schema");
         Model vocab = RDFDataMgr.loadModel(VOCAB_FILE);
-        RDFDataMgr.write(System.out, vocab, Lang.TTL);
+        //RDFDataMgr.write(System.out, vocab, Lang.TTL);
 
         System.out.println("---- Data");
         Model data = RDFDataMgr.loadModel(DATA_FILE);
-        RDFDataMgr.write(System.out, data, Lang.TTL);
+        //RDFDataMgr.write(System.out, data, Lang.TTL);
 
         // Jena rules RDFS
 //        System.out.println("---- Rules");
@@ -245,17 +294,9 @@ public class DevRDFS {
     }
 
     private static void sendToStream(Graph graph, StreamRDF stream) {
-        graph.getPrefixMapping().getNsPrefixMap().forEach(stream::prefix);
-        graph.find(Node.ANY, Node.ANY, Node.ANY).forEachRemaining(stream::triple);
-    }
-
-    private static void test(Node s, Node p, Node o) {
-        compare("G2", g_rdfs2, inf, s, p, o);
-    }
-
-    private static void test3(Node s, Node p, Node o) {
-        System.out.println("** GraphRDFS3 **");
-        dwim(g_rdfs3, inf, s,p,o);
+        StreamRDFOps.sendGraphToStream(graph, stream);
+//        graph.getPrefixMapping().getNsPrefixMap().forEach(stream::prefix);
+//        graph.find(Node.ANY, Node.ANY, Node.ANY).forEachRemaining(stream::triple);
     }
 
     static Node node(String str) { return NodeFactory.createURI("http://example/"+str) ; }
@@ -282,6 +323,7 @@ public class DevRDFS {
 //                ! triple.getPredicate().getNameSpace().equals(RDFS.getURI());
 //            }
 //    };
+    /** Match a graph, maybe remove RDFS vocab */
     static void dwim$(String label, Graph g, Node s, Node p , Node o, boolean filter) {
         if ( label != null )
             System.out.println("** Graph ("+label+"):");

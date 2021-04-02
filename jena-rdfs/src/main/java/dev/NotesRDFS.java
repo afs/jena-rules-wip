@@ -18,36 +18,45 @@
 package dev;
 
 public class NotesRDFS {
+
+    // Quad solver.
+    // [Match]
+    // Check effect of case insensitive language change.
+
+    // [ ] Testing
+    //     General, TIM, TDB1, TDB2.
+    // [ ] Library in ARQ:; Abortable, IteratorAbortable.
+    // [ ] SolverRX: abortable? (TDB - abortable?)
+    // [ ] Close for GraphMatcher stream.
+
+    // Maybe use equalTerms in TDB1,TDB2 (means getting Node)
+
+    // Clearup/rename: TDB1, TDB2
+    //   SolverLib, Solver, SolverRx
+
+    // [ ] TDB2
+    // [ ] TDB1
+
+    // ---- Abortable
+    //
+    // Only need at the data touch points + sorting, not every iterator?
+    // [ ] Library in ARQ:; Abortable, IteratorAbortable. Share TDB
+    // [ ] SolverRX: abortable? (TDB - abortable?)
+
+    // ---- RDFS
+
+    // [ ] More tests: TestInfStreamRDFS
+    // [ ] AssemblerDatasetRDFS
+    // [ ] AssemblerGraphRDFS
+
     // Check and deal with:
     // [RDFS]
 
-    // Remove _0's
+    // Test for subproperties of rdf:type and other vocabulary.
+    // Factory: test for no RDFS and get out of the way (Dataset)
 
-    // Replace.
-    // org.apache.jena.riot.process.inf
+    // Tests for Transitive in ARQ?
 
-    // Two engines:
-    //   Matcher (for find) : Find3_X
-    //   Streamer : StreamInEngine_X
-    //     SuperClass for holding setup + constants.
-    //     Or one engine_X
-
-    // Dataset, Find4.
-
-    // Review
-    //   Unnecessary Triple.create, other work.
-    //   Ca we use/share more between  StreamInf and Find3?
-
-    // StreamInf_X :: The expander.
-    //   Tests needed
-    // better than Find3 code? Unlikely but try pure StreamInfEngineRDFS/GraphRDFS
-
-    // OpExecutor version?
-
-
-    // First - MVP - GraphRDFS working in Node space.
-
-    // SetupRDFS - not <T>, have subclass to get that needed for Find3_X
 
     // TODO: Other RDFS+
     //   rdfs:member
