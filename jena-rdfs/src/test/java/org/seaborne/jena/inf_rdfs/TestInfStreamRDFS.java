@@ -21,8 +21,9 @@ package org.seaborne.jena.inf_rdfs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import org.apache.jena.graph.Graph;
@@ -30,15 +31,16 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.lang.CollectorStreamTriples;
-import org.apache.jena.riot.other.G;
 import org.apache.jena.riot.system.StreamRDF;
-import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.riot.system.StreamRDFOps;
-import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.graph.NodeConst;
 import org.apache.jena.sparql.sse.SSE;
 import org.junit.Test;
 
+/**
+ * Stream machinery tests.
+ * Tests of stream results are mainly in TestMaterialized*
+ */
 public class TestInfStreamRDFS {
 
     static final String DIR = "testing/Inf";
@@ -48,6 +50,7 @@ public class TestInfStreamRDFS {
     static final String RULES_FILE = DIR+"/rdfs-min.rules";
     protected static Graph vocab;
     protected static Graph data;
+    protected static SetupRDFS<Node> setup;
 
     static {
         vocab = RDFDataMgr.loadGraph(VOCAB_FILE);
@@ -55,10 +58,11 @@ public class TestInfStreamRDFS {
     }
 
     @Test public void basic_0() {
-        Graph graph = inf(vocab, stream->StreamRDFOps.sendGraphToStream(data, stream));
-        //RDFDataMgr.write(System.out, graph, Lang.TTL);
+        List<Triple> results = infOutput(stream->StreamRDFOps.sendGraphToStream(data, stream));
+        Set<Triple> resultSet = new HashSet<>(results);
         assertEquals(5, data.size());
-        assertEquals(13, graph.size());
+        assertEquals(13, resultSet.size());
+        assertEquals(13, results.size());
     }
 
     private static Node node_c  = SSE.parseNode(":c");
@@ -70,41 +74,42 @@ public class TestInfStreamRDFS {
 
     @Test public void infer_1() {
         Triple t = SSE.parseTriple("(:c :p :x)");
-        Graph graph = inf(vocab, x->x.triple(t));
+        List<Triple> results = infOutput(x->x.triple(t));
 
-        long count1 = G.countSP(graph, node_c, rdfType);
-        assertEquals(2, count1);
-
-        assertTrue(G.isOfType(graph, node_c, node_Q));
-        assertTrue(G.isOfType(graph, node_c, node_Q2));
+        assertEquals(4, results.size());
+        assertTrue(listContains(results, "(:c :p :x)"));
+        assertTrue(listContains(results, "(:c :pTop :x)"));
+        assertTrue(listContains(results, "(:c rdf:type :Q)"));
+        assertTrue(listContains(results, "(:c rdf:type :Q2)"));
     }
 
     @Test public void infer_2() {
         Triple t = SSE.parseTriple("(:X rdf:type :T)");
+        List<Triple> results = infOutput(x->x.triple(t));
+
         // Types :T :T2 :T3 and :U.
-        Graph graph = inf(vocab, x->x.triple(t));
-        //RDFDataMgr.write(System.out, graph, Lang.TTL);
-        long count1 = G.countSP(graph, node_X, rdfType);
-        assertEquals(4, count1);
-        // And only these type triples
-        assertEquals(4, graph.size());
+        assertEquals(4, results.size());
+        assertTrue(listContains(results, "(:X rdf:type :T)"));
+        assertTrue(listContains(results, "(:X rdf:type :T2)"));
+        assertTrue(listContains(results, "(:X rdf:type :T3)"));
+        assertTrue(listContains(results, "(:X rdf:type :U)"));
+    }
+
+    private static boolean listContains(List<Triple> list, String strTriple) {
+        Triple triple = SSE.parseTriple(strTriple);
+        return list.stream().anyMatch(t->triple.equals(t));
+    }
+
+    private static boolean match(Node node, Node slot) {
+        return node == null || node == Node.ANY || node.equals(slot);
     }
 
     // Inference to a list
-    private static List<Triple> infOutput(Triple ... triples) {
+    private static List<Triple> infOutput(Consumer<StreamRDF> action) {
         CollectorStreamTriples dest = new CollectorStreamTriples();
         StreamRDF stream = InfFactory.infRDFS(dest, vocab);
-        exec(stream, x->Arrays.stream(triples).forEach(x::triple));
-        return dest.getCollected();
-    }
-
-    // Inference to graph
-    private static Graph inf(Graph vocab, Consumer<StreamRDF> action) {
-        Graph graph = GraphFactory.createDefaultGraph();
-        StreamRDF dest = StreamRDFLib.graph(graph);
-        StreamRDF stream = InfFactory.infRDFS(dest, vocab);
         exec(stream, action);
-        return graph;
+        return dest.getCollected();
     }
 
     private static void exec(StreamRDF stream, Consumer<StreamRDF> action) {

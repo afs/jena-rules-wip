@@ -26,7 +26,6 @@ import java.util.function.Predicate;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.rdf.model.impl.Util;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
@@ -34,6 +33,7 @@ import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
+import org.apache.jena.sparql.expr.nodevalue.NodeFunctions;
 
 /**
  * This is the data access step: RX.matchData/SolverRX.matchQuadPattern
@@ -79,8 +79,6 @@ public class StageMatchData {
         Node pm = matchConst[QP];
         Node om = matchConst[QO];
 
-        // [MATCH] Triple vs Quad
-
         DatasetGraph dsg = execCxt.getDataset();
 
         Iterator<Quad> iterMatches = dsg.find(gm, sm, pm, om);
@@ -106,7 +104,6 @@ public class StageMatchData {
         if ( anyGraph ) {
             iterMatches = Iter.map(iterMatches, quadsToUnion);
             // Guaranteed
-            // [Match]
             iterMatches = Iter.distinct(iterMatches);
 
             // This depends on the way indexes are chosen and
@@ -116,10 +113,8 @@ public class StageMatchData {
             //
             // If any slot is defined, then the index will be X??G.
             // If no slot is defined, then the index will be ???G.
-            // But the TupleTable
-            // See TupleTable.scanAllIndex that ensures the latter.
-            // No G part way through.
-            // [Match] Better if.
+            // Must be guaranteed.
+            //
             //iterMatches = Iter.distinctAdjacent(iterMatches);
         }
 
@@ -181,16 +176,8 @@ public class StageMatchData {
     }
 
     /** Test equality of two concrete teams. */
-    // [Match] Library.
     private static boolean sameTermAs(Node node1, Node node2) {
-        if ( Util.isLangString(node1) && Util.isLangString(node2) ) {
-            String lex1 = node1.getLiteralLexicalForm();
-            String lex2 = node2.getLiteralLexicalForm();
-            if ( !lex1.equals(lex2) )
-                return false;
-            return node1.getLiteralLanguage().equalsIgnoreCase(node2.getLiteralLanguage());
-        }
-        return node1.equals(node2);
+        return NodeFunctions.sameTerm(node1, node2);
     }
 
     // Variable or not a variable. Not <<?var>>

@@ -26,6 +26,7 @@ import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.util.FileUtils;
+
 /** Test graphs  */
 public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
     // [RDFS] As parameterized tests
@@ -55,6 +56,7 @@ public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
         catch (IOException ex) { IO.exception(ex) ; return null ; }
     }
 
+    /** The graph with the right answers (via jena-core Rules) */
     @Override
     final
     protected Graph getReferenceGraph() {

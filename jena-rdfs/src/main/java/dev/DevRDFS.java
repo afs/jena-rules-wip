@@ -17,8 +17,6 @@
 
 package dev;
 
-import static org.apache.jena.sparql.sse.SSE.str;
-
 import java.io.IOException;
 import java.util.*;
 
@@ -51,17 +49,18 @@ import org.apache.jena.sparql.sse.SSE;
 import org.apache.jena.sparql.util.QueryExecUtils;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.tdb2.DatabaseMgr;
-import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.seaborne.jena.inf_rdfs.*;
-import org.seaborne.jena.inf_rdfs.engine.InfGlobal;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_TDB1;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_TDB2;
 import solver.OpExecutorQuads;
 import solver.PatternMatchData;
 
 public class DevRDFS {
-    static { LogCtl.setLogging(); }
+    static {
+        //JenaSystem.DEBUG_INIT = true;
+        LogCtl.setLogging();
+    }
 
     // Extract transitive closure code.
     // InferenceSetupRDFS
@@ -101,8 +100,6 @@ public class DevRDFS {
         sparql();
         System.exit(0);
 
-        //basic();
-        //plain();
         expand();
     }
 
@@ -170,10 +167,14 @@ public class DevRDFS {
         String PREFIX = "PREFIX : <http://example/>  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
         //String qs = PREFIX+"\n"+"SELECT * { { ?s ?p ?o } UNION { GRAPH ?g {?s ?p ?o } } }";
         String qs = PREFIX+"\n"+"SELECT * { :a rdf:type ?type}";
+        //String qs = PREFIX+"\n"+"SELECT (count(?type) AS ?X) { :a rdf:type ?type}";
+
         Query query = QueryFactory.create(qs);
 
         //DatasetGraph dsg = DatasetGraphFactory.wrap(graph);
         // Union?
+
+        // Query to list, check list.
 
         boolean ALL = false;
 
@@ -187,7 +188,7 @@ public class DevRDFS {
             QueryExecUtils.executeQuery(qExec);
         }
 
-        if ( true )
+        if ( ALL )
         {
             System.out.println("-- Graph");
             Graph g2 = new GraphRDFS(data.getGraph(), setup);
@@ -215,6 +216,7 @@ public class DevRDFS {
             //DatasetGraphRDFS.byGraph = false;
         }
 
+        if ( true )
         {
             // Chooses OpExecutorQuads (when default)
             System.out.println("-- DatasetGraph, find/4");
@@ -225,6 +227,7 @@ public class DevRDFS {
             QueryExecUtils.executeQuery(qExec);
         }
 
+        if ( true )
         {
             // Chooses OpExecutorTDB1 -> getGraph unless context hides TDB1 dataset choice.
             System.out.println("-- DatasetGraph, find/4, TDB/node");
@@ -234,6 +237,20 @@ public class DevRDFS {
             QC.setFactory(dsg.getContext(), OpExecutorQuads::new);
 
             DatasetGraph dsgx = new DatasetGraphRDFS(dsg, setup);
+            QueryExecution qExec = QueryExecutionFactory.create(query, dsgx);
+            QueryExecUtils.executeQuery(qExec);
+        }
+
+        if ( true )
+        {
+            System.out.println("-- Expand Graph");
+            // Expand and query.
+            Graph graphExpanded = Factory.createDefaultGraph();
+            StreamRDF stream = StreamRDFLib.graph(graphExpanded);
+            // Apply inferences.
+            stream = new InfStreamRDFS(stream, setup);
+            sendToStream(data.getGraph(), stream);
+            DatasetGraph dsgx = DatasetGraphFactory.wrap(graphExpanded);
             QueryExecution qExec = QueryExecutionFactory.create(query, dsgx);
             QueryExecUtils.executeQuery(qExec);
         }
@@ -298,71 +315,5 @@ public class DevRDFS {
 //        graph.getPrefixMapping().getNsPrefixMap().forEach(stream::prefix);
 //        graph.find(Node.ANY, Node.ANY, Node.ANY).forEachRemaining(stream::triple);
     }
-
-    static Node node(String str) { return NodeFactory.createURI("http://example/"+str) ; }
-
-    static void dwim(Graph gTest, Graph gInf, Node s, Node p , Node o) {
-        dwim$("inference", gInf, s,p,o, true);
-        dwim$("test", gTest, s,p,o, false);
-        System.out.println();
-    }
-
-    static void dwim(Graph graph, Node s, Node p , Node o) {
-        dwim$(null, graph, s,p,o, false);
-    }
-
-
-//    static Filter<Triple> filterRDFS = new Filter<Triple>() {
-//        @Override
-//        public boolean accept(Triple triple) {
-//            if ( InfGlobal.includeDerivedDataRDFS ) {
-//                Node p = triple.getPredicate();
-//                return ! p.equals(RDFS.Nodes.domain) && ! p.equals(RDFS.Nodes.range);
-//            }
-//            return
-//                ! triple.getPredicate().getNameSpace().equals(RDFS.getURI());
-//            }
-//    };
-    /** Match a graph, maybe remove RDFS vocab */
-    static void dwim$(String label, Graph g, Node s, Node p , Node o, boolean filter) {
-        if ( label != null )
-            System.out.println("** Graph ("+label+"):");
-        System.out.printf("find(%s, %s, %s)\n", str(s), str(p), str(o));
-        ExtendedIterator<Triple> iter = g.find(s, p, o);
-        List<Triple> x = iter.toList();
-        if ( filter )
-            x = InfGlobal.removeRDFS(x);
-        x.forEach(t -> System.out.println("    "+t));
-        System.out.println();
-    }
-
-    static void compare(String label, Graph testGraph, Graph refGraph, Node s, Node p , Node o) {
-        if ( label != null )
-            System.out.println("** Compare ("+label+"):");
-        else
-            System.out.println("** Compare");
-        System.out.printf("find(%s, %s, %s)\n", str(s), str(p), str(o));
-        List<Triple> x1 = testGraph.find(s, p, o).toList();
-        List<Triple> x2 = refGraph.find(s, p, o).toList();
-        if ( true )
-            x2 = InfGlobal.removeRDFS(x2);
-        boolean b = sameElts(x1, x2);
-        if ( !b ) {
-            System.out.println("  Different:");
-            x1.stream().map(SSE::str).forEach(t -> System.out.println("Test:  "+t));
-            x2.stream().map(SSE::str).forEach(t -> System.out.println("Ref :  "+t));
-        } else {
-            System.out.println("  Same:");
-            x1.stream().map(SSE::str).forEach(t -> System.out.println("    "+t));
-        }
-
-        System.out.println();
-    }
-
-    /** Test for same elements, regarless of cardinality */
-    public static <T> boolean sameElts(Collection<T> left, Collection<T> right) {
-        return right.containsAll(left) && left.containsAll(right);
-    }
-
 }
 

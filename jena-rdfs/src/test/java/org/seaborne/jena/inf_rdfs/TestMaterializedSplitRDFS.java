@@ -18,7 +18,6 @@
 package org.seaborne.jena.inf_rdfs;
 
 import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.GraphUtil;
 import org.apache.jena.graph.Node;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
@@ -27,32 +26,30 @@ import org.apache.jena.sparql.graph.GraphFactory;
 import org.junit.BeforeClass;
 
 /** Test of RDFS.
- * Expanded graph, combined vocab and data.
+ * Expanded graph, split vocab and data.
  */
-public class TestExpandCombinedRDFS extends AbstractTestGraphRDFS {
+public class TestMaterializedSplitRDFS extends AbstractTestGraphRDFS {
 
-    private static Graph testGraphExpanded;
+    private static Graph testGraphMaterialized;
     @BeforeClass public static void setupHere() {
-        Graph dataTest = GraphFactory.createDefaultGraph();
-        testGraphExpanded = GraphFactory.createDefaultGraph();
-        GraphUtil.addInto(dataTest, data);
-        GraphUtil.addInto(dataTest, vocab);
-        SetupRDFS<Node> setup = InfFactory.setupRDF(vocab, true);
-        StreamRDF stream = StreamRDFLib.graph(testGraphExpanded);
+        testGraphMaterialized = GraphFactory.createDefaultGraph();
+        SetupRDFS<Node> setup = InfFactory.setupRDF(vocab, false);
+        StreamRDF stream = StreamRDFLib.graph(testGraphMaterialized);
         stream = new InfStreamRDFS(stream, setup);
-        StreamRDFOps.graphToStream(dataTest, stream);
+        StreamRDFOps.graphToStream(data, stream);
     }
 
-    public TestExpandCombinedRDFS() {}
+    public TestMaterializedSplitRDFS() {
+    }
 
     @Override
     protected boolean removeVocabFromReferenceResults() {
-        return false;
+        return true;
     }
 
     @Override
     protected Graph getTestGraph() {
-        return testGraphExpanded;
+        return testGraphMaterialized;
     }
 
     @Override

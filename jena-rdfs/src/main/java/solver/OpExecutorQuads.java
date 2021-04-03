@@ -69,10 +69,11 @@ public class OpExecutorQuads extends OpExecutor {
 //    }
 
     protected Node currentGraph = null;
-    // [Match] Maybe push graph node for BGPs'.
+
     @Override
     protected QueryIterator execute(OpGraph opGraph, QueryIterator input) {
         Node gn = opGraph.getNode();
+        // Stack
         Node previous = currentGraph;
         try {
             currentGraph = gn;

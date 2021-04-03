@@ -16,36 +16,8 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf_rdfs;
+package org.seaborne.jena.inf_rdfs.assembler;
 
-import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.compose.MultiUnion;
-
-/** Test a GraphRDFS */
-public class TestGraphCombinedRDFS extends AbstractTestGraphRDFS {
-
-    private Graph testGraph = null;
-
-    public TestGraphCombinedRDFS(){
-        MultiUnion g = new MultiUnion();
-        g.addGraph(data);
-        g.addGraph(vocab);
-        testGraph = InfFactory.graphRDFS(g);
-    }
-
-    @Override
-    protected boolean removeVocabFromReferenceResults() {
-        return false;
-    }
-
-    @Override
-    protected Graph getTestGraph() {
-        return testGraph;
-    }
-
-    @Override
-    protected String getTestLabel() {
-        return "Combined data,vocab";
-    }
+public class AssemblerDatasetGraphRDFS {
 
 }

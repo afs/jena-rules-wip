@@ -23,8 +23,8 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses( {
     TestGraphSplitRDFS.class
     , TestGraphCombinedRDFS.class
-    , TestExpandCombinedRDFS.class
-    , TestExpandSplitRDFS.class
+    , TestMaterializedCombinedRDFS.class
+    , TestMaterializedSplitRDFS.class
     , TestInfStreamRDFS.class
 })
 

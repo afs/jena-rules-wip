@@ -21,18 +21,13 @@ public class NotesRDFS {
 
     // ---- Quad solver.
     // [Match]
-    // Check effect of case insensitive language change.
-
-    // PatternMatchData vs PatternMatchData_Quad
-    // [Match] Library. StageMatchData.sameTermAs
+    //   PatternMatchData - notes RX integration.
 
     // [ ] Testing
     //     General, TIM, TDB1, TDB2.
-    // [ ] Library in ARQ:; Abortable, IteratorAbortable.
+    // [x] Library in ARQ:; Abortable, IteratorAbortable.
     // [ ] SolverRX: abortable? (TDB - abortable?)
     // [ ] Close for GraphMatcher stream.
-
-    // Maybe use equalTerms in TDB1,TDB2 (means getting Node)
 
     // Clearup/rename: TDB1, TDB2
     //   SolverLib, Solver, SolverRx
@@ -40,15 +35,11 @@ public class NotesRDFS {
     // [ ] TDB2
     // [ ] TDB1
 
-    // ---- Abortable
-    //
-    // Only need at the data touch points + sorting, not every iterator?
-    // [ ] Library in ARQ:; Abortable, IteratorAbortable. Share TDB
-    // [ ] SolverRX: abortable? (TDB - abortable?)
-
     // ---- RDFS
 
-    // [ ] More tests: TestInfStreamRDFS
+    // [x] More tests: TestInfStreamRDFS
+    // [?] Expose the stream sets - class, property, domain, range
+
     // [ ] AssemblerDatasetRDFS
     // [ ] AssemblerGraphRDFS
     // [ ] Closing iterators
@@ -85,6 +76,15 @@ public class NotesRDFS {
         owl:FunctionalProperty
         owl:InverseFunctionalProperty
 
+        ---
+        OWL, not in "RDFS 3.0"
+        owl:disjointWith
+        owl:differentFrom
+        owl:complementOf
+        owl:someValueOf
+        owl:allValuesFrom
+        owl:hasValue
+
 Head is a single triple
    Transitive reasoner
    sameAs
@@ -98,6 +98,9 @@ Head is a single triple
      rdf:_N processes => rdf:member
      list:member => ????
      OWL RL
+
+     OWL
+
 */
 
 }
