@@ -39,7 +39,6 @@ import org.apache.jena.sparql.engine.binding.BindingFactory;
  * This is the data access step: RX.matchData/SolverRX.matchQuadPattern
  */
 public class StageMatchData {
-    // Need data version of Solver.execute to call "access"
 
     // Positions in Tuple4/Quad
     private static int QG = 0 ;
@@ -49,11 +48,6 @@ public class StageMatchData {
 
     private static Function<Quad, Quad> quadsToUnion =
             quad -> Quad.create(Quad.unionGraph, quad.getSubject(), quad.getPredicate(), quad.getObject());
-
-//    // Positions in Tuple3/Triple
-//    private static int TS = 1 ;
-//    private static int TP = 2 ;
-//    private static int TO = 3 ;
 
     /* Entry point from PattenMatchData.
      *   graphNode may be Node.ANY, meaning union graph and should make triples unique.
@@ -65,10 +59,6 @@ public class StageMatchData {
         });
     }
 
-    /* Entry point */
-    // Tuple3/4? or [].
-    // Graph and dataset versions? => only dataset.
-    // Callable as graph node + BGP so (OpGraph) should work.
     static Iterator<Binding> access(Binding binding, Node graphName, Triple pattern, Predicate<Quad> filter, boolean anyGraph, ExecutionContext execCxt) {
         // Assumes if anyGraph, then graphName == null.
         // graphName == Quad.defaultgraphURI for triples.
@@ -79,9 +69,6 @@ public class StageMatchData {
 
         Node[] matchConst = new Node[4];
         Var[] vars = new Var[4];
-        // [Match] Improve
-        //3,4 switchable.
-        // Why not Node[]?
 
         boolean b = prepareQuad(binding, graphName, pattern, matchConst, vars);
         if ( !b )
@@ -137,25 +124,6 @@ public class StageMatchData {
         }
 
         BindingBuilder bindingBuilder = BindingFactory.builder(binding);
-
-        // [Match] Does Quad actually help? If not, Tuple4.
-//        // Matches to Binding.
-//        Function<Tuple<Node>, Binding> binder = tuple -> {
-//            bindingBuilder.reset();
-//            for ( int i = 0 ; i < vars.length ; i++ ) {
-//                Var var = vars[i];
-//                if ( var == null )
-//                    continue;
-//                Node value = tuple.get(i);
-//                if ( ! compatible(bindingBuilder, var, value))
-//                    return null;
-//                bindingBuilder.add(var, value);
-//            }
-//            return bindingBuilder.build();
-//        };
-//
-//        return Iter.iter(iterMatches).map(binder).removeNulls();
-//    }
 
         Function<Quad, Binding> binder = quad -> quadToBinding(bindingBuilder, quad, matchConst, vars);
         return Iter.iter(iterMatches).map(binder).removeNulls();

@@ -39,16 +39,10 @@ import org.seaborne.jena.inf_rdfs.SetupRDFS;
  */
 
 public class ApplyRDFS<X, T> extends CxtInf<X,T>{
-    // [RDFS] javadoc
-    // Expanded in X space.
 
     public ApplyRDFS(SetupRDFS<X> setup, MapperX<X, T> mapper) {
         super(setup, mapper);
     }
-
-    // TODO: ?? Other RDFS+
-    //   rdfs:member
-    //   list:member
 
     /**
      * Apply RDFS rules based on the 3-tuple.

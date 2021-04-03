@@ -75,17 +75,14 @@ public class DatasetGraphRDFS extends DatasetGraphWrapper implements DatasetGrap
 
     // Quad-centric access
     @Override
-    public Iterator<Quad> find(Quad quad)
-    { return find(quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject()); }
+    public Iterator<Quad> find(Quad quad) {
+        return find(quad.getGraph(), quad.getSubject(), quad.getPredicate(), quad.getObject());
+    }
 
-    // [RDFS] Crude, partial
     @Override
     public Iterator<Quad> find(Node g, Node s, Node p, Node o) {
-        // Sort out graph
         if ( g == null )
             g = Quad.defaultGraphIRI;
-        //if ( g == Node.ANY ) {}
-        //if ( g == Quad.unionGraph ) {}
 
         Iterator<Quad> iter = findInf(g, s, p, o);
         if ( iter == null )

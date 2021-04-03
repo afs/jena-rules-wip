@@ -19,9 +19,12 @@ package dev;
 
 public class NotesRDFS {
 
-    // Quad solver.
+    // ---- Quad solver.
     // [Match]
     // Check effect of case insensitive language change.
+
+    // PatternMatchData vs PatternMatchData_Quad
+    // [Match] Library. StageMatchData.sameTermAs
 
     // [ ] Testing
     //     General, TIM, TDB1, TDB2.
@@ -48,6 +51,7 @@ public class NotesRDFS {
     // [ ] More tests: TestInfStreamRDFS
     // [ ] AssemblerDatasetRDFS
     // [ ] AssemblerGraphRDFS
+    // [ ] Closing iterators
 
     // Check and deal with:
     // [RDFS]
@@ -58,7 +62,7 @@ public class NotesRDFS {
     // Tests for Transitive in ARQ?
 
 
-    // TODO: Other RDFS+
+    // ==== Other RDFS+
     //   rdfs:member
     //   list:member
 

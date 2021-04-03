@@ -50,13 +50,14 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
     public MatchRDFS(SetupRDFS<X> setup, MapperX<X,T> mapper) {
         super(setup, mapper);
         this.applyInf = t-> {
+            // Revisit use of applyInf.
+            //   used in inf from find_ANY_ANY_ANY
+            //   used in inf from infFilter from ANY_ANY_T, ANY_type_ANY, X_ANY_Y
             // [RDFS]  Non-collecting stream engine. Replace?
             List<T> x = new ArrayList<>();
             x.add(t);
             Output<X> dest = (s,p,o) -> x.add(dstCcreate(s,p,o));
             ApplyRDFS<X, T> streamInf = new ApplyRDFS<>(setup, mapper);
-            // [RDFS]
-            // [RDFS] process(nc) or infer(exc)?
             //   process needed but infer+explicit current triple saves a create.
             streamInf.infer(mapper.subject(t), mapper.predicate(t), mapper.object(t), dest);
             return x.stream();

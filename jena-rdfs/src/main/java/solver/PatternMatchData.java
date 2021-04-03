@@ -1,5 +1,5 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one
+QueryIterAbortable * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
  * regarding copyright ownership.  The ASF licenses this file
@@ -34,6 +34,7 @@ import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.iterator.Abortable;
+import org.apache.jena.sparql.engine.iterator.QueryIterAbortable;
 import org.apache.jena.sparql.engine.iterator.QueryIterPlainWrapper;
 
 /**
@@ -102,40 +103,9 @@ public class PatternMatchData {
                 System.out.println("No results");
         }
 
-        // "input" will be closed by QueryIterTDB but is otherwise unused.
+        // "input" will be closed by QueryIterAbortable but is otherwise unused.
         // "killList" will be aborted on timeout.
-        return new QueryIterMatcher(chain, killList, input, execCxt);
-    }
-
-    public static class QueryIterMatcher extends QueryIterPlainWrapper
-    {
-        final private QueryIterator originalInput;
-        private List<Abortable> killList;
-
-        // The original input needs closing as well.
-        public QueryIterMatcher(Iterator<Binding> iterBinding, List<Abortable> killList , QueryIterator originalInput, ExecutionContext execCxt) {
-            super(iterBinding, execCxt);
-            this.originalInput = originalInput;
-            this.killList = killList;
-        }
-
-        @Override
-        protected void closeIterator()
-        {
-            if ( originalInput != null )
-                originalInput.close();
-            super.closeIterator();
-        }
-
-        @Override
-        protected void requestCancel()
-        {
-            if ( killList != null )
-                for ( Abortable it : killList )
-                    it.abort();
-            if ( originalInput != null )
-                originalInput.cancel();
-        }
+        return new QueryIterAbortable(chain, killList, input, execCxt);
     }
 
 //    static Iterator<Binding> matchQuadPattern(Iterator<BindingNodeId> chain, Node graphNode, Triple tPattern,

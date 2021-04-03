@@ -22,13 +22,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.jena.sparql.engine.iterator.Abortable;
+import org.apache.jena.sparql.engine.iterator.IterAbortable;
 
 public class SolverLib {
     public static <T> Iterator<T> makeAbortable(Iterator<T> iter, List<Abortable> killList)
     {
         if ( killList == null )
             return iter;
-        IteratorAbortable<T> k = new IteratorAbortable<>(iter);
+        IterAbortable<T> k = new IterAbortable<>(iter);
         killList.add(k);
         return k;
     }

@@ -24,8 +24,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.atlas.lib.tuple.Tuple;
-import org.apache.jena.atlas.lib.tuple.TupleFactory;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.impl.Util;
@@ -41,7 +39,6 @@ import org.apache.jena.sparql.engine.binding.BindingFactory;
  * This is the data access step: RX.matchData/SolverRX.matchQuadPattern
  */
 public class StageMatchData_Quad {
-    // Need data version of Solver.execute to call "access"
 
     // Positions in Tuple4/Quad
     private static int QG = 0 ;
@@ -49,22 +46,19 @@ public class StageMatchData_Quad {
     private static int QP = 2 ;
     private static int QO = 3 ;
 
-//    // Positions in Tuple3/Triple
-//    private static int TS = 1 ;
-//    private static int TP = 2 ;
-//    private static int TO = 3 ;
+    private static Function<Quad, Quad> quadsToUnion =
+            quad -> Quad.create(Quad.unionGraph, quad.getSubject(), quad.getPredicate(), quad.getObject());
 
-    /* Entry point */
+    /* Entry point from PattenMatchData.
+     *   graphNode may be Node.ANY, meaning union graph and should make triples unique.
+     *   graphNode may be null, meaning default graph
+     */
     static Iterator<Binding> access(Iterator<Binding> input, Node graphName, Triple pattern, Predicate<Quad> filter, boolean anyGraph, ExecutionContext execCxt) {
         return Iter.flatMap(input, binding -> {
             return access(binding, graphName, pattern, filter, anyGraph, execCxt);
         });
     }
 
-    /* Entry point */
-    // Tuple3/4? or [].
-    // Graph and dataset versions? => only dataset.
-    public // [MATCH] Development.
     static Iterator<Binding> access(Binding binding, Node graphName, Triple pattern, Predicate<Quad> filter, boolean anyGraph, ExecutionContext execCxt) {
         // Assumes if anyGraph, then graphName == null.
         // graphName == Quad.defaultgraphURI for triples.
@@ -75,9 +69,6 @@ public class StageMatchData_Quad {
 
         Node[] matchConst = new Node[4];
         Var[] vars = new Var[4];
-        // [Match] Improve
-        //3,4 switchable.
-        // Why not Node[]?
 
         boolean b = prepareQuad(binding, graphName, pattern, matchConst, vars);
         if ( !b )
@@ -87,9 +78,6 @@ public class StageMatchData_Quad {
         Node sm = matchConst[QS];
         Node pm = matchConst[QP];
         Node om = matchConst[QO];
-
-        // [MATCH] Triple vs Quad
-
         DatasetGraph dsg = execCxt.getDataset();
 
         Iterator<Quad> iterMatches = dsg.find(gm, sm, pm, om);
@@ -133,25 +121,6 @@ public class StageMatchData_Quad {
         }
 
         BindingBuilder bindingBuilder = BindingFactory.builder(binding);
-
-        // [Match] Does Quad actually help? If not, Tuple4.
-//        // Matches to Binding.
-//        Function<Tuple<Node>, Binding> binder = tuple -> {
-//            bindingBuilder.reset();
-//            for ( int i = 0 ; i < vars.length ; i++ ) {
-//                Var var = vars[i];
-//                if ( var == null )
-//                    continue;
-//                Node value = tuple.get(i);
-//                if ( ! compatible(bindingBuilder, var, value))
-//                    return null;
-//                bindingBuilder.add(var, value);
-//            }
-//            return bindingBuilder.build();
-//        };
-//
-//        return Iter.iter(iterMatches).map(binder).removeNulls();
-//    }
 
         Function<Quad, Binding> binder = quad -> quadToBinding(bindingBuilder, quad, matchConst, vars);
         return Iter.iter(iterMatches).map(binder).removeNulls();
@@ -198,22 +167,6 @@ public class StageMatchData_Quad {
             matchConst[i] = n;
     }
 
-
-    /** Substitute, then split into constants and variables and */
-    private static boolean prepareTuple(Binding binding, Tuple<Node> pattern, Node[] matchConst, Var[] vars) {
-        for ( int i = 0 ; i < pattern.len() ; i++ ) {
-            Node n = pattern.get(i);
-            // Substitution and turning into NodeIds
-            // Variables unsubstituted are null NodeIds
-            n = substituteFlat(n, binding);
-            if ( Var.isVar(n) )
-                vars[i] = Var.alloc(n);
-            else
-                matchConst[i] = n;
-        }
-        return true;
-    }
-
     // Compatible: new variable or sameTerm as existing binding.
     private static boolean compatible(BindingBuilder output, Var var, Node value) {
         Node x = output.get(var);
@@ -240,12 +193,4 @@ public class StageMatchData_Quad {
     private static Node substituteFlat(Node n, Binding binding) {
         return Var.lookup(binding::get, n);
     }
-
-    static Function<Quad, Quad> quadsToUnion = quad -> Quad.create(Quad.unionGraph, quad.getSubject(), quad.getPredicate(), quad.getObject());
-
-    // Rewrite with "union" in the G slot.
-    static Function<Tuple<Node>, Tuple<Node>> quadsToAnyTriples = quad -> TupleFactory.create4(Quad.unionGraph, quad.get(QS), quad.get(QP), quad.get(QO));
-
-
-
 }
