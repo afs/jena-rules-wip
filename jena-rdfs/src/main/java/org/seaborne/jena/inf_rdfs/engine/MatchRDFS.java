@@ -18,18 +18,15 @@
 
 package org.seaborne.jena.inf_rdfs.engine;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import org.seaborne.jena.inf_rdfs.SetupRDFS;
+import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
 
 /**
- * Match a 3-tuple, which might have widlcards, applying a fixed set of inference rules.
+ * Match a 3-tuple, which might have wildcards, applying a fixed set of inference rules.
  * This class is the core machinery of matching data using an RDFS schema.
  * This is inference on the A-Box (the data) with respect to a fixed T-Box
  * (the vocabulary, ontology).
@@ -45,9 +42,11 @@ import org.seaborne.jena.inf_rdfs.SetupRDFS;
  * @see ApplyRDFS ApplyRDFS for the matching algorithm.
  */
 public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
+    // Debug: "stream = StreamOps.debug(stream)"
+
     private final Function<T,Stream<T>> applyInf;
 
-    public MatchRDFS(SetupRDFS<X> setup, MapperX<X,T> mapper) {
+    public MatchRDFS(SetupRDFS_X<X> setup, MapperX<X,T> mapper) {
         super(setup, mapper);
         this.applyInf = t-> {
             // Revisit use of applyInf.
@@ -106,7 +105,7 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
                     return find_X_ANY_ANY(subject);
             } else {
                 if ( isTerm(object) )
-                    return find_ANY_ANY_T(object);
+                    return find_ANY_ANY_Y(object);
                 else
                     return find_ANY_ANY_ANY();
             }
@@ -199,22 +198,24 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
         return find_X_ANY_Y(subject, ANY);
     }
 
-    private Stream<T> find_ANY_ANY_T(X object) {
+    private Stream<T> find_ANY_ANY_Y(X object) {
         Stream<T> stream = sourceFind(ANY, ANY, object);
+        // Remove rdf:type because we want to drive that through the inference processing.
         stream = stream.filter( triple -> ! predicate(triple).equals(rdfType)) ;
-        // and get via inference.
-        // Exclude rdf:type and do by inference?
+        // rdf:type with inference.
         stream = Stream.concat(stream, find_ANY_type_T(object));
+        // [RDFS] (Out of date)
         // ? ? P (range) does not find :x a :P when :P is a class
         // and "some p range P"
         // Include from setup?
         boolean ensureDistinct = false;
         if ( setup.includeDerivedDataRDFS() ) {
-            // These cause duplicates.
+            // These may cause duplicates.
             ensureDistinct = true;
             stream = Stream.concat(stream, sourceFind(ANY, rdfsRange, object));
             stream = Stream.concat(stream, sourceFind(ANY, rdfsDomain, object));
             stream = Stream.concat(stream, sourceFind(ANY, rdfsRange, object));
+            // By looking in the data only, we don't see inferred "type rdfsSubClassOf type".
             stream = Stream.concat(stream, sourceFind(object, rdfsSubClassOf, ANY));
             stream = Stream.concat(stream, sourceFind(ANY, rdfsSubClassOf, object));
         }

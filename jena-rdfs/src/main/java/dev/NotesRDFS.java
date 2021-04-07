@@ -19,30 +19,80 @@ package dev;
 
 public class NotesRDFS {
 
+    // X subclass X not inferred. Inc/exc issue?
+
     // ---- Quad solver.
     // [Match]
     //   PatternMatchData - notes RX integration.
+    // Can/should we merge OpExecutor, OpExecutorQuads?
 
     // [ ] Testing
     //     General, TIM, TDB1, TDB2.
     // [x] Library in ARQ:; Abortable, IteratorAbortable.
-    // [ ] SolverRX: abortable? (TDB - abortable?)
-    // [ ] Close for GraphMatcher stream.
+    // * SolverRX: abortable? (TDB - abortable?)
 
     // Clearup/rename: TDB1, TDB2
     //   SolverLib, Solver, SolverRx
 
-    // [ ] TDB2
-    // [ ] TDB1
+    // Ready. Use with TIM (and, in tests, general).
 
     // ---- RDFS
 
     // [x] More tests: TestInfStreamRDFS
-    // [?] Expose the stream sets - class, property, domain, range
+    // [ ] test:assemblers.
+    // [-] Expose the stream sets - class, property, domain, range. Each has a "if work to do start so keep as-is.
+    // [?] Closing iterators IIF stream ends
+    // [ ] Check hiding modes.
+    // [ ] SysRDFS  - register OpExecutor.
+    // [ ] Integration tests - dataset esp. findNG
+    // [ ] Try AbstractTestGraphRDFS : min-backwards. -> 4 failures because of
+    //    org.seaborne.jena.inf_rdfs.TestGraphCombinedRDFS
+    //      test_rdfs_11(org.seaborne.jena.inf_rdfs.TestGraphCombinedRDFS)
+    //      test_rdfs_16a(org.seaborne.jena.inf_rdfs.TestGraphCombinedRDFS)
+    //    org.seaborne.jena.inf_rdfs.TestMaterializedCombinedRDFS
+    //      test_rdfs_11(org.seaborne.jena.inf_rdfs.TestMaterializedCombinedRDFS)
+    //      test_rdfs_16a(org.seaborne.jena.inf_rdfs.TestMaterializedCombinedRDFS)
+    // rdfs_16a is short.
+//    Expected: find(null, null, http://example/X)
+//        http://example/b @rdf:type http://example/X
+//      Got (Combined data,vocab):
+//        http://example/b @rdf:type http://example/X
+//        http://example/X @rdfs:subClassOf http://example/X  **
 
-    // [ ] AssemblerDatasetRDFS
-    // [ ] AssemblerGraphRDFS
-    // [ ] Closing iterators
+//    Expected: find(null, null, http://example/X)
+//        http://example/b @rdf:type http://example/X
+//      Got (Expanded, combined):
+//        http://example/X @rdfs:subClassOf http://example/X  **
+//        http://example/b @rdf:type http://example/X
+
+
+
+
+
+    // [ ] TDB2
+    // [ ] TDB1
+
+    // Can we see the vocab?  And get subclass of subclass
+    //   ?SC rdfs:subClassOf :Type .
+    //   :R  rdfs:subClassOf :S1 .
+    //   :R  rdfs:subClassOf :S2 .
+    // Data has :subClassOf, :subProperty Of:
+    // Domain and range need expanding?
+    //   :p rdfs:domain :T1 . :T1 subClassOf :T2 => :p rdfs:domain :T2 .
+    //       includeDerivedDataRDFS
+
+    // [ ] assertSparql
+
+    // """
+    // Modes of
+    //   combined A-box, T-box but hiding derived data
+    //   split A-box, T-box but with derived RDFS from data
+    // are not supported.
+    // """
+
+    // [x] AssemblerDatasetRDFS
+    // [x] AssemblerGraphRDFS
+    // [x] org.apache.jena.riot.process.inf.InfFactory
 
     // Check and deal with:
     // [RDFS]

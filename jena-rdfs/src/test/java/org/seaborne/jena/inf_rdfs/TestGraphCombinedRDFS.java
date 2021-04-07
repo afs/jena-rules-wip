@@ -19,7 +19,8 @@
 package org.seaborne.jena.inf_rdfs;
 
 import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.compose.MultiUnion;
+import org.apache.jena.graph.GraphUtil;
+import org.apache.jena.sparql.graph.GraphFactory;
 
 /** Test a GraphRDFS */
 public class TestGraphCombinedRDFS extends AbstractTestGraphRDFS {
@@ -27,9 +28,9 @@ public class TestGraphCombinedRDFS extends AbstractTestGraphRDFS {
     private Graph testGraph = null;
 
     public TestGraphCombinedRDFS(){
-        MultiUnion g = new MultiUnion();
-        g.addGraph(data);
-        g.addGraph(vocab);
+        Graph g = GraphFactory.createDefaultGraph();
+        GraphUtil.addInto(g, data);
+        GraphUtil.addInto(g, vocab);
         testGraph = InfFactory.graphRDFS(g);
     }
 

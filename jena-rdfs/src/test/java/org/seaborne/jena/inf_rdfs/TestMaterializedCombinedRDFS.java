@@ -19,7 +19,6 @@ package org.seaborne.jena.inf_rdfs;
 
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.GraphUtil;
-import org.apache.jena.graph.Node;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.riot.system.StreamRDFOps;
@@ -38,7 +37,9 @@ public class TestMaterializedCombinedRDFS extends AbstractTestGraphRDFS {
         testGraphMaterialized = GraphFactory.createDefaultGraph();
         GraphUtil.addInto(dataTest, data);    // dataTest <- data
         GraphUtil.addInto(dataTest, vocab);   // dataTest <- vocab
-        SetupRDFS<Node> setup = InfFactory.setupRDF(vocab, true);
+        SetupRDFS setup = InfFactory.setupRDFS(vocab, true);
+
+        // Fill testGraphMaterialized
         StreamRDF stream = StreamRDFLib.graph(testGraphMaterialized);
         stream = new InfStreamRDFS(stream, setup);
         StreamRDFOps.graphToStream(dataTest, stream);
@@ -58,7 +59,7 @@ public class TestMaterializedCombinedRDFS extends AbstractTestGraphRDFS {
 
     @Override
     protected String getTestLabel() {
-        return "Expaned, combined";
+        return "Expanded, combined";
     }
 }
 

@@ -36,6 +36,7 @@ import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.sparql.graph.NodeConst;
 import org.apache.jena.sparql.sse.SSE;
 import org.junit.Test;
+import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
 
 /**
  * Stream machinery tests.
@@ -50,7 +51,7 @@ public class TestInfStreamRDFS {
     static final String RULES_FILE = DIR+"/rdfs-min.rules";
     protected static Graph vocab;
     protected static Graph data;
-    protected static SetupRDFS<Node> setup;
+    protected static SetupRDFS_X<Node> setup;
 
     static {
         vocab = RDFDataMgr.loadGraph(VOCAB_FILE);

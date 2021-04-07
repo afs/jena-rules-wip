@@ -16,8 +16,11 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.inf_rdfs.assembler;
+package solver;
 
-public class AssemblerGraphRDFS {
-
+public class TS_SolverQ {
+    //       AbstractDatasetGraphTests
+    //       AbstractDatasetGraphFind
+    //       AbstractDatasetGraphFindPatterns
+    //       AbstractTestGraphOverDatasetGraph
 }

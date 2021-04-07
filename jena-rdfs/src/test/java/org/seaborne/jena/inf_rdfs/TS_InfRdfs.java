@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
     , TestMaterializedCombinedRDFS.class
     , TestMaterializedSplitRDFS.class
     , TestInfStreamRDFS.class
+    , TestAssemblerRDFS.class
 })
 
 public class TS_InfRdfs { }

@@ -18,7 +18,6 @@
 package org.seaborne.jena.inf_rdfs;
 
 import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.Node;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.riot.system.StreamRDFOps;
@@ -33,7 +32,7 @@ public class TestMaterializedSplitRDFS extends AbstractTestGraphRDFS {
     private static Graph testGraphMaterialized;
     @BeforeClass public static void setupHere() {
         testGraphMaterialized = GraphFactory.createDefaultGraph();
-        SetupRDFS<Node> setup = InfFactory.setupRDF(vocab, false);
+        SetupRDFS setup = InfFactory.setupRDFS(vocab, false);
         StreamRDF stream = StreamRDFLib.graph(testGraphMaterialized);
         stream = new InfStreamRDFS(stream, setup);
         StreamRDFOps.graphToStream(data, stream);

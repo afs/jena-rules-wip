@@ -19,7 +19,7 @@ package org.seaborne.jena.inf_rdfs.engine;
 
 import java.util.Set;
 
-import org.seaborne.jena.inf_rdfs.SetupRDFS;
+import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
 
 /**
  * Apply a fixed set of inference rules to a 3-tuple.
@@ -40,7 +40,7 @@ import org.seaborne.jena.inf_rdfs.SetupRDFS;
 
 public class ApplyRDFS<X, T> extends CxtInf<X,T>{
 
-    public ApplyRDFS(SetupRDFS<X> setup, MapperX<X, T> mapper) {
+    public ApplyRDFS(SetupRDFS_X<X> setup, MapperX<X, T> mapper) {
         super(setup, mapper);
     }
 
@@ -77,6 +77,8 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs9: (?x rdfs:subClassOf ?y), (?a rdf:type ?x) -> (?a rdf:type ?y)]
      */
     private void subClass(X s, X p, X o, Output<X> out) {
+        if ( ! setup.hasClassDeclarations() )
+            return;
         if ( p.equals(rdfType) ) {
             Set<X> x = setup.getSuperClasses(o);
             x.forEach(c -> derive(s, rdfType, c, out));
@@ -99,6 +101,8 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs6: (?a ?p ?b), (?p rdfs:subPropertyOf ?q) -> (?a ?q ?b)]
      */
     private void subProperty(X s, X p, X o, Output<X> out) {
+        if ( ! setup.hasPropertyDeclarations() )
+            return;
         Set<X> x = setup.getSuperProperties(p);
         x.forEach(p2 -> derive(s, p2, o, out));
         if ( setup.includeDerivedDataRDFS() ) {
@@ -121,6 +125,8 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs9: (?x rdfs:subClassOf ?y), (?a rdf:type ?x) -> (?a rdf:type ?y)]
      */
     final private void domain(X s, X p, X o, Output<X> out) {
+        if ( ! setup.hasDomainDeclarations() )
+            return;
         Set<X> x = setup.getDomain(p);
         x.forEach(c -> {
             derive(s, rdfType, c, out);
@@ -135,7 +141,8 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs9: (?x rdfs:subClassOf ?y), (?a rdf:type ?x) -> (?a rdf:type ?y)]
      */
     final private void range(X s, X p, X o, Output<X> out) {
-        // Range
+        if ( ! setup.hasRangeDeclarations() )
+            return;
         Set<X> x = setup.getRange(p);
         x.forEach(c -> {
             derive(o, rdfType, c, out);

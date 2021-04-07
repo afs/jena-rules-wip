@@ -19,6 +19,7 @@
 package org.apache.jena.inf_rdfs.sys;
 
 import org.apache.jena.sys.JenaSystem;
+import org.seaborne.jena.inf_rdfs.assembler.VocabRDFS;
 
 public class SysRDFS {
 
@@ -39,6 +40,7 @@ public class SysRDFS {
                 System.err.println("SysRDFS.init - start");
 
             // Wire in assemblers
+            VocabRDFS.init();
 
             if ( JenaSystem.DEBUG_INIT )
                 System.err.println("SysRDFS.init - finish");

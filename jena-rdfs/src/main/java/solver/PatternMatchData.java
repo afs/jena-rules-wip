@@ -108,6 +108,7 @@ public class PatternMatchData {
         return new QueryIterAbortable(chain, killList, input, execCxt);
     }
 
+    // SolverRX
 //    static Iterator<Binding> matchQuadPattern(Iterator<BindingNodeId> chain, Node graphNode, Triple tPattern,
 //                                              NodeTupleTable nodeTupleTable, Tuple<Node> patternTuple,
 //                                              boolean anyGraph, Predicate<Tuple<NodeId>> filter, ExecutionContext execCxt) {

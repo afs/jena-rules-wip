@@ -25,7 +25,7 @@ import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.Quad;
-import org.seaborne.jena.inf_rdfs.SetupRDFS;
+import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
 
 /**
  * Find in one graph of a dataset.
@@ -36,7 +36,7 @@ public class InfFindQuad extends MatchRDFS<Node, Quad> {
     private final DatasetGraph dsg;
     private Node graph;
 
-    public InfFindQuad(SetupRDFS<Node> setup, Node g, DatasetGraph dsg) {
+    public InfFindQuad(SetupRDFS_X<Node> setup, Node g, DatasetGraph dsg) {
         super(setup, Mappers.mapperQuad(g));
         this.graph = g ;
         this.dsg = dsg;
@@ -44,7 +44,7 @@ public class InfFindQuad extends MatchRDFS<Node, Quad> {
 
     @Override
     public Stream<Quad> sourceFind(Node s, Node p, Node o) {
-        Iterator<Quad> iter = dsg.find(graph, s,p,o);
+        Iterator<Quad> iter = dsg.find(graph, s, p, o);
         Stream<Quad> stream = Iter.asStream(iter);
         return stream;
     }

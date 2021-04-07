@@ -30,14 +30,13 @@ import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.tdb2.store.NodeId;
-import org.seaborne.jena.inf_rdfs.SetupRDFS;
 import org.seaborne.jena.inf_rdfs.engine.InfGlobal;
 
 /**
  * Core datastructures needed for RDFS for one vocabulary.
  * To be general, this is in {@code <X>} space (e.g. {@link Node}, {@link NodeId}).
  */
-public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
+public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
     public final Graph vocabGraph;
     // Variants for with and without the key in the value side.
 
@@ -45,17 +44,20 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
     private final Map<X, Set<X>> superClassesInc      = new HashMap<>();
     private final Map<X, Set<X>> subClasses           = new HashMap<>();
     private final Map<X, Set<X>> subClassesInc        = new HashMap<>();
-    private final Set<X> classes                      = new HashSet<>();
+
     private final Map<X, Set<X>> superPropertiesInc   = new HashMap<>();
     private final Map<X, Set<X>> superProperties      = new HashMap<>();
     private final Map<X, Set<X>> subPropertiesInc     = new HashMap<>();
     private final Map<X, Set<X>> subProperties        = new HashMap<>();
+
     // Predicate -> type
     private final Map<X, Set<X>> propertyRange        = new HashMap<>();
     private final Map<X, Set<X>> propertyDomain       = new HashMap<>();
+
     // Type -> predicate
     private final Map<X, Set<X>> rangeToProperty      = new HashMap<>();
     private final Map<X, Set<X>> domainToProperty     = new HashMap<>();
+
     // Whether we include the RDFS data in the results (as if TBox (rules) and ABox (ground data) are one unit).
     private final boolean includeDerivedDataRDFS$;
     private final boolean hasAnyRDFS;
@@ -76,7 +78,6 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
         vocabGraph = vocab;
 
         // Calculate a different way and see if the answers are the same.
-        // [RDFS]
         final boolean CHECK = false;
 
         // Find super/sub classes
@@ -99,11 +100,6 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
         if ( CHECK )
             execCheck("rdfs:range", vocab, propertyRange, rangeToProperty);
 
-        // All mentioned classes
-        classes.addAll(superClasses.keySet());
-        classes.addAll(subClasses.keySet());
-        classes.addAll(rangeToProperty.keySet());
-        classes.addAll(domainToProperty.keySet());
         deepCopyInto(superClassesInc, superClasses);
         addKeysToValues(superClassesInc);
         deepCopyInto(subClassesInc, subClasses);
@@ -118,10 +114,11 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
 
     protected abstract X fromNode(Node node);
 
+    // Calculate using SPARQL andsee if we get the same answer.
     private void execCheck(String path, Graph vocab, Map<X, Set<X>> supers, Map<X, Set<X>> subs) {
-        Map<X, Set<X>> mSupers         = new HashMap<>();
-        Map<X, Set<X>> mSubs           = new HashMap<>();
-        String queryString = "SELECT ?x ?y { ?x "+path+" ?y }";
+        Map<X, Set<X>> mSupers  = new HashMap<>();
+        Map<X, Set<X>> mSubs    = new HashMap<>();
+        String queryString      = "SELECT ?x ?y { ?x "+path+" ?y }";
         exec(queryString, vocab, mSupers, mSubs);
         if ( ! mSupers.equals(supers) || ! mSubs.equals(subs) )
             throw new InternalErrorException(path);
@@ -151,6 +148,7 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
         });
     }
 
+    // The copy does not share teh Set structure with the source.
     private void deepCopyInto(Map<X, Set<X>> dest, Map<X, Set<X>> src) {
         src.entrySet().forEach(e -> {
             Set<X> x = new HashSet<>(e.getValue());
@@ -158,6 +156,7 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS<X>{
         });
     }
 
+    //  For each entry, add the key in the value set.
     private void addKeysToValues(Map<X, Set<X>> map) {
         map.entrySet().forEach(e -> e.getValue().add(e.getKey()) );
     }

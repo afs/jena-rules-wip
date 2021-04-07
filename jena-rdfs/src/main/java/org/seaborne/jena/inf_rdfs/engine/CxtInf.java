@@ -21,7 +21,7 @@ package org.seaborne.jena.inf_rdfs.engine;
 import java.util.Objects;
 
 import org.apache.jena.graph.Node;
-import org.seaborne.jena.inf_rdfs.SetupRDFS;
+import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
 
 /**
  * Class to help implementations of RDFS inference.
@@ -35,10 +35,10 @@ import org.seaborne.jena.inf_rdfs.SetupRDFS;
     public final X rdfsSubPropertyOf;
     public final X rdfsDomain;
     public final X rdfsRange;
-    public final SetupRDFS<X> setup;
+    public final SetupRDFS_X<X> setup;
     public final MapperX<X, T> mapper;
 
-    protected CxtInf(SetupRDFS<X> setup, MapperX<X, T> mapper) {
+    protected CxtInf(SetupRDFS_X<X> setup, MapperX<X, T> mapper) {
         this.setup = Objects.requireNonNull(setup);
         this.mapper = Objects.requireNonNull(mapper);
         this.ANY = mapper.fromNode(Node.ANY);

@@ -27,6 +27,7 @@ import org.apache.jena.sparql.core.Quad;
 import org.seaborne.jena.inf_rdfs.engine.ApplyRDFS;
 import org.seaborne.jena.inf_rdfs.engine.Mappers;
 import org.seaborne.jena.inf_rdfs.engine.Output;
+import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
 
 /**
  * A {@link StreamRDF} that applies RDFS to the stream.
@@ -37,7 +38,7 @@ import org.seaborne.jena.inf_rdfs.engine.Output;
  * The output stream may include duplicates.
  */
 public class InfStreamRDFS extends StreamRDFWrapper {
-    private final SetupRDFS<Node>     rdfsSetup;
+    private final SetupRDFS_X<Node>     rdfsSetup;
     private final ApplyRDFS<Node, Triple> rdfs;
     private final Output<Node> outputTriple;
     private final boolean includeInput = true;
@@ -46,7 +47,7 @@ public class InfStreamRDFS extends StreamRDFWrapper {
     private Output<Node> currentGraphOutput;
     private ApplyRDFS<Node, Quad> rdfsQuad = null;
 
-    public InfStreamRDFS(final StreamRDF output, SetupRDFS<Node> rdfsSetup) {
+    public InfStreamRDFS(final StreamRDF output, SetupRDFS_X<Node> rdfsSetup) {
         super(output);
         this.rdfsSetup = rdfsSetup;
         outputTriple = (s,p,o)->output.triple(Triple.create(s,p,o));

@@ -18,7 +18,8 @@
 package dev;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
 
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.logging.LogCtl;
@@ -32,33 +33,29 @@ import org.apache.jena.riot.other.Transitive;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
 import org.apache.jena.riot.system.StreamRDFOps;
-import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.DatasetGraph;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.engine.ExecutionContext;
-import org.apache.jena.sparql.engine.QueryIterator;
-import org.apache.jena.sparql.engine.binding.Binding;
-import org.apache.jena.sparql.engine.binding.BindingFactory;
-import org.apache.jena.sparql.engine.iterator.QueryIterRoot;
+import org.apache.jena.sparql.core.assembler.AssemblerUtils;
 import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.engine.main.QueryEngineMain;
 import org.apache.jena.sparql.engine.main.QueryEngineMainQuad;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.sse.SSE;
 import org.apache.jena.sparql.util.QueryExecUtils;
+import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.tdb2.DatabaseMgr;
+import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.seaborne.jena.inf_rdfs.*;
+import org.seaborne.jena.inf_rdfs.assembler.VocabRDFS;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_TDB1;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_TDB2;
 import solver.OpExecutorQuads;
-import solver.PatternMatchData;
 
 public class DevRDFS {
     static {
-        //JenaSystem.DEBUG_INIT = true;
+        JenaSystem.init();
         LogCtl.setLogging();
     }
 
@@ -75,27 +72,13 @@ public class DevRDFS {
 
     static Graph inf;
 
-    private static void test() {
-        Graph g = GraphFactory.createDefaultGraph();
-        g.add(SSE.parseTriple("(:n1 :p :n2)"));
-        g.add(SSE.parseTriple("(:n2 :p :n3)"));
-        g.add(SSE.parseTriple("(:n2 :p :n4)"));
-        g.add(SSE.parseTriple("(:n3 :p :n5)"));
-        g.add(SSE.parseTriple("(:n5 :p :n1)"));
-        g.add(SSE.parseTriple("(:n1 :p :n1)"));
-//        g.add(SSE.parseTriple("()"));
-//        g.add(SSE.parseTriple("()"));
-
-        //Multimap<Node, Node> x = TransitiveX.transitive(g, SSE.parseNode(":p"));
-        //x.keySet().forEach(k->System.out.printf("%s   %s\n", k,x.get(k)));
-        Map<Node, Collection<Node>> x = Transitive.transitive(g, SSE.parseNode(":p"));
-        x.forEach((k,v)->System.out.printf("%s   %s\n", k, v));
-        System.out.println("DONE");
-        System.exit(0);
-    }
-
     public static void main(String...argv) throws IOException {
+        visible(); System.exit(0);
+
+
         //matchData();System.exit(0);
+
+        assembler();System.exit(0);
 
         sparql();
         System.exit(0);
@@ -103,40 +86,22 @@ public class DevRDFS {
         expand();
     }
 
-    static String[] data = {
-         "(:g :S :p :x)"
-        ,"(:g1 :s1 :p :x)"
-        ,"(:g1 :x :p 'B')"
-        ,"(:g2 :s1 :p :x)"
-        ,"(:g2 :x :p 'C')"
-    };
+    private static void visible() {
+        Graph g0 = SSE.parseGraph("(graph (:s rdf:type :T) (:T rdfs:subClassOf :T2))");
+        Graph graph =InfFactory.graphRDFS(g0);
+        ExtendedIterator<Triple> iter = graph.find(null, null, SSE.parseNode(":T2"));
+        Iter.print(iter);
+    }
 
-    private static void matchData() {
-        DatasetGraph dsg = DatasetGraphFactory.createTxnMem();
-        Arrays.stream(data).forEach(x->dsg.add(SSE.parseQuad(x)));
-        ExecutionContext execCxt = new ExecutionContext(null, dsg.getDefaultGraph(), dsg, null);
-        BasicPattern bgp = SSE.parseBGP("(bgp (?s ?p ?x) (?x ?q ?o))");
+    private static void assembler() {
+        // vocab.ttl
+        // data.ttl
 
-        //Node gn = Quad.unionGraph;
-        Node gn = SSE.parseNode("?g");
-
-        //Check input with binding
-        Binding start = BindingFactory.binding(Var.alloc("g"), SSE.parseNode(":g2"));
-        //Binding start = BindingFactory.root();
-        QueryIterator input = QueryIterRoot.create(start, execCxt);
-        QueryIterator iter = PatternMatchData.execute(dsg, gn, bgp, input, null, execCxt);
-
-//        Iterator<Binding> iter = StageMatchData.access(BindingFactory.root(),
-//                                                       null, SSE.parseTriple("(?s ?p ?o)"),
-//                                                       null/*filter*/, true, execContext);
-        List<Binding> x = Iter.toList(iter);
-        if ( x.isEmpty() )
-            System.out.println("[ <empty> ]");
-        else {
-            StringJoiner sj = new StringJoiner("\n  ", "[\n  ", "\n]");
-            x.forEach(b->sj.add(b.toString()));
-            System.out.println(sj.toString());
-        }
+        Dataset ds = (Dataset)AssemblerUtils.build("assembler-rdfs.ttl", VocabRDFS.tDatasetRDFS);
+        RDFDataMgr.write(System.out, ds.getDefaultModel(), Lang.TTL);
+        System.out.println("--------------");
+        Model model = (Model)AssemblerUtils.build("assembler-rdfs.ttl", VocabRDFS.tGraphRDFS);
+        RDFDataMgr.write(System.out, model, Lang.TTL);
     }
 
     private static void sparql() {
@@ -153,7 +118,7 @@ public class DevRDFS {
 //        RDFDataMgr.write(System.out, data, Lang.TTL);
 //        System.out.println("----");
 
-        SetupRDFS<Node> setup = InfFactory.setupRDF(vocab.getGraph(), false);
+        SetupRDFS setup = InfFactory.setupRDFS(vocab.getGraph(), false);
 
         if ( false )
         {
@@ -302,7 +267,7 @@ public class DevRDFS {
         System.out.println("---- Expansion");
         // Expansion Graph
         Graph graphExpanded = Factory.createDefaultGraph();
-        SetupRDFS<Node> setup = InfFactory.setupRDF(vocab.getGraph(), combined);
+        SetupRDFS setup = InfFactory.setupRDFS(vocab.getGraph(), combined);
         StreamRDF stream = StreamRDFLib.graph(graphExpanded);
         // Apply inferences.
         stream = new InfStreamRDFS(stream, setup);
@@ -315,5 +280,24 @@ public class DevRDFS {
 //        graph.getPrefixMapping().getNsPrefixMap().forEach(stream::prefix);
 //        graph.find(Node.ANY, Node.ANY, Node.ANY).forEachRemaining(stream::triple);
     }
+
+    private static void dwimTransitive() {
+            Graph g = GraphFactory.createDefaultGraph();
+            g.add(SSE.parseTriple("(:n1 :p :n2)"));
+            g.add(SSE.parseTriple("(:n2 :p :n3)"));
+            g.add(SSE.parseTriple("(:n2 :p :n4)"));
+            g.add(SSE.parseTriple("(:n3 :p :n5)"));
+            g.add(SSE.parseTriple("(:n5 :p :n1)"));
+            g.add(SSE.parseTriple("(:n1 :p :n1)"));
+    //        g.add(SSE.parseTriple("()"));
+    //        g.add(SSE.parseTriple("()"));
+
+            //Multimap<Node, Node> x = TransitiveX.transitive(g, SSE.parseNode(":p"));
+            //x.keySet().forEach(k->System.out.printf("%s   %s\n", k,x.get(k)));
+            Map<Node, Collection<Node>> x = Transitive.transitive(g, SSE.parseNode(":p"));
+            x.forEach((k,v)->System.out.printf("%s   %s\n", k, v));
+            System.out.println("DONE");
+            System.exit(0);
+        }
 }
 

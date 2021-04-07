@@ -18,9 +18,6 @@
 
 package solver;
 
-import org.apache.jena.graph.Node;
-import org.apache.jena.sparql.algebra.op.OpBGP;
-import org.apache.jena.sparql.algebra.op.OpGraph;
 import org.apache.jena.sparql.algebra.op.OpQuad;
 import org.apache.jena.sparql.algebra.op.OpQuadPattern;
 import org.apache.jena.sparql.engine.ExecutionContext;
@@ -42,55 +39,5 @@ public class OpExecutorQuads extends OpExecutor {
     protected QueryIterator execute(OpQuadPattern quadPattern, QueryIterator input) {
         QueryIterator qIter = PatternMatchData.execute(execCxt.getDataset(), quadPattern.getGraphNode(), quadPattern.getBasicPattern(), input, null/*filter*/, execCxt);
         return qIter;
-
-//        // Convert to BGP forms to execute in this graph-centric engine.
-//        if (quadPattern.isDefaultGraph() && execCxt.getActiveGraph() == execCxt.getDataset().getDefaultGraph()) {
-//            // Note we tested that the containing graph was the dataset's
-//            // default graph.
-//            // Easy case.
-//            OpBGP opBGP = new OpBGP(quadPattern.getBasicPattern()) ;
-//            return execute(opBGP, input) ;
-//        }
-//        // Not default graph - (graph .... )
-//        OpBGP opBGP = new OpBGP(quadPattern.getBasicPattern()) ;
-//        OpGraph op = new OpGraph(quadPattern.getGraphNode(), opBGP) ;
-//        return execute(op, input) ;
     }
-
-    @Override
-    protected QueryIterator execute(OpBGP opBGP, QueryIterator input) {
-//             super:: QueryIterator qIter = stageGenerator.execute(pattern, input, execCxt) ;
-        return super.execute(opBGP, input);
-    }
-//
-//    @Override
-//    protected QueryIterator execute(OpTriple opTriple, QueryIterator input) {
-//        return super.execute(opTriple, input);
-//    }
-
-    protected Node currentGraph = null;
-
-    @Override
-    protected QueryIterator execute(OpGraph opGraph, QueryIterator input) {
-        Node gn = opGraph.getNode();
-        // Stack
-        Node previous = currentGraph;
-        try {
-            currentGraph = gn;
-            return super.execute(opGraph, input);
-        } finally {
-            currentGraph = previous;
-        }
-    }
-
-//    @Override
-//    protected QueryIterator execute(OpQuadBlock quadBlock, QueryIterator input) {
-//        Op op = quadBlock.convertOp() ;
-//        return exec(op, input) ;
-//    }
-//
-//    @Override
-//    protected QueryIterator execute(OpPath opPath, QueryIterator input) {
-//        return new QueryIterPath(opPath.getTriplePath(), input, execCxt) ;
-//    }
 }

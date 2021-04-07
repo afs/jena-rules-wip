@@ -31,18 +31,21 @@ import org.apache.jena.util.FileUtils;
 public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
     // [RDFS] As parameterized tests
 
-    static final String DIR = "testing/Inf";
-    static final String DATA_FILE = DIR+"/rdfs-data.ttl";
-    static final String VOCAB_FILE = DIR+"/rdfs-vocab.ttl";
-    //static final String RULES_FILE = DIR+"/rdfs-min-backwards.rules";
-    static final String RULES_FILE = DIR+"/rdfs-min.rules";
-    private static Graph infGraph;
+    private static final String DIR = "testing/Inf";
+    private static final String DATA_FILE = DIR+"/rdfs-data.ttl";
+    private static final String VOCAB_FILE = DIR+"/rdfs-vocab.ttl";
+
+    // [RDFS] 4 failues (2* same on combined A-box/T-box.)
+    //private static final String RULES_FILE = DIR+"/rdfs-min-backwards.rules";
+    // Forward rules.
+    private static final String RULES_FILE = DIR+"/rdfs-min.rules";
+    private static Graph referenceGraph;
     protected static Graph vocab;
     protected static Graph data;
     static {
         vocab = RDFDataMgr.loadGraph(VOCAB_FILE);
         data = RDFDataMgr.loadGraph(DATA_FILE);
-        infGraph = createRulesGraph(data, vocab, RULES_FILE);
+        referenceGraph = createRulesGraph(data, vocab, RULES_FILE);
     }
 
     /** Create a Jena-rules backed graph */
@@ -60,7 +63,7 @@ public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
     @Override
     final
     protected Graph getReferenceGraph() {
-        return infGraph;
+        return referenceGraph;
     }
 
     @Override

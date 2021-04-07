@@ -81,7 +81,10 @@ public class StageMatchData {
 
         DatasetGraph dsg = execCxt.getDataset();
 
-        Iterator<Quad> iterMatches = dsg.find(gm, sm, pm, om);
+        // Union -> findNG - do not include default graph.
+        Iterator<Quad> iterMatches = anyGraph
+                ? dsg.findNG(gm, sm, pm, om)
+                : dsg.find(gm, sm, pm, om) ;
 
         if ( false ) {
             // Debug

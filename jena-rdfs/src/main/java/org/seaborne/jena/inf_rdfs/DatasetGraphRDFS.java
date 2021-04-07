@@ -36,14 +36,14 @@ public class DatasetGraphRDFS extends DatasetGraphWrapper implements DatasetGrap
     // Do not unwrap.
     // Name name as DatasetGraphWrapperFinal?
 
-    private final SetupRDFS<Node> setup;
+    private final SetupRDFS setup;
 
-    public DatasetGraphRDFS(DatasetGraph dsg, SetupRDFS<Node> setup) {
+    public DatasetGraphRDFS(DatasetGraph dsg, SetupRDFS setup) {
         super(dsg);
         this.setup = setup;
     }
 
-    public DatasetGraphRDFS(DatasetGraph dsg, SetupRDFS<Node> setup, Context cxt) {
+    public DatasetGraphRDFS(DatasetGraph dsg, SetupRDFS setup, Context cxt) {
         super(dsg, cxt);
         this.setup = setup;
     }
@@ -91,7 +91,7 @@ public class DatasetGraphRDFS extends DatasetGraphWrapper implements DatasetGrap
     }
 
     private Iterator<Quad> findInf(Node g, Node s, Node p, Node o) {
-        MatchRDFS<Node, Quad> infMatcher = new InfFindQuad(setup, g , getR());
+        MatchRDFS<Node, Quad> infMatcher = new InfFindQuad(setup, g, getR());
         Stream<Quad> quads = infMatcher.match(s, p, o);
         Iterator<Quad> iter = quads.iterator();
         // [RDFS] Close : Check
@@ -101,14 +101,16 @@ public class DatasetGraphRDFS extends DatasetGraphWrapper implements DatasetGrap
 
     @Override
     public Iterator<Quad> findNG(Node g, Node s, Node p, Node o) {
-        //
         if ( Quad.isDefaultGraph(g) )
             throw new IllegalArgumentException("Default graph is findNG call");
         if ( g == null )
             g = Node.ANY;
-        // [RDFS] Check!
-        // Exclude default graph by filter
-        return Iter.filter(findInf(g, s, p, o), q-> ! q.isDefaultGraph());
+        Iterator<Quad> iter = findInf(g, s, p, o);
+        // [RDFS] need test
+        if ( g == Node.ANY )
+            // Exclude default graph by filter
+            iter = Iter.filter(findInf(g, s, p, o), q-> ! q.isDefaultGraph());
+        return iter;
     }
 
     @Override

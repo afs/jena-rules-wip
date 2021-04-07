@@ -17,10 +17,9 @@
 
 package org.seaborne.jena.inf_rdfs;
 import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.system.StreamRDF;
-import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_Node;
+import org.apache.jena.sparql.core.DatasetGraph;
 
 /** Factory for interference-related classes. */
 public class InfFactory {
@@ -29,28 +28,40 @@ public class InfFactory {
      * Create an RDFS inference graph with split A-box (data) and T-box (RDFS schema).
      */
     public static Graph graphRDFS(Graph data, Graph vocab) {
-        return graphRDFS(data, new SetupRDFS_Node(vocab, data==vocab));
+        return graphRDFS(data, new SetupRDFS(vocab, data==vocab));
     }
 
     /**
-     * Create an RDFS inference graph over a graph with both  with split A-box (data) and T-box (RDFS schema).
+     * Create an RDFS inference graph over a graph with both A-box (data) and T-box (RDFS schema).
      */
     public static Graph graphRDFS(Graph data) {
-        return graphRDFS(data, new SetupRDFS_Node(data, true));
+        return graphRDFS(data, new SetupRDFS(data, true));
+    }
+
+    /**
+     * Create an RDFS inference graph over a graph according to an {@link SetupRDFS}.
+     */
+    public static Graph graphRDFS(Graph data, SetupRDFS setup) {
+        return new GraphRDFS(data, setup);
+    }
+
+    /**
+     * Create an RDFS inference dataset.
+     */
+    public static DatasetGraph datasetRDFS(DatasetGraph data, SetupRDFS setup) {
+        return new DatasetGraphRDFS(data, setup);
+    }
+
+    /**
+     * Create an RDFS inference dataset.
+     */
+    public static DatasetGraph datasetRDFS(DatasetGraph data, Graph vocab ) {
+        return new DatasetGraphRDFS(data, new SetupRDFS(vocab, true));
     }
 
     /** Create an {@link SetupRDFS} */
-    public static SetupRDFS<Node> setupRDF(Graph vocab, boolean incDerivedDataRDFS) {
-        return new SetupRDFS_Node(vocab, incDerivedDataRDFS);
-    }
-
-    // Modes of
-    //   combined A-box, T-box but hiding derived data
-    //   split A-box, T-box but with derived RDFS from data
-    // are not supported.
-
-    public static Graph graphRDFS(Graph data, SetupRDFS<Node> setup) {
-        return new GraphRDFS(data, setup);
+    public static SetupRDFS setupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
+        return new SetupRDFS(vocab, incDerivedDataRDFS);
     }
 
     /** Stream expand data based on a separate vocabulary */
@@ -60,12 +71,12 @@ public class InfFactory {
 
     /** Stream expand data based on a separate vocabulary */
     public static StreamRDF infRDFS(StreamRDF data, Graph vocab) {
-        SetupRDFS_Node setup = new SetupRDFS_Node(vocab, false);
+        SetupRDFS setup = new SetupRDFS(vocab, false);
         return infRDFS(data, setup);
     }
 
     /** Expand a stream of RDF using RDFS */
-    public static StreamRDF infRDFS(StreamRDF data, SetupRDFS<Node> setup) {
+    public static StreamRDF infRDFS(StreamRDF data, SetupRDFS setup) {
         return new InfStreamRDFS(data, setup);
     }
 }
