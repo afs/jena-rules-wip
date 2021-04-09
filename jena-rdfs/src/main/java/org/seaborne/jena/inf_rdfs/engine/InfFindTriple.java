@@ -53,7 +53,7 @@ public class InfFindTriple extends MatchRDFS<Node, Triple> {
     }
 
     @Override
-    protected Triple dstCcreate(Node s, Node p, Node o) {
+    protected Triple dstCreate(Node s, Node p, Node o) {
         return Triple.create(s, p, o);
     }
 }

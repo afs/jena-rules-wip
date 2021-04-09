@@ -35,10 +35,14 @@ public abstract class AbstractTestGraphRDFS extends AbstractTestRDFS {
     private static final String DATA_FILE = DIR+"/rdfs-data.ttl";
     private static final String VOCAB_FILE = DIR+"/rdfs-vocab.ttl";
 
-    // [RDFS] 4 failues (2* same on combined A-box/T-box.)
-    //private static final String RULES_FILE = DIR+"/rdfs-min-backwards.rules";
+    // Should be the same outcomes.
+    // Backward rules.
+    private static final String RULES_FILE_BWD = DIR+"/rdfs-min-backwards.rules";
     // Forward rules.
-    private static final String RULES_FILE = DIR+"/rdfs-min.rules";
+    private static final String RULES_FILE_FWD = DIR+"/rdfs-min.rules";
+
+    private static final String RULES_FILE = RULES_FILE_FWD;
+
     private static Graph referenceGraph;
     protected static Graph vocab;
     protected static Graph data;

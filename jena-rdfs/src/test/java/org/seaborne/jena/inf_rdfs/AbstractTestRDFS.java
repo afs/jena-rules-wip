@@ -17,7 +17,7 @@
 
 package org.seaborne.jena.inf_rdfs;
 
-import static org.seaborne.jena.inf_rdfs.engine.InfGlobal.rdfType;
+import static org.seaborne.jena.inf_rdfs.engine.InfGlobal.*;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -110,6 +110,17 @@ public abstract class AbstractTestRDFS {
 
     @Test public void test_rdfs_30()        { test(node("e"), null, null) ; }
     @Test public void test_rdfs_31()        { test(node("e"), node("r"), null) ; }
+
+    // [RDFS]
+    @Test public void test_rdfs_40()        { test(null, rdfsSubClassOf, null); }
+    @Test public void test_rdfs_40a()       { test(node("T3"), rdfsSubClassOf, null); }
+    @Test public void test_rdfs_40b()       { test(null, rdfsSubClassOf, node("T3")); }
+    @Test public void test_rdfs_40c()       { test(node("T3"), rdfsSubClassOf, node("T3")); }
+
+    @Test public void test_rdfs_41()        { test(null, rdfsSubPropertyOf, null); }
+    @Test public void test_rdfs_41a()       { test(node("p"), rdfsSubPropertyOf, null); }
+    @Test public void test_rdfs_41b()       { test(null, rdfsSubPropertyOf, node("p")); }
+    @Test public void test_rdfs_41c()       { test(node("p"), rdfsSubPropertyOf, node("p")); }
 
     protected void test(Node s, Node p, Node o) {
         //RDFDataMgr.write(System.out, getReferenceGraph(), RDFFormat.TURTLE_FLAT);

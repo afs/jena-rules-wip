@@ -38,36 +38,35 @@ public class NotesRDFS {
 
     // ---- RDFS
 
-    // [x] More tests: TestInfStreamRDFS
-    // [ ] test:assemblers.
+    // [ ] includeDerivedDataRDFS ==> combinedDataRDFS ??
+    // [ ] Test of combined data+RDFS but hide RDFS.(Why?)
+
+
+    // [ ] Need subsets of vocab/data to test with.
+    //     subclass
+    //     subproperty
+    //     range, range + subclass
+    //     domain, domain + subclass
+
+    // [ ] Revisit extract rules for tests.
+    //       Only effects "combined" i.e. RDFS in the data and not hidden.
+    //       ==> SetupRDFS.includeDerivedDataRDFS
+    //       Can we support "true" if abox != tbox? Or always false.
+    // [x] find_ANY_subClassOf_ANY
+    // [x] find_ANY_subPropertyOf_ANY
+    // [x] tests 40(? subClassOf?), 41(? subPropertyOf ?)
     // [-] Expose the stream sets - class, property, domain, range. Each has a "if work to do start so keep as-is.
-    // [?] Closing iterators IIF stream ends
-    // [ ] Check hiding modes.
+
+    // [ ] test combined abox/tbox and  incDerivedDataRDFS=false
+
     // [ ] SysRDFS  - register OpExecutor.
     // [ ] Integration tests - dataset esp. findNG
-    // [ ] Try AbstractTestGraphRDFS : min-backwards. -> 4 failures because of
-    //    org.seaborne.jena.inf_rdfs.TestGraphCombinedRDFS
-    //      test_rdfs_11(org.seaborne.jena.inf_rdfs.TestGraphCombinedRDFS)
-    //      test_rdfs_16a(org.seaborne.jena.inf_rdfs.TestGraphCombinedRDFS)
-    //    org.seaborne.jena.inf_rdfs.TestMaterializedCombinedRDFS
-    //      test_rdfs_11(org.seaborne.jena.inf_rdfs.TestMaterializedCombinedRDFS)
-    //      test_rdfs_16a(org.seaborne.jena.inf_rdfs.TestMaterializedCombinedRDFS)
-    // rdfs_16a is short.
-//    Expected: find(null, null, http://example/X)
-//        http://example/b @rdf:type http://example/X
-//      Got (Combined data,vocab):
-//        http://example/b @rdf:type http://example/X
-//        http://example/X @rdfs:subClassOf http://example/X  **
 
-//    Expected: find(null, null, http://example/X)
-//        http://example/b @rdf:type http://example/X
-//      Got (Expanded, combined):
-//        http://example/X @rdfs:subClassOf http://example/X  **
-//        http://example/b @rdf:type http://example/X
+    // [x] test:assemblers.
+    // [x] Try AbstractTestGraphRDFS : min-backwards. -> 4 failures
+    // [x] More tests: TestInfStreamRDFS
 
-
-
-
+    // == Phase 2
 
     // [ ] TDB2
     // [ ] TDB1

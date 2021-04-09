@@ -29,11 +29,11 @@
 	     (?a rdfs:subPropertyOf ?b) , notEqual(?a, ?b) , 
 	     (?b rdfs:subPropertyOf ?c) , notEqual(?b, ?c) , notEqual(?a, ?c) ]
 
-# [rdfs5b: (?a rdfs:subPropertyOf ?a) <- (?a rdf:type rdf:Property) ]
+## [rdfs5b: (?a rdfs:subPropertyOf ?a) <- (?a rdf:type rdf:Property) ]
 
 [rdfs6:  (?a ?q ?b) <- (?a ?p ?b), (?p rdfs:subPropertyOf ?q) , notEqual(?p,?q) ]
 
-# [rdfs7:  (?a rdfs:subClassOf ?a) <- (?a rdf:type rdfs:Class) ]
+## [rdfs7:  (?a rdfs:subClassOf ?a) <- (?a rdf:type rdfs:Class) ]
 
 [rdfs8:  (?a rdfs:subClassOf ?c) <- 
 	     (?a rdfs:subClassOf ?b) , notEqual(?a, ?b) ,
@@ -50,8 +50,8 @@
 # These replace (rdfs:range rdfs:range rdfs:Class) which combines with 
 # rdfs7: (?a rdf:type rdfs:Class) ]
 
+[rdfsX1: (?T rdfs:subClassOf ?T )  <- (?a rdf:type ?T ) ]
 [rdfsX2: (?T rdfs:subClassOf ?T )  <- (?a rdf:domain ?T ) ]
-
 [rdfsX3: (?T rdfs:subClassOf ?T )  <- (?a rdf:range ?T ) ]
 
 [rdfsX4: (?a rdfs:subClassOf ?a )  <- (?a rdfs:subClassOf ?b ) , notEqual(?a,?b) ]

@@ -55,7 +55,7 @@ public class InfFindQuad extends MatchRDFS<Node, Quad> {
     }
 
     @Override
-    protected Quad dstCcreate(Node s, Node p, Node o) {
+    protected Quad dstCreate(Node s, Node p, Node o) {
         return Quad.create(graph, s, p, o);
     }
 }

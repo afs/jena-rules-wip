@@ -24,11 +24,12 @@
 
 [rdfs5a: (?a rdfs:subPropertyOf ?b), (?b rdfs:subPropertyOf ?c) -> (?a rdfs:subPropertyOf ?c)]
 
-# [rdfs5b: (?a rdf:type rdf:Property) -> (?a rdfs:subPropertyOf ?a)]
+## [rdfs5b: (?a rdf:type rdf:Property) -> (?a rdfs:subPropertyOf ?a)]
 
 [rdfs6:  (?a ?p ?b), (?p rdfs:subPropertyOf ?q) -> (?a ?q ?b)]
 
-# [rdfs7:  (?a rdf:type rdfs:Class) -> (?a rdfs:subClassOf ?a)]
+# No X subClassOf when rdf:type used.
+## [rdfs7:  (?a rdf:type rdfs:Class) -> (?a rdfs:subClassOf ?a)]
 
 [rdfs8:  (?a rdfs:subClassOf ?b), (?b rdfs:subClassOf ?c) -> (?a rdfs:subClassOf ?c)]
 
@@ -41,13 +42,16 @@
 # These replace (rdfs:range rdfs:range rdfs:Class) which combines with 
 # rdfs7: (?a rdf:type rdfs:Class) -> (?a rdfs:subClassOf ?a)
 
+## Needed for "combined"
+
 [rdfsX1: (?a rdf:type ?T ) -> (?T rdfs:subClassOf ?T ) ]
 [rdfsX2: (?a rdf:domain ?T ) -> (?T rdfs:subClassOf ?T ) ]
 [rdfsX3: (?a rdf:range ?T ) -> (?T rdfs:subClassOf ?T ) ]
-
+ 
+## X rdfs:subClassOf X only if there is a rdfs:subClassOf mentioning X.
 [rdfsX4: (?a rdfs:subClassOf ?b ) , notEqual(?a,?b) -> (?a rdfs:subClassOf ?a ) ]
 [rdfsX5: (?a rdfs:subClassOf ?b ) , notEqual(?a,?b) -> (?b rdfs:subClassOf ?b ) ]
 
+## P rdfs:subClassOf P only if there is a rdfs:subPropertyOf mentioning P.
 [rdfsX6: (?a rdfs:subPropertyOf ?b ) , notEqual(?a,?b) -> (?a rdfs:subPropertyOf ?a ) ]
 [rdfsX7: (?a rdfs:subPropertyOf ?b ) , notEqual(?a,?b) -> (?b rdfs:subPropertyOf ?b ) ]
-

@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
 
 /**
@@ -42,7 +41,6 @@ import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
  * @see ApplyRDFS ApplyRDFS for the matching algorithm.
  */
 public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
-    // Debug: "stream = StreamOps.debug(stream)"
 
     private final Function<T,Stream<T>> applyInf;
 
@@ -55,7 +53,7 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
             // [RDFS]  Non-collecting stream engine. Replace?
             List<T> x = new ArrayList<>();
             x.add(t);
-            Output<X> dest = (s,p,o) -> x.add(dstCcreate(s,p,o));
+            Output<X> dest = (s,p,o) -> x.add(dstCreate(s,p,o));
             ApplyRDFS<X, T> streamInf = new ApplyRDFS<>(setup, mapper);
             //   process needed but infer+explicit current triple saves a create.
             streamInf.infer(mapper.subject(t), mapper.predicate(t), mapper.object(t), dest);
@@ -68,7 +66,7 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
     // Access data.
     protected abstract boolean sourceContains(X s, X p, X o);
     protected abstract Stream<T> sourceFind(X s, X p, X o);
-    protected abstract T dstCcreate(X s, X p, X o);
+    protected abstract T dstCreate(X s, X p, X o);
 
     protected final X subject(T tuple)        { return mapper.subject(tuple); }
     protected final X predicate(T tuple)      { return mapper.predicate(tuple); }
@@ -111,13 +109,34 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
             }
         }
 
+        // find_ANY_subClassOf_ANY
+        // find ANY_subPropertyOf_ANY
+
+        if ( rdfsSubPropertyOf.equals(predicate) || rdfsSubClassOf.equals(predicate) ) {
+            if ( ! setup.includeDerivedDataRDFS() )
+                // Only need to look in the data.
+                // No support for subPropertyOf RDFS vocabulary.
+                return sourceFind(subject, predicate, object);
+            if ( isTerm(subject) ) {
+                if ( isTerm(object) )
+                    return find_X_sub_Y(subject, predicate, object);
+                else
+                    return find_X_sub_ANY(subject, predicate);
+            } else {
+                if ( isTerm(object) )
+                    return find_ANY_sub_Y(predicate, object);
+                else
+                    return find_ANY_sub_ANY(predicate);
+            }
+        }
+
         // ?? term ??
         return find_subproperty(subject, predicate, object);
     }
 
     private Stream<T> find_subproperty(X subject, X predicate, X object) {
         // Find with subproperty
-        // We assume no subproperty of rdf:type
+        // No subProperty of rdf:type or RDFS vocabulary.
 
         Set<X> predicates = setup.getSubProperties(predicate);
         if ( predicates == null || predicates.isEmpty() )
@@ -129,7 +148,7 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
         for ( X p : predicates ) {
             Stream<T> stream = sourceFind(subject, p, object);
             // Rewrite with predicate
-            stream = stream.map(tuple -> dstCcreate(subject(tuple), predicate, object(tuple)) );
+            stream = stream.map(tuple -> dstCreate(subject(tuple), predicate, object(tuple)) );
             tuples = Stream.concat(tuples, stream);
         }
         return tuples;
@@ -137,19 +156,19 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
 
     private Stream<T> find_X_type_T(X subject, X object) {
         if ( sourceContains(subject, rdfType, object) )
-            return Stream.of(dstCcreate(subject, rdfType, object));
+            return Stream.of(dstCreate(subject, rdfType, object));
         Set<X> types = new HashSet<>();
         accTypesRange(types, subject);
         if ( types.contains(object) )
-            return Stream.of(dstCcreate(subject, rdfType, object));
+            return Stream.of(dstCreate(subject, rdfType, object));
         accTypesDomain(types, subject);
         if ( types.contains(object) )
-            return Stream.of(dstCcreate(subject, rdfType, object));
+            return Stream.of(dstCreate(subject, rdfType, object));
         accTypes(types, subject);
         // expand supertypes
         types = superTypes(types);
         if ( types.contains(object) )
-            return Stream.of(dstCcreate(subject, rdfType, object));
+            return Stream.of(dstCreate(subject, rdfType, object));
         return Stream.empty();
     }
 
@@ -160,7 +179,7 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
         accTypes(types, subject);
         // expand supertypes
         types = superTypes(types);
-        return types.stream().map( type -> dstCcreate(subject, rdfType, type));
+        return types.stream().map( type -> dstCreate(subject, rdfType, type));
     }
 
     private Stream<T> find_ANY_type_T(X type) {
@@ -181,6 +200,7 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
         return stream;
     }
 
+    // ANY predicate is not a special predicate
     private Stream<T> find_X_ANY_Y(X subject, X object) {
         // Start at X.
         // (X ? ?) - inference - project "X ? T"
@@ -193,11 +213,13 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
         return infFilter(stream, subject, ANY, object);
     }
 
+    // ANY predicate is not a special predicate
     private Stream<T> find_X_ANY_ANY(X subject) {
         // Can we do better?
         return find_X_ANY_Y(subject, ANY);
     }
 
+    // ANY predicate is not a special predicate
     private Stream<T> find_ANY_ANY_Y(X object) {
         Stream<T> stream = sourceFind(ANY, ANY, object);
         // Remove rdf:type because we want to drive that through the inference processing.
@@ -226,9 +248,47 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
         return stream;
     }
 
-    //    private static <X> Iterator<X> distinct(Iterator<X> iter) {
-    //        return Iter.distinct(iter);
-    //    }
+    private Stream<T> find_X_sub_Y(X subject, X predicate, X object) {
+        // Only called if includeDerivedDataRDFS is true.
+        // [RDFS]
+        Stream<T> stream = sourceFind(ANY, ANY, object);
+        stream = infFilter(stream, subject, predicate, object);
+        boolean yes = stream.findAny().isPresent();
+        return yes ? Stream.of(dstCreate(subject, predicate, object)) : Stream.empty();
+    }
+
+    private Stream<T> find_X_sub_ANY(X subject, X predicate) {
+        // Only called if includeDerivedDataRDFS is true.
+        Set<X> superOf = predicate.equals(rdfsSubClassOf)
+                // Include self.
+                ? setup.getSuperClassesInc(subject)
+                : setup.getSuperPropertiesInc(subject);
+        return superOf.stream().map(obj->dstCreate(subject, predicate, obj));
+    }
+
+    private Stream<T> find_ANY_sub_Y(X predicate, X object) {
+        // Only called if includeDerivedDataRDFS is true.
+        // If X is a subclass of Y, then so are all subclasses of X are subclasses of Y.
+        Set<X> subOf = predicate.equals(rdfsSubClassOf)
+                // Include self.
+                ? setup.getSubClassesInc(object)
+                : setup.getSubPropertiesInc(object);
+        return subOf.stream().map(subj->dstCreate(subj, predicate, object));
+    }
+
+    private Stream<T> find_ANY_sub_ANY(X predicate) {
+        // Only called if includeDerivedDataRDFS is true.
+        // This is not efficient.
+        // [RDFS] can we do better?
+        if ( rdfsSubPropertyOf.equals(predicate) )
+            return inf(sourceFind(ANY, predicate, ANY)).distinct();
+
+        // subclassOf need to pick out domain and range use.
+        // [RDFS] setup to have "all classes"
+        // See find_???_type_T??? cases.
+        Stream<T> stream = sourceFind(ANY, ANY, ANY);
+        return infFilter(stream, ANY, predicate, ANY).distinct();
+    }
 
     private Stream<T> find_ANY_ANY_ANY() {
         Stream<T> stream = sourceFind(ANY, ANY, ANY);
@@ -260,7 +320,7 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
     private void accInstances(Set<T> tuples, Set<X> types, X requestedType) {
         for ( X type : types ) {
             Stream<T> stream = sourceFind(ANY, rdfType, type);
-            stream.forEach(triple -> tuples.add(dstCcreate(subject(triple), rdfType, requestedType)) );
+            stream.forEach(triple -> tuples.add(dstCreate(subject(triple), rdfType, requestedType)) );
         }
     }
 
@@ -271,7 +331,7 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
                 continue;
             predicates.forEach(p -> {
                 Stream<T> stream = sourceFind(ANY, p, ANY);
-                stream.forEach(triple -> tuples.add(dstCcreate(subject(triple), rdfType, requestedType)) );
+                stream.forEach(triple -> tuples.add(dstCreate(subject(triple), rdfType, requestedType)) );
             });
         }
     }
@@ -283,7 +343,7 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
                 continue;
             predicates.forEach(p -> {
                 Stream<T> stream = sourceFind(ANY, p, ANY);
-                stream.forEach(triple -> tuples.add(dstCcreate(object(triple), rdfType, requestedType)) );
+                stream.forEach(triple -> tuples.add(dstCreate(object(triple), rdfType, requestedType)) );
             });
         }
     }

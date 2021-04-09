@@ -94,15 +94,14 @@ public class DevRDFS {
     }
 
     private static void assembler() {
-        // vocab.ttl
-        // data.ttl
-
         Dataset ds = (Dataset)AssemblerUtils.build("assembler-rdfs.ttl", VocabRDFS.tDatasetRDFS);
         RDFDataMgr.write(System.out, ds.getDefaultModel(), Lang.TTL);
         System.out.println("--------------");
         Model model = (Model)AssemblerUtils.build("assembler-rdfs.ttl", VocabRDFS.tGraphRDFS);
         RDFDataMgr.write(System.out, model, Lang.TTL);
     }
+
+
 
     private static void sparql() {
         Node gn = NodeFactory.createURI("http://example/g");
@@ -214,7 +213,7 @@ public class DevRDFS {
             StreamRDF stream = StreamRDFLib.graph(graphExpanded);
             // Apply inferences.
             stream = new InfStreamRDFS(stream, setup);
-            sendToStream(data.getGraph(), stream);
+            StreamRDFOps.sendGraphToStream(data.getGraph(), stream);
             DatasetGraph dsgx = DatasetGraphFactory.wrap(graphExpanded);
             QueryExecution qExec = QueryExecutionFactory.create(query, dsgx);
             QueryExecUtils.executeQuery(qExec);
@@ -271,14 +270,8 @@ public class DevRDFS {
         StreamRDF stream = StreamRDFLib.graph(graphExpanded);
         // Apply inferences.
         stream = new InfStreamRDFS(stream, setup);
-        sendToStream(data.getGraph(), stream);
+        StreamRDFOps.sendGraphToStream(data.getGraph(), stream);
         RDFDataMgr.write(System.out, graphExpanded, Lang.TTL);
-    }
-
-    private static void sendToStream(Graph graph, StreamRDF stream) {
-        StreamRDFOps.sendGraphToStream(graph, stream);
-//        graph.getPrefixMapping().getNsPrefixMap().forEach(stream::prefix);
-//        graph.find(Node.ANY, Node.ANY, Node.ANY).forEachRemaining(stream::triple);
     }
 
     private static void dwimTransitive() {
