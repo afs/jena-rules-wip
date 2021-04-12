@@ -20,16 +20,17 @@ package org.seaborne.jena.inf_rdfs;
 
 import org.apache.jena.graph.Graph;
 
-/** Separate data and vocabulary; do not include RDF inferences - normal pattern of use */
-public class TestGraphSplitRDFS extends AbstractTestGraphRDFS {
+/** Separate data and vocabulary; include RDFS inferences. */
+public class TestGraphSplitRDFSInc extends AbstractTestGraphRDFS {
     private Graph testGraph = null;
 
-    public TestGraphSplitRDFS(){
-        testGraph = InfFactory.graphRDFS(data, vocab);
+    public TestGraphSplitRDFSInc(){
+        SetupRDFS setup = new SetupRDFS(vocab, true);
+        testGraph = InfFactory.graphRDFS(data, setup);
     }
 
     @Override
-    protected boolean removeVocabFromReferenceResults() { return true; }
+    protected boolean removeVocabFromReferenceResults() { return false; }
 
     @Override
     protected Graph getTestGraph() {
@@ -38,6 +39,6 @@ public class TestGraphSplitRDFS extends AbstractTestGraphRDFS {
 
     @Override
     protected String getTestLabel() {
-        return "Split data,vocab (hide RDFS)";
+        return "Split data, vocab (with RDFS)";
     }
 }

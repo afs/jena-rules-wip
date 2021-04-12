@@ -32,7 +32,7 @@ public class TestMaterializedSplitRDFS extends AbstractTestGraphRDFS {
     private static Graph testGraphMaterialized;
     @BeforeClass public static void setupHere() {
         testGraphMaterialized = GraphFactory.createDefaultGraph();
-        SetupRDFS setup = InfFactory.setupRDFS(vocab, false);
+        SetupRDFS setup = InfFactory.setupRDFS(vocab);
         StreamRDF stream = StreamRDFLib.graph(testGraphMaterialized);
         stream = new InfStreamRDFS(stream, setup);
         StreamRDFOps.graphToStream(data, stream);
@@ -42,9 +42,7 @@ public class TestMaterializedSplitRDFS extends AbstractTestGraphRDFS {
     }
 
     @Override
-    protected boolean removeVocabFromReferenceResults() {
-        return true;
-    }
+    protected boolean removeVocabFromReferenceResults() { return true; }
 
     @Override
     protected Graph getTestGraph() {
@@ -53,7 +51,7 @@ public class TestMaterializedSplitRDFS extends AbstractTestGraphRDFS {
 
     @Override
     protected String getTestLabel() {
-        return "Expaned, combined";
+        return "Expanded, split";
     }
 }
 

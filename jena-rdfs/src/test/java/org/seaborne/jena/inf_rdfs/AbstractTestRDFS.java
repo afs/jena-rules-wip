@@ -17,18 +17,18 @@
 
 package org.seaborne.jena.inf_rdfs;
 
-import static org.seaborne.jena.inf_rdfs.engine.InfGlobal.*;
+import static org.seaborne.jena.inf_rdfs.engine.InfGlobal.rdfType;
+import static org.seaborne.jena.inf_rdfs.engine.InfGlobal.rdfsSubClassOf;
+import static org.seaborne.jena.inf_rdfs.engine.InfGlobal.rdfsSubPropertyOf;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.atlas.lib.ListUtils;
-import org.apache.jena.atlas.lib.SetUtils;
+import org.apache.jena.atlas.lib.Pair;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
@@ -41,12 +41,15 @@ import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
 import org.apache.jena.util.FileUtils;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.seaborne.jena.inf_rdfs.engine.InfGlobal;
 
 /** Testing based on a graph under test ({@link #getTestGraph()}) and a reference graph
  * ({@link #getReferenceGraph()}) that is assumed to return the correct answers.
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public abstract class AbstractTestRDFS {
     private static PrintStream      out = System.err;
     static Node node(String str) { return NodeFactory.createURI("http://example/"+str) ; }
@@ -72,8 +75,6 @@ public abstract class AbstractTestRDFS {
 
     @Test public void test_rdfs_09()        { test(node("z"), null, null) ;  }
     @Test public void test_rdfs_10()        { test(node("z"), rdfType, null) ; }
-
-    @Test public void test_rdfs_11()        { test(null, null, null) ; }
 
     @Test public void test_rdfs_12a()       { test(null, rdfType, node("P")) ; }
     @Test public void test_rdfs_12b()       { test(null, rdfType, node("P1")) ; }
@@ -101,47 +102,72 @@ public abstract class AbstractTestRDFS {
     @Test public void test_rdfs_15a()       { test(null, rdfType, node("U")) ; }
     @Test public void test_rdfs_15b()       { test(null, null, node("U")) ; }
 
-    @Test public void test_rdfs_16a()       { test(null, null, node("X")) ; }
-    @Test public void test_rdfs_16b()       { test(null, rdfType, node("X")) ; }
+    // Not in data, not vocab.
+    @Test public void test_rdfs_16a()       { test(null, null, node("Other")) ; }
+    @Test public void test_rdfs_16b()       { test(null, rdfType, node("Other")) ; }
+
+    // In data, not vocab.
+    @Test public void test_rdfs_17a()       { test(null, null, node("X")) ; }
+    @Test public void test_rdfs_17b()       { test(null, rdfType, node("X")) ; }
 
     @Test public void test_rdfs_20()        { test(null, node("p"), null) ; }
     @Test public void test_rdfs_21()        { test(null, node("pp"), null) ; }
     @Test public void test_rdfs_22()        { test(null, node("ppp"), null) ; }
+    @Test public void test_rdfs_23()        { test(null, node("pTop"), null) ; }
+
+
 
     @Test public void test_rdfs_30()        { test(node("e"), null, null) ; }
     @Test public void test_rdfs_31()        { test(node("e"), node("r"), null) ; }
 
-    // [RDFS]
+    // [RDFS] Renumber
     @Test public void test_rdfs_40()        { test(null, rdfsSubClassOf, null); }
     @Test public void test_rdfs_40a()       { test(node("T3"), rdfsSubClassOf, null); }
     @Test public void test_rdfs_40b()       { test(null, rdfsSubClassOf, node("T3")); }
     @Test public void test_rdfs_40c()       { test(node("T3"), rdfsSubClassOf, node("T3")); }
+    @Test public void test_rdfs_40c2()       { test(node("T3"), rdfsSubClassOf, node("U")); }
 
-    @Test public void test_rdfs_41()        { test(null, rdfsSubPropertyOf, null); }
-    @Test public void test_rdfs_41a()       { test(node("p"), rdfsSubPropertyOf, null); }
-    @Test public void test_rdfs_41b()       { test(null, rdfsSubPropertyOf, node("p")); }
-    @Test public void test_rdfs_41c()       { test(node("p"), rdfsSubPropertyOf, node("p")); }
+    @Test public void test_rdfs_41a()       { test(node("T"), rdfsSubClassOf, null); }
+    @Test public void test_rdfs_41b()       { test(null, rdfsSubClassOf, node("T")); }
+    @Test public void test_rdfs_41c()       { test(node("T"), rdfsSubClassOf, node("T")); }
+    @Test public void test_rdfs_41c2()       { test(node("T"), rdfsSubClassOf, node("U")); }
+
+    @Test public void test_rdfs_42a()       { test(node("U"), rdfsSubClassOf, null); }
+    @Test public void test_rdfs_42b()       { test(null, rdfsSubClassOf, node("U")); }
+    @Test public void test_rdfs_42c()       { test(node("U"), rdfsSubClassOf, node("U")); }
+
+
+    // [RDFS] Dupl to 41
+    @Test public void test_rdfs_40d()       { test(node("NO"), rdfsSubClassOf, null); }
+    @Test public void test_rdfs_40e()       { test(null, rdfsSubClassOf, node("NO")); }
+    @Test public void test_rdfs_40f()       { test(node("NO"), rdfsSubClassOf, node("NO")); }
+    @Test public void test_rdfs_40g()       { test(node("NO"), rdfsSubClassOf, node("U")); }
+    @Test public void test_rdfs_40h()       { test(node("T3"), rdfsSubClassOf, node("T")); }    // No.
+
+    @Test public void test_rdfs_50()        { test(null, rdfsSubPropertyOf, null); }
+    @Test public void test_rdfs_50a()       { test(node("p"), rdfsSubPropertyOf, null); }
+    @Test public void test_rdfs_50b()       { test(null, rdfsSubPropertyOf, node("p")); }
+    @Test public void test_rdfs_50c()       { test(node("p"), rdfsSubPropertyOf, node("p")); }
+
+    @Test public void test_rdfs_99_all()    { test(null, null, null) ; }
+
+
 
     protected void test(Node s, Node p, Node o) {
         //RDFDataMgr.write(System.out, getReferenceGraph(), RDFFormat.TURTLE_FLAT);
         // The "right" answers (generated by Jena Inference Engine with rdfs-min.rules).
-        List<Triple> x0 = findInGraph(getReferenceGraph(), s, p, o);
+        List<Triple> expected = findInGraph(getReferenceGraph(), s, p, o);
 
         if ( removeVocabFromReferenceResults() )
-            x0 = InfGlobal.removeRDFS(x0);
+            expected = InfGlobal.removeRDFS(expected);
 
         // Graph under test.
-        List<Triple> x1 = findInGraph(getTestGraph(), s, p, o);
+        List<Triple> actual = findInGraph(getTestGraph(), s, p, o);
 
-        boolean b = ListUtils.equalsUnordered(x0, x1);
+        boolean b = ListUtils.equalsUnordered(expected, actual);
         if ( ! b ) {
-            out.println("Expected: find("+s+", "+p+", "+o+")");
-            x0 = print(out, x0);
-            out.println("Got ("+getTestLabel()+"):");
-            x1 = print(out, x1);
-            out.println();
-            //out.println("Diff:");
-            //printDiff(out, x0, x1);
+            out.println("Fail: find("+s+", "+p+", "+o+")");
+            printDiff(out, expected, actual);
         }
 
         Assert.assertTrue(getTestLabel(), b);
@@ -184,14 +210,30 @@ public abstract class AbstractTestRDFS {
     /** Return a label for the graph under test */
     protected abstract String getTestLabel();
 
-    static protected <X> void printDiff(PrintStream out, List<X> A, List<X> B) {
-        A.stream().forEach(item -> out.println("1: "+item));
-        B.stream().forEach(item -> out.println("2: "+item));
-        Set<X> aa = new HashSet<>(A);
-        Set<X> bb = new HashSet<>(B);
-        SetUtils.difference(aa, bb).stream().forEach(item -> out.println("> "+item));
-        SetUtils.difference(bb, aa).stream().forEach(item -> out.println("< "+item));
+    //find("+s+", "+p+", "+o+")"
+    static protected <X> void printDiff(PrintStream out, List<X> expected, List<X> actual) {
+        if ( actual.size() < 10 ) {
+            out.println("Actual:");
+            if ( actual.isEmpty() )
+                out.println("  Empty");
+            else
+                actual.forEach(t->out.println("  "+t));
+        }
+
+        Pair<List<X>, List<X>> diff = ListUtils.listDiffBoth(expected, actual);
+        out.println("  Diff expected\\actual");
+        diff.getLeft().forEach(t->out.println("    Expected, not actual: "+t));
+        out.println("  Diff actual\\expected:");
+        diff.getRight().forEach(t->out.println("   Actual, not expected: "+t));
         out.println();
+
+////        A.stream().forEach(item -> out.println("1: "+item));
+////        B.stream().forEach(item -> out.println("2: "+item));
+//        Set<X> aa = new HashSet<>(A);
+//        Set<X> bb = new HashSet<>(B);
+//        SetUtils.difference(aa, bb).stream().forEach(item -> out.println("> "+item));
+//        SetUtils.difference(bb, aa).stream().forEach(item -> out.println("< "+item));
+//        out.println();
     }
 
     static List<Triple> print(PrintStream out, List<Triple> x) {

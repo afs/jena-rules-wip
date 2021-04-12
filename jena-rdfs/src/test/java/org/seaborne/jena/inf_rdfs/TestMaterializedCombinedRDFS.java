@@ -34,12 +34,12 @@ public class TestMaterializedCombinedRDFS extends AbstractTestGraphRDFS {
 
     @BeforeClass public static void setupHere() {
         Graph dataTest = GraphFactory.createDefaultGraph();
-        testGraphMaterialized = GraphFactory.createDefaultGraph();
-        GraphUtil.addInto(dataTest, data);    // dataTest <- data
-        GraphUtil.addInto(dataTest, vocab);   // dataTest <- vocab
-        SetupRDFS setup = InfFactory.setupRDFS(vocab, true);
+        GraphUtil.addInto(dataTest, data);
+        GraphUtil.addInto(dataTest, vocab);
+        SetupRDFS setup = new SetupRDFS(vocab, true);
 
         // Fill testGraphMaterialized
+        testGraphMaterialized = GraphFactory.createDefaultGraph();
         StreamRDF stream = StreamRDFLib.graph(testGraphMaterialized);
         stream = new InfStreamRDFS(stream, setup);
         StreamRDFOps.graphToStream(dataTest, stream);
@@ -48,9 +48,7 @@ public class TestMaterializedCombinedRDFS extends AbstractTestGraphRDFS {
     public TestMaterializedCombinedRDFS() {}
 
     @Override
-    protected boolean removeVocabFromReferenceResults() {
-        return false;
-    }
+    protected boolean removeVocabFromReferenceResults() { return false; }
 
     @Override
     protected Graph getTestGraph() {
@@ -59,7 +57,7 @@ public class TestMaterializedCombinedRDFS extends AbstractTestGraphRDFS {
 
     @Override
     protected String getTestLabel() {
-        return "Expanded, combined";
+        return "Expanded, combined, with meta";
     }
 }
 

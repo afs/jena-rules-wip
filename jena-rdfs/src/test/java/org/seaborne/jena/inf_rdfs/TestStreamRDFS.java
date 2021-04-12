@@ -42,7 +42,7 @@ import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
  * Stream machinery tests.
  * Tests of stream results are mainly in TestMaterialized*
  */
-public class TestInfStreamRDFS {
+public class TestStreamRDFS {
 
     static final String DIR = "testing/Inf";
     static final String DATA_FILE = DIR+"/rdfs-data.ttl";

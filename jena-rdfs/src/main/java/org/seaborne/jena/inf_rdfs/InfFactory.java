@@ -60,9 +60,14 @@ public class InfFactory {
     }
 
     /** Create an {@link SetupRDFS} */
-    public static SetupRDFS setupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
-        return new SetupRDFS(vocab, incDerivedDataRDFS);
+    public static SetupRDFS setupRDFS(Graph vocab) {
+        return new SetupRDFS(vocab, false);
     }
+
+//    /** Create an {@link SetupRDFS}; include RDFS inferred information (e.g. rdfs:subClassOf appears) */
+//    public static SetupRDFS setupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
+//        return new SetupRDFS(vocab, incDerivedDataRDFS);
+//    }
 
     /** Stream expand data based on a separate vocabulary */
     public static StreamRDF infRDFS(StreamRDF data, Model vocab) {

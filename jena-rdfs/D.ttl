@@ -3,18 +3,5 @@ PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
 
 # Vocab
-:p rdfs:range :T .
-:T rdfs:subClassOf :T1 .
-:T1 rdfs:subClassOf :TOP .
-
+:p2 rdfs:subPropertyOf :p .
 :p rdfs:subPropertyOf :pTop .
-
-# Data
-
-:s1 :p :x .
-
-## :x :q :o1 .
-## 
-## :s2 :p :x .
-## 
-## :z :q :o2 .

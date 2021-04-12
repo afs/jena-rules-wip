@@ -17,6 +17,7 @@
 
 package org.seaborne.jena.inf_rdfs.setup;
 
+import java.util.Map;
 import java.util.Set;
 import org.apache.jena.graph.Node;
 import org.apache.jena.tdb2.store.NodeId;
@@ -28,13 +29,32 @@ import org.apache.jena.tdb2.store.NodeId;
  */
 public interface SetupRDFS_X<X> {
 
+
+    /** Return the sub-class hierarchy - map from class to its subclasses (transitive). */
+    public Map<X, Set<X>> getSubClassHierarchy();
+
+    /** Return the sub-property hierarchy - map from property to its sub-properties (transitive). */
+    public Map<X, Set<X>> getSubPropertyHierarchy();
+
+    /** Return the mapping property to range(s). */
+    public Map<X, Set<X>> getPropertyRanges();
+
+    /** Return the mapping property to domains(s). */
+    public Map<X, Set<X>> getPropertyDomains();
+
+//    /**
+//     * Match against the vocabulary, with transitive closure of rdfsSubClassOf and subPropertyOf.
+//     * Return a stream of 3-tuples.
+//     */
+//    public <T> Stream<T> match(X s, X p, X o);
+
     /** All super-types of an element.
      * Does not include the element unless there is a cycle of length >1.
      * Returns an empty set of there are no declared superclasses.
      */
     public Set<X> getSuperClasses(X elt);
 
-    /** All super-types of an element, including the element itself */
+    /** All super-types of an element, including the element itself. */
     public Set<X> getSuperClassesInc(X elt);
 
     /** All sub-types of an element.  Does not include the element unless there is a cycle of length >1 */

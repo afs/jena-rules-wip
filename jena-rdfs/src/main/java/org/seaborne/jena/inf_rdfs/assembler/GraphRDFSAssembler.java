@@ -76,7 +76,7 @@ public class GraphRDFSAssembler extends AssemblerBase implements Assembler {
             throw new AssemblerException(root, "Required property missing: "+VocabRDFS.pRdfsSchemaFile) ;
 
         Graph schema = RDFDataMgr.loadGraph(schemaFile);
-        SetupRDFS setup = InfFactory.setupRDFS(schema, false);
+        SetupRDFS setup = InfFactory.setupRDFS(schema);
         Graph graphRDFS = InfFactory.graphRDFS(base.getGraph(), setup);
         return graphRDFS;
     }

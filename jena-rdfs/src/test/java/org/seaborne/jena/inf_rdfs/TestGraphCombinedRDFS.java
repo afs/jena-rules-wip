@@ -35,9 +35,7 @@ public class TestGraphCombinedRDFS extends AbstractTestGraphRDFS {
     }
 
     @Override
-    protected boolean removeVocabFromReferenceResults() {
-        return false;
-    }
+    protected boolean removeVocabFromReferenceResults() { return false; }
 
     @Override
     protected Graph getTestGraph() {
@@ -46,7 +44,7 @@ public class TestGraphCombinedRDFS extends AbstractTestGraphRDFS {
 
     @Override
     protected String getTestLabel() {
-        return "Combined data,vocab";
+        return "Combined data, vocab";
     }
 
 }

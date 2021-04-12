@@ -106,7 +106,6 @@ public class DatasetGraphRDFS extends DatasetGraphWrapper implements DatasetGrap
         if ( g == null )
             g = Node.ANY;
         Iterator<Quad> iter = findInf(g, s, p, o);
-        // [RDFS] need test
         if ( g == Node.ANY )
             // Exclude default graph by filter
             iter = Iter.filter(findInf(g, s, p, o), q-> ! q.isDefaultGraph());

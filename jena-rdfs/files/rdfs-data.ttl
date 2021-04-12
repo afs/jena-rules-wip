@@ -8,10 +8,12 @@ PREFIX : <http://example/>
 
 :a rdf:type :T .
 
+# Not in vocab.
 :b rdf:type :X .
 
 :c :p :x .
 
 :d :q :z .
 
+# Not in vocab.
 :e :r :v .

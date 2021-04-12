@@ -17,6 +17,7 @@
 
 package org.seaborne.jena.inf_rdfs.setup;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.jena.atlas.lib.InternalErrorException;
 import org.apache.jena.atlas.lib.StrUtils;
@@ -38,8 +39,8 @@ import org.seaborne.jena.inf_rdfs.engine.InfGlobal;
  */
 public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
     public final Graph vocabGraph;
-    // Variants for with and without the key in the value side.
 
+    // Variants for with and without the key in the value side.
     private final Map<X, Set<X>> superClasses         = new HashMap<>();
     private final Map<X, Set<X>> superClassesInc      = new HashMap<>();
     private final Map<X, Set<X>> subClasses           = new HashMap<>();
@@ -59,7 +60,7 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
     private final Map<X, Set<X>> domainToProperty     = new HashMap<>();
 
     // Whether we include the RDFS data in the results (as if TBox (rules) and ABox (ground data) are one unit).
-    private final boolean includeDerivedDataRDFS$;
+    private final boolean includeDerivedDataRDFS;
     private final boolean hasAnyRDFS;
 
     private static String preamble = StrUtils.strjoinNL
@@ -74,31 +75,34 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
 //    }
 
     protected BaseSetupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
-        includeDerivedDataRDFS$ = incDerivedDataRDFS;
+        includeDerivedDataRDFS = incDerivedDataRDFS;
         vocabGraph = vocab;
+        hasAnyRDFS = setup();
+    }
 
+    private boolean setup() {
         // Calculate a different way and see if the answers are the same.
         final boolean CHECK = false;
 
         // Find super/sub classes
-        execTransitive(vocab, InfGlobal.rdfsSubClassOf, superClasses, subClasses);
+        execTransitive(vocabGraph, InfGlobal.rdfsSubClassOf, superClasses, subClasses);
         if ( CHECK )
-            execCheck("rdfs:subClassOf+", vocab, superClasses, subClasses);
+            execCheck("rdfs:subClassOf+", vocabGraph, superClasses, subClasses);
 
         // Find super/sub properties
-        execTransitive(vocab, InfGlobal.rdfsSubPropertyOf, superProperties, subProperties);
+        execTransitive(vocabGraph, InfGlobal.rdfsSubPropertyOf, superProperties, subProperties);
         if( CHECK )
-            execCheck("rdfs:subPropertyOf+", vocab, superProperties, subProperties);
+            execCheck("rdfs:subPropertyOf+", vocabGraph, superProperties, subProperties);
 
         // Find domain
-        execSingle(vocab, InfGlobal.rdfsDomain, propertyDomain, domainToProperty);
+        execSingle(vocabGraph, InfGlobal.rdfsDomain, propertyDomain, domainToProperty);
         if( CHECK )
-            execCheck("rdfs:domain", vocab, propertyDomain, domainToProperty);
+            execCheck("rdfs:domain", vocabGraph, propertyDomain, domainToProperty);
 
         // Find range
-        execSingle(vocab, InfGlobal.rdfsRange, propertyRange, rangeToProperty);
+        execSingle(vocabGraph, InfGlobal.rdfsRange, propertyRange, rangeToProperty);
         if ( CHECK )
-            execCheck("rdfs:range", vocab, propertyRange, rangeToProperty);
+            execCheck("rdfs:range", vocabGraph, propertyRange, rangeToProperty);
 
         deepCopyInto(superClassesInc, superClasses);
         addKeysToValues(superClassesInc);
@@ -109,73 +113,10 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
         deepCopyInto(subPropertiesInc, subProperties);
         addKeysToValues(subPropertiesInc);
 
-        hasAnyRDFS = hasClassDeclarations() || hasPropertyDeclarations() || hasRangeDeclarations() || hasDomainDeclarations();
+        return hasClassDeclarations() || hasPropertyDeclarations() || hasRangeDeclarations() || hasDomainDeclarations();
     }
 
     protected abstract X fromNode(Node node);
-
-    // Calculate using SPARQL andsee if we get the same answer.
-    private void execCheck(String path, Graph vocab, Map<X, Set<X>> supers, Map<X, Set<X>> subs) {
-        Map<X, Set<X>> mSupers  = new HashMap<>();
-        Map<X, Set<X>> mSubs    = new HashMap<>();
-        String queryString      = "SELECT ?x ?y { ?x "+path+" ?y }";
-        exec(queryString, vocab, mSupers, mSubs);
-        if ( ! mSupers.equals(supers) || ! mSubs.equals(subs) )
-            throw new InternalErrorException(path);
-    }
-
-    /** Calculate super/sub mapping */
-    private void execTransitive(Graph vocab, Node property, Map<X, Set<X>> superMap, Map<X, Set<X>> subMap) {
-        Map<Node, Collection<Node>> map = Transitive.transitive(vocab, property);
-        map.forEach((n,c)->{
-            c.forEach(nc->{
-                X a = fromNode(n);
-                X b = fromNode(nc);
-                put(superMap, a, b);
-                put(subMap, b, a);
-            });
-        });
-    }
-
-    private void execSingle(Graph vocab, Node predicate, Map<X, Set<X>> propertyMap, Map<X, Set<X>> reversePropertyMap) {
-        G.find(vocab, Node.ANY, predicate, Node.ANY).forEach(t->{
-            Node s = t.getSubject();
-            Node o = t.getObject();
-            X a = fromNode(s);
-            X b = fromNode(o);
-            put(propertyMap, a, b);
-            put(reversePropertyMap, b, a);
-        });
-    }
-
-    // The copy does not share teh Set structure with the source.
-    private void deepCopyInto(Map<X, Set<X>> dest, Map<X, Set<X>> src) {
-        src.entrySet().forEach(e -> {
-            Set<X> x = new HashSet<>(e.getValue());
-            dest.put(e.getKey(), x);
-        });
-    }
-
-    //  For each entry, add the key in the value set.
-    private void addKeysToValues(Map<X, Set<X>> map) {
-        map.entrySet().forEach(e -> e.getValue().add(e.getKey()) );
-    }
-
-    private void exec(String qs, Graph graph, Map<X, Set<X>> multimap1, Map<X, Set<X>> multimap2) {
-        Query query = QueryFactory.create(preamble + "\n" + qs, Syntax.syntaxARQ);
-        try ( QueryExecution qexec = QueryExecutionFactory.create(query, DatasetGraphFactory.wrap(graph)) ) {
-            ResultSet rs = qexec.execSelect();
-            for ( ; rs.hasNext() ; ) {
-                Binding soln = rs.nextBinding();
-                Node x = soln.get(Var.alloc("x"));
-                Node y = soln.get(Var.alloc("y"));
-                X a = fromNode(x);
-                X b = fromNode(y);
-                put(multimap1, a, b);
-                put(multimap2, b, a);
-            }
-        }
-    }
 
     /**
      * Go from Node space to X space for a node that is in the RDFS vocabulary.
@@ -185,20 +126,18 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
 
     @Override
     public boolean includeDerivedDataRDFS() {
-        return includeDerivedDataRDFS$;
+        return includeDerivedDataRDFS;
     }
 
-    private static <X> void put(Map<X, Set<X>> multimap, X n1, X n2) {
-        if ( !multimap.containsKey(n1) )
-            multimap.put(n1, new HashSet<X>());
-        multimap.get(n1).add(n2);
-    }
+    @Override
+    public Map<X, Set<X>> getSubClassHierarchy()    { return superClassesInc; }
+    @Override
+    public Map<X, Set<X>> getSubPropertyHierarchy() { return superPropertiesInc; }
 
-    private Set<X> empty = Collections.emptySet();
-    private Set<X> result(Map<X, Set<X>> map, X elt) {
-        Set<X> x = map.get(elt);
-        return x != null ? x : empty;
-    }
+    @Override
+    public Map<X, Set<X>> getPropertyRanges()       { return propertyRange; }
+    @Override
+    public Map<X, Set<X>> getPropertyDomains()      { return propertyDomain; }
 
     // get* : return the Set corresponding to element elt
     // get*Inc : return the Set corresponding to element elt incluinge self.
@@ -286,5 +225,97 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
     @Override
     public Set<X> getPropertiesByDomain(X elt) {
         return result(domainToProperty, elt);
+    }
+
+    // Calculate using SPARQL and see if we get the same answer.
+    private void execCheck(String path, Graph vocab, Map<X, Set<X>> supers, Map<X, Set<X>> subs) {
+        Map<X, Set<X>> mSupers  = new HashMap<>();
+        Map<X, Set<X>> mSubs    = new HashMap<>();
+        String queryString      = "SELECT ?x ?y { ?x "+path+" ?y }";
+        exec(queryString, vocab, mSupers, mSubs);
+        if ( ! mSupers.equals(supers) || ! mSubs.equals(subs) )
+            throw new InternalErrorException(path);
+    }
+
+    /** Calculate super/sub mapping */
+    private void execTransitive(Graph vocab, Node property, Map<X, Set<X>> superMap, Map<X, Set<X>> subMap) {
+        Map<Node, Collection<Node>> map = Transitive.transitive(vocab, property);
+        map.forEach((n,c)->{
+            c.forEach(nc->{
+                X a = fromNode(n);
+                X b = fromNode(nc);
+                put(superMap, a, b);
+                put(subMap, b, a);
+            });
+        });
+    }
+
+    private void execSingle(Graph vocab, Node predicate, Map<X, Set<X>> propertyMap, Map<X, Set<X>> reversePropertyMap) {
+        G.find(vocab, Node.ANY, predicate, Node.ANY).forEach(t->{
+            Node s = t.getSubject();
+            Node o = t.getObject();
+            X a = fromNode(s);
+            X b = fromNode(o);
+            put(propertyMap, a, b);
+            put(reversePropertyMap, b, a);
+        });
+    }
+
+    // The copy does not share the Set structure with the source.
+    private void deepCopyInto(Map<X, Set<X>> dest, Map<X, Set<X>> src) {
+        src.entrySet().forEach(e -> {
+            Set<X> x = new HashSet<>(e.getValue());
+            dest.put(e.getKey(), x);
+        });
+    }
+
+    //  For each entry, add the key in the value set.
+    private void addKeysToValues(Map<X, Set<X>> map) {
+        map.entrySet().forEach(e -> e.getValue().add(e.getKey()) );
+        ensureValuesAsKeys(map);
+    }
+
+    // Ensure every value is also a key, if it isn't add (x,x).
+    private void ensureValuesAsKeys(Map<X, Set<X>> map) {
+        Set<X> free = map.values().stream()
+                .flatMap(setx -> setx.stream())
+                .filter(x -> !map.containsKey(x))
+                .collect(Collectors.toSet());
+        free.forEach(x -> {
+            Set<X> set = map.get(x);
+            if ( set == null ) {
+                set = new HashSet<>();
+                map.put(x, set);
+            }
+            set.add(x);
+        });
+    }
+
+    private void exec(String qs, Graph graph, Map<X, Set<X>> multimap1, Map<X, Set<X>> multimap2) {
+        Query query = QueryFactory.create(preamble + "\n" + qs, Syntax.syntaxARQ);
+        try ( QueryExecution qexec = QueryExecutionFactory.create(query, DatasetGraphFactory.wrap(graph)) ) {
+            ResultSet rs = qexec.execSelect();
+            for ( ; rs.hasNext() ; ) {
+                Binding soln = rs.nextBinding();
+                Node x = soln.get(Var.alloc("x"));
+                Node y = soln.get(Var.alloc("y"));
+                X a = fromNode(x);
+                X b = fromNode(y);
+                put(multimap1, a, b);
+                put(multimap2, b, a);
+            }
+        }
+    }
+
+    private static <X> void put(Map<X, Set<X>> multimap, X n1, X n2) {
+        if ( !multimap.containsKey(n1) )
+            multimap.put(n1, new HashSet<X>());
+        multimap.get(n1).add(n2);
+    }
+
+    // Return empty set, not null.
+    private Set<X> result(Map<X, Set<X>> map, X elt) {
+        Set<X> x = map.get(elt);
+        return x != null ? x : Collections.emptySet();
     }
 }

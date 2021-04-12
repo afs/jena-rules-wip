@@ -77,14 +77,17 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
 
     // Rule extracts from Jena's RDFS rules etc/rdfs.rules
 
+    private static final boolean SHORT_CIRCUIT = true;
+
     /*
      * [rdfs8: (?a rdfs:subClassOf ?b), (?b rdfs:subClassOf ?c) -> (?a rdfs:subClassOf ?c)]
      * [rdfs9: (?x rdfs:subClassOf ?y), (?a rdf:type ?x) -> (?a rdf:type ?y)]
      */
     private void subClass(X s, X p, X o, Output<X> out) {
-        // [RDFS] check
-//        if ( ! setup.hasClassDeclarations() && ! setup.includeDerivedDataRDFS() )
-//            return;
+        if ( SHORT_CIRCUIT ) {
+            if ( ! setup.hasClassDeclarations() && ! setup.includeDerivedDataRDFS() )
+                return;
+        }
         if ( p.equals(rdfType) ) {
             // Include or exclude "X subClassOf X" : rdfs7
             Set<X> x = setup.getSuperClasses(o);
@@ -109,9 +112,9 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs6: (?a ?p ?b), (?p rdfs:subPropertyOf ?q) -> (?a ?q ?b)]
      */
     private void subProperty(X s, X p, X o, Output<X> out) {
-        // [RDFS] check
-//        if ( ! setup.hasClassDeclarations() && ! setup.includeDerivedDataRDFS() )
-//            return;
+        if ( SHORT_CIRCUIT ) {
+            if ( ! setup.hasClassDeclarations() && ! setup.includeDerivedDataRDFS() )
+                return;}
         Set<X> x = setup.getSuperProperties(p);
         x.forEach(p2 -> derive(s, p2, o, out));
         if ( setup.includeDerivedDataRDFS() ) {
@@ -135,9 +138,10 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs9: (?x rdfs:subClassOf ?y), (?a rdf:type ?x) -> (?a rdf:type ?y)]
      */
     final private void domain(X s, X p, X o, Output<X> out) {
-        // [RDFS] check
-//        if ( ! setup.hasDomainDeclarations() )
-//            return;
+        if ( SHORT_CIRCUIT ) {
+            if ( ! setup.hasDomainDeclarations() )
+                return;
+        }
         Set<X> x = setup.getDomain(p);
         x.forEach(c -> {
             derive(s, rdfType, c, out);
@@ -152,9 +156,10 @@ public class ApplyRDFS<X, T> extends CxtInf<X,T>{
      * [rdfs9: (?x rdfs:subClassOf ?y), (?a rdf:type ?x) -> (?a rdf:type ?y)]
      */
     final private void range(X s, X p, X o, Output<X> out) {
-        // [RDFS] check
-//        if ( ! setup.hasRangeDeclarations() )
-//            return;
+        if ( SHORT_CIRCUIT ) {
+            if ( ! setup.hasRangeDeclarations() )
+                return;
+        }
         Set<X> x = setup.getRange(p);
         x.forEach(c -> {
             derive(o, rdfType, c, out);

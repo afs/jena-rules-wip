@@ -25,11 +25,12 @@ public class NotesRDFS {
     // [Match]
     //   PatternMatchData - notes RX integration.
     // Can/should we merge OpExecutor, OpExecutorQuads?
+    //   Push into the DSG?
 
     // [ ] Testing
     //     General, TIM, TDB1, TDB2.
-    // [x] Library in ARQ:; Abortable, IteratorAbortable.
     // * SolverRX: abortable? (TDB - abortable?)
+    // [ ] SysRDFS  - register OpExecutor.
 
     // Clearup/rename: TDB1, TDB2
     //   SolverLib, Solver, SolverRx
@@ -37,70 +38,36 @@ public class NotesRDFS {
     // Ready. Use with TIM (and, in tests, general).
 
     // ---- RDFS
+    // -- Release
+    // [ ] org.apache.jena.rdfs
+    // [ ] Solver
 
-    // [ ] includeDerivedDataRDFS ==> combinedDataRDFS ??
-    // [ ] Test of combined data+RDFS but hide RDFS.(Why?)
+    // -- Refinement
+    // Check and deal with:
+    // [RDFS]
+    // [ ] accABC -> streams?
+    // [ ] Set up function to calculate and behave like a Graph<X>
+    // [ ] Test empty setup!
 
+    // [ ] Tests for range and supertype.
+    //     (:x rdf:type ?type) is types-in-data + range + domain use -> super class expansion
+    //     Check order.
 
-    // [ ] Need subsets of vocab/data to test with.
-    //     subclass
-    //     subproperty
-    //     range, range + subclass
-    //     domain, domain + subclass
+    // [ ] Strip MatchRDFS of unnecessary extras.
 
-    // [ ] Revisit extract rules for tests.
-    //       Only effects "combined" i.e. RDFS in the data and not hidden.
-    //       ==> SetupRDFS.includeDerivedDataRDFS
-    //       Can we support "true" if abox != tbox? Or always false.
-    // [x] find_ANY_subClassOf_ANY
-    // [x] find_ANY_subPropertyOf_ANY
-    // [x] tests 40(? subClassOf?), 41(? subPropertyOf ?)
-    // [-] Expose the stream sets - class, property, domain, range. Each has a "if work to do start so keep as-is.
-
-    // [ ] test combined abox/tbox and  incDerivedDataRDFS=false
-
-    // [ ] SysRDFS  - register OpExecutor.
     // [ ] Integration tests - dataset esp. findNG
-
-    // [x] test:assemblers.
-    // [x] Try AbstractTestGraphRDFS : min-backwards. -> 4 failures
-    // [x] More tests: TestInfStreamRDFS
 
     // == Phase 2
 
     // [ ] TDB2
     // [ ] TDB1
-
-    // Can we see the vocab?  And get subclass of subclass
-    //   ?SC rdfs:subClassOf :Type .
-    //   :R  rdfs:subClassOf :S1 .
-    //   :R  rdfs:subClassOf :S2 .
-    // Data has :subClassOf, :subProperty Of:
-    // Domain and range need expanding?
-    //   :p rdfs:domain :T1 . :T1 subClassOf :T2 => :p rdfs:domain :T2 .
-    //       includeDerivedDataRDFS
-
     // [ ] assertSparql
 
-    // """
-    // Modes of
-    //   combined A-box, T-box but hiding derived data
-    //   split A-box, T-box but with derived RDFS from data
-    // are not supported.
-    // """
 
-    // [x] AssemblerDatasetRDFS
-    // [x] AssemblerGraphRDFS
-    // [x] org.apache.jena.riot.process.inf.InfFactory
-
-    // Check and deal with:
-    // [RDFS]
-
-    // Test for subproperties of rdf:type and other vocabulary.
-    // Factory: test for no RDFS and get out of the way (Dataset)
+    // [ ] Test for subproperties of rdf:type and other vocabulary.
+    //     Factory: test for no RDFS and get out of the way (Dataset)
 
     // Tests for Transitive in ARQ?
-
 
     // ==== Other RDFS+
     //   rdfs:member
@@ -153,4 +120,3 @@ Head is a single triple
 */
 
 }
-

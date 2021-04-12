@@ -21,11 +21,21 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses( {
-    TestGraphSplitRDFS.class
+
+    // Stream uses.
+    TestStreamRDFS.class
+
+    // Backwards inference modes supported.
+    , TestGraphSplitRDFS.class
+    , TestGraphSplitRDFSInc.class               // Unimportant.
+
     , TestGraphCombinedRDFS.class
-    , TestMaterializedCombinedRDFS.class
+
     , TestMaterializedSplitRDFS.class
-    , TestInfStreamRDFS.class
+    , TestMaterializedCombinedRDFS.class
+
+
+    // Assembler.
     , TestAssemblerRDFS.class
 })
 

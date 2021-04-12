@@ -117,7 +117,7 @@ public class DevRDFS {
 //        RDFDataMgr.write(System.out, data, Lang.TTL);
 //        System.out.println("----");
 
-        SetupRDFS setup = InfFactory.setupRDFS(vocab.getGraph(), false);
+        SetupRDFS setup = InfFactory.setupRDFS(vocab.getGraph());
 
         if ( false )
         {
@@ -266,7 +266,7 @@ public class DevRDFS {
         System.out.println("---- Expansion");
         // Expansion Graph
         Graph graphExpanded = Factory.createDefaultGraph();
-        SetupRDFS setup = InfFactory.setupRDFS(vocab.getGraph(), combined);
+        SetupRDFS setup = new SetupRDFS(vocab.getGraph(), combined);
         StreamRDF stream = StreamRDFLib.graph(graphExpanded);
         // Apply inferences.
         stream = new InfStreamRDFS(stream, setup);
