@@ -41,7 +41,7 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.engine.binding.BindingBuilder;
 import org.apache.jena.sparql.engine.binding.BindingFactory;
 import org.apache.jena.sparql.engine.iterator.QueryIterSingleton;
-import org.apache.jena.sparql.engine.iterator.QueryIterTriplePattern;
+import org.apache.jena.sparql.engine.main.QC;
 import org.seaborne.jena.rules.*;
 
 public class RuleOps {
@@ -221,7 +221,7 @@ public class RuleOps {
         // Create a chain of triple iterators.
         QueryIterator chain = QueryIterSingleton.create(org.apache.jena.sparql.engine.binding.BindingFactory.root(), execContext) ;
         for (Triple triple : pattern)
-            chain = new QueryIterTriplePattern(chain, triple, execContext) ;
+            chain = QC.execute(chain, triple, execContext) ;
         return chain ;
     }
 

@@ -42,7 +42,7 @@ import org.seaborne.jena.inf_rdfs.setup.ConfigRDFS;
  *
  * @see ApplyRDFS ApplyRDFS for the matching algorithm.
  */
-public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
+public abstract class MatchRDFS<X, T> extends CxtInf<X, T> implements Match<X,T> {
     // [RDFS] Marks places for possible improvements.
     // The primary use case is data access with inference.
     //
@@ -76,7 +76,8 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
         };
     }
 
-    public Stream<T> match(X s, X p, X o) { return matchWithInf(s, p ,o); }
+    @Override
+    public final Stream<T> match(X s, X p, X o) { return matchWithInf(s, p ,o); }
 
     // Access data.
     protected abstract boolean sourceContains(X s, X p, X o);
@@ -172,7 +173,10 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
         if ( sourceContains(subject, rdfType, object) )
             return Stream.of(dstCreate(subject, rdfType, object));
 
-        // Accumulate types, testign whether we can exit early, then calculate supertypes.
+        if ( setup.hasOnlyPropertyDeclarations() )
+            return Stream.empty();
+
+        // Accumulate types, testing whether we can exit early, then calculate supertypes.
         Set<X> types = new HashSet<>();
 
         accTypesRange(types, subject);
@@ -209,8 +213,8 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
         // If in the data and only in the data,
 
         // XXX [RDFS] Domain?
-        // Fast path - no subClasses
-        if ( setup.getSubClasses(type).isEmpty() )
+        // Fast path - no rdf:type work.
+        if ( setup.hasOnlyPropertyDeclarations() )
             return sourceFind(ANY, rdfType, type);
 
         // Using a set suppresses duplicates.
@@ -225,6 +229,8 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
     }
 
     private Stream<T> find_ANY_type_ANY() {
+        if ( setup.hasOnlyPropertyDeclarations() )
+            return sourceFind(ANY, rdfType, ANY);
         Stream<T> stream = sourceFind(ANY, ANY, ANY);
         // [RDFS] revisit. These are the only uses of inf/infFilter
         stream = infFilter(stream, null, rdfType, null);
@@ -346,6 +352,7 @@ public abstract class MatchRDFS<X, T> extends CxtInf<X, T> {
     }
 
     private Stream<T> find_ANY_sub_ANY_rdfs(X predicate) {
+        // Only called if includeDerivedDataRDFS is true.
         Stream<T> stream = sourceFind(ANY, predicate, ANY);
 
         // For any types in the data, create X subClass X

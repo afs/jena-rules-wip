@@ -19,7 +19,7 @@ package org.seaborne.jena.inf_rdfs.engine;
 
 import java.util.Set;
 
-import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
+import org.seaborne.jena.inf_rdfs.setup.ConfigRDFS;
 
 /**
  * Apply a fixed set of inference rules to a 3-tuple.
@@ -40,7 +40,7 @@ import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
 
 public class ApplyRDFS<X, T> extends CxtInf<X,T>{
 
-    public ApplyRDFS(SetupRDFS_X<X> setup, MapperX<X, T> mapper) {
+    public ApplyRDFS(ConfigRDFS<X> setup, MapperX<X, T> mapper) {
         super(setup, mapper);
     }
 

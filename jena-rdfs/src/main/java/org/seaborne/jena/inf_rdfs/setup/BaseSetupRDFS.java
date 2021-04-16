@@ -37,7 +37,7 @@ import org.seaborne.jena.inf_rdfs.engine.InfGlobal;
  * Core datastructures needed for RDFS for one vocabulary.
  * To be general, this is in {@code <X>} space (e.g. {@link Node}, {@link NodeId}).
  */
-public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
+public abstract class BaseSetupRDFS<X> implements ConfigRDFS<X>{
     public final Graph vocabGraph;
 
     // Variants for with and without the key in the value side.
@@ -62,6 +62,7 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
     // Whether we include the RDFS data in the results (as if TBox (rules) and ABox (ground data) are one unit).
     private final boolean includeDerivedDataRDFS;
     private final boolean hasAnyRDFS;
+    private final boolean hasOnlyPropertyDeclarations;
 
     private static String preamble = StrUtils.strjoinNL
         ("PREFIX  rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
@@ -77,7 +78,9 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
     protected BaseSetupRDFS(Graph vocab, boolean incDerivedDataRDFS) {
         includeDerivedDataRDFS = incDerivedDataRDFS;
         vocabGraph = vocab;
+        // Fast path flags.
         hasAnyRDFS = setup();
+        hasOnlyPropertyDeclarations = ! hasClassDeclarations() && ! hasDomainDeclarations() && ! hasRangeDeclarations();
     }
 
     private boolean setup() {
@@ -200,6 +203,11 @@ public abstract class BaseSetupRDFS<X> implements SetupRDFS_X<X>{
     @Override
     public boolean hasDomainDeclarations() {
         return ! propertyDomain.isEmpty();
+    }
+
+    @Override
+    public boolean hasOnlyPropertyDeclarations() {
+        return hasOnlyPropertyDeclarations;
     }
 
     @Override

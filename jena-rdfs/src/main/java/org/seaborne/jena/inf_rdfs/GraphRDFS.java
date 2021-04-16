@@ -27,7 +27,7 @@ import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.util.iterator.WrappedIterator;
 import org.seaborne.jena.inf_rdfs.engine.InfFindTriple;
 import org.seaborne.jena.inf_rdfs.engine.MatchRDFS;
-import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
+import org.seaborne.jena.inf_rdfs.setup.ConfigRDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +37,9 @@ import org.slf4j.LoggerFactory;
 public class GraphRDFS extends GraphWrapper {
     private static Logger log = LoggerFactory.getLogger(GraphRDFS.class);
     private final MatchRDFS<Node, Triple> source;
-    private final SetupRDFS_X<Node> setup;
+    private final ConfigRDFS<Node> setup;
 
-    public GraphRDFS(Graph graph, SetupRDFS_X<Node> setup) {
+    public GraphRDFS(Graph graph, ConfigRDFS<Node> setup) {
         super(graph);
         this.setup = setup;
         this.source = new InfFindTriple(setup, graph);

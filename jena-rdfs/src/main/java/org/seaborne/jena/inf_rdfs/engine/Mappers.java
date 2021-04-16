@@ -37,8 +37,8 @@ public class Mappers {
     }
 
     private static class MapperTriple implements MapperX<Node, Triple> {
-        @Override public Node fromNode(Node n)  { return n; }
-        @Override public Node toNode(Node x)    { return x; }
+        @Override public Node fromNode(Node n)          { return n; }
+        @Override public Node toNode(Node x)            { return x; }
         @Override public Node subject(Triple triple)    { return triple.getSubject(); }
         @Override public Node predicate(Triple triple)  { return triple.getPredicate(); }
         @Override public Node object(Triple triple)     { return triple.getObject(); }
@@ -47,16 +47,16 @@ public class Mappers {
     public static class MapperQuad implements MapperX<Node, Quad> {
         private final Node graph;
         MapperQuad(Node g)  { this.graph = g; }
-        @Override public Node fromNode(Node n)  { return n; }
-        @Override public Node toNode(Node x)    { return x; }
+        @Override public Node fromNode(Node n)      { return n; }
+        @Override public Node toNode(Node x)        { return x; }
         @Override public Node subject(Quad quad)    { return quad.getSubject(); }
         @Override public Node predicate(Quad quad)  { return quad.getPredicate(); }
         @Override public Node object(Quad quad)     { return quad.getObject(); }
     }
 
     private static class MapperTuple implements MapperX<Node, Tuple<Node>> {
-        @Override public Node fromNode(Node n)  { return n; }
-        @Override public Node toNode(Node x)    { return x; }
+        @Override public Node fromNode(Node n)              { return n; }
+        @Override public Node toNode(Node x)                { return x; }
         @Override public Node subject(Tuple<Node> tuple)    { return offset(tuple, 0); }
         @Override public Node predicate(Tuple<Node> tuple)  { return offset(tuple, 1); }
         @Override public Node object(Tuple<Node> tuple)     { return offset(tuple, 2); }

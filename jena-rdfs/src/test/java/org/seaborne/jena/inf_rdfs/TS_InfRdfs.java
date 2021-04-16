@@ -25,18 +25,29 @@ import org.junit.runners.Suite;
     // Stream uses.
     TestStreamRDFS.class
 
-    // Backwards inference modes supported.
+    // Separate data and schema.
     , TestGraphSplitRDFS.class
-    , TestGraphSplitRDFSInc.class               // Unimportant.
 
+    // Separate data and schema. Add back calculated schema inferences.
+    , TestGraphSplitRDFSInc.class
+
+    // One graph: data and schema.
     , TestGraphCombinedRDFS.class
 
+    // Separate data and schema. Materialized.
     , TestMaterializedSplitRDFS.class
-    , TestMaterializedCombinedRDFS.class
 
+    // One graph: data and schema, Materialized.
+    , TestMaterializedCombinedRDFS.class
 
     // Assembler.
     , TestAssemblerRDFS.class
+
+    // Other
+    , TestMiscRDFS.class
+
+    // DatetGraphRDFS and SPARQL.
+    , TestInfSPARQL.class
 })
 
 public class TS_InfRdfs { }

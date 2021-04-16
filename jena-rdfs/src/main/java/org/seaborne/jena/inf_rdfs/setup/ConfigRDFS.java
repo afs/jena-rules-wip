@@ -27,8 +27,7 @@ import org.apache.jena.tdb2.store.NodeId;
  * {@code <T>} maybe {@link Node} but it may be some storage idea of a RDF term,
  * such as TDB2's {@link NodeId}.
  */
-public interface SetupRDFS_X<X> {
-
+public interface ConfigRDFS<X> {
 
     /** Return the sub-class hierarchy - map from class to its subclasses (transitive). */
     public Map<X, Set<X>> getSubClassHierarchy();
@@ -41,12 +40,6 @@ public interface SetupRDFS_X<X> {
 
     /** Return the mapping property to domains(s). */
     public Map<X, Set<X>> getPropertyDomains();
-
-//    /**
-//     * Match against the vocabulary, with transitive closure of rdfsSubClassOf and subPropertyOf.
-//     * Return a stream of 3-tuples.
-//     */
-//    public <T> Stream<T> match(X s, X p, X o);
 
     /** All super-types of an element.
      * Does not include the element unless there is a cycle of length >1.
@@ -92,6 +85,12 @@ public interface SetupRDFS_X<X> {
 
     /** Does this setup have any property/subproperty declarations? */
     public boolean hasPropertyDeclarations();
+
+    /**
+     * Does this setup have any property/subproperty declarations
+     * and no range, domain or subClass (which means no rdf:type work needed).
+     */
+    public boolean hasOnlyPropertyDeclarations();
 
     /** Does this setup have any range declarations? */
     public boolean hasRangeDeclarations();

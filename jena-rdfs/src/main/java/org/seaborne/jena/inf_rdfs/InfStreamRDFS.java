@@ -17,8 +17,6 @@
 
 package org.seaborne.jena.inf_rdfs;
 
-import java.util.function.Consumer;
-
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.system.StreamRDF;
@@ -27,7 +25,7 @@ import org.apache.jena.sparql.core.Quad;
 import org.seaborne.jena.inf_rdfs.engine.ApplyRDFS;
 import org.seaborne.jena.inf_rdfs.engine.Mappers;
 import org.seaborne.jena.inf_rdfs.engine.Output;
-import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
+import org.seaborne.jena.inf_rdfs.setup.ConfigRDFS;
 
 /**
  * A {@link StreamRDF} that applies RDFS to the stream.
@@ -38,29 +36,21 @@ import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
  * The output stream may include duplicates.
  */
 public class InfStreamRDFS extends StreamRDFWrapper {
-    private final SetupRDFS_X<Node>     rdfsSetup;
+    private final ConfigRDFS<Node>     rdfsSetup;
     private final ApplyRDFS<Node, Triple> rdfs;
     private final Output<Node> outputTriple;
     private final boolean includeInput = true;
 
     private Node currentGraph;
     private Output<Node> currentGraphOutput;
-    private ApplyRDFS<Node, Quad> rdfsQuad = null;
 
-    public InfStreamRDFS(final StreamRDF output, SetupRDFS_X<Node> rdfsSetup) {
+    public InfStreamRDFS(final StreamRDF output, ConfigRDFS<Node> rdfsSetup) {
         super(output);
         this.rdfsSetup = rdfsSetup;
         outputTriple = (s,p,o)->output.triple(Triple.create(s,p,o));
         this.rdfs = new ApplyRDFS<>(rdfsSetup, Mappers.mapperTriple());
     }
 
-    /** Triple output function. Send to StreamRDF. */
-    private final Consumer<Triple> dest = triple -> {
-        if ( currentGraph == null )
-            super.triple(triple);
-        else
-            super.quad(Quad.create(currentGraph, triple));
-    };
     @Override
     public void triple(Triple triple) {
         if ( includeInput )

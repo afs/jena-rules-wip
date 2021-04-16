@@ -25,7 +25,7 @@ import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.util.iterator.ExtendedIterator;
-import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_X;
+import org.seaborne.jena.inf_rdfs.setup.ConfigRDFS;
 
 /**
  * Find in one graph.
@@ -35,7 +35,7 @@ public class InfFindTriple extends MatchRDFS<Node, Triple> {
 
     private final Graph graph;
 
-    public InfFindTriple(SetupRDFS_X<Node> setup, Graph graph) {
+    public InfFindTriple(ConfigRDFS<Node> setup, Graph graph) {
         super(setup, Mappers.mapperTriple());
         this.graph = graph;
     }

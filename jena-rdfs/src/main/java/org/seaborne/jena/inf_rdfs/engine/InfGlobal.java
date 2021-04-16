@@ -32,6 +32,8 @@ import org.apache.jena.vocabulary.RDFS;
  * Constants relating to inference.
  */
 public class InfGlobal {
+
+    public static final Node ANY               = Node.ANY;
     public static final Node rdfType           = RDF.Nodes.type;
     public static final Node rdfsRange         = RDFS.Nodes.range;
     public static final Node rdfsDomain        = RDFS.Nodes.domain;

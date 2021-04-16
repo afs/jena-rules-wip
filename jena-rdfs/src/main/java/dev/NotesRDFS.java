@@ -19,49 +19,35 @@ package dev;
 
 public class NotesRDFS {
 
-    // X subclass X not inferred. Inc/exc issue?
-
-    // ---- Quad solver.
-    // [Match]
-    //   PatternMatchData - notes RX integration.
-    // Can/should we merge OpExecutor, OpExecutorQuads?
-    //   Push into the DSG?
-
-    // [ ] Testing
-    //     General, TIM, TDB1, TDB2.
-    // * SolverRX: abortable? (TDB - abortable?)
-    // [ ] SysRDFS  - register OpExecutor.
-
-    // Clearup/rename: TDB1, TDB2
-    //   SolverLib, Solver, SolverRx
-
-    // Ready. Use with TIM (and, in tests, general).
-
     // ---- RDFS
     // -- Release
     // [ ] org.apache.jena.rdfs
-    // [ ] Solver
 
     // -- Refinement
     // Check and deal with:
     // [RDFS]
-    // [ ] accABC -> streams?
-    // [ ] Set up function to calculate and behave like a Graph<X>
-    // [ ] Test empty setup!
+    // Setup.
+    // [?] accABC -> streams?
+    // [-] Set up function to calculate and behave like a Graph<X>
+    // [x] Test empty setup!
 
-    // [ ] Tests for range and supertype.
-    //     (:x rdf:type ?type) is types-in-data + range + domain use -> super class expansion
-    //     Check order.
+    // [x] Strip MatchRDFS of unnecessary extras.
+    //     find_ANY_type_T - ensure tests cover.
+    //     Test, No subclasses, only D&R
+    //     test find_X_type_T. Subtype in domain and as a superlcass.
+    //     find_ANY_ANY_Y and Y is or has sub/super classes.
 
-    // [ ] Strip MatchRDFS of unnecessary extras.
+    // [x] Integration tests - dataset esp. findNG
 
-    // [ ] Integration tests - dataset esp. findNG
+    // [ ] Test SPARQL.
+    // [ ] Fuseki Main --rdfs=
 
     // == Phase 2
 
     // [ ] TDB2
     // [ ] TDB1
     // [ ] assertSparql
+    // [ ] SysRDFS  - register an OpExecutor?
 
 
     // [ ] Test for subproperties of rdf:type and other vocabulary.

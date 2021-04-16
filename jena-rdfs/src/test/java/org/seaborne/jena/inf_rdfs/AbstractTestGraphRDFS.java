@@ -19,6 +19,7 @@
 package org.seaborne.jena.inf_rdfs;
 
 import java.io.IOException;
+
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.reasoner.Reasoner;

@@ -16,21 +16,13 @@
  * limitations under the License.
  */
 
-package solver;
+package org.seaborne.jena.inf_rdfs.engine;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.stream.Stream;
 
-import org.apache.jena.sparql.engine.iterator.Abortable;
-import org.apache.jena.sparql.engine.iterator.IterAbortable;
-
-public class SolverLib {
-    public static <T> Iterator<T> makeAbortable(Iterator<T> iter, List<Abortable> killList)
-    {
-        if ( killList == null )
-            return iter;
-        IterAbortable<T> k = new IterAbortable<>(iter);
-        killList.add(k);
-        return k;
-    }
+/**
+ * Match by S/P/O.
+ */
+public interface Match<X, T> {
+    public Stream<T> match(X s, X p, X o);
 }

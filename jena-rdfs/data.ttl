@@ -6,26 +6,24 @@ PREFIX list:    <http://jena.hpl.hp.com/ARQ/list#>
 
 PREFIX : <http://example/>
 
-:c :p :x
+:a rdf:type :T .
 
-## :a rdf:type :T .
-## 
-## :b :p 123 .
-## 
-## :c :q :z .
+:b :p 123 .
 
-## :T rdfs:label "foo" .
-## :T rdfs:subClassOf :TTT .
-## 
-## :b rdf:type :X .
-## 
-## :c :p :x .
-## 
-## :c :p :b .
-## 
-## :c :p :x1 .
-## :c :pp :x2 .
-## 
-## :d :q :z .
-## 
-## :e :r :v .
+:c :q :z .
+
+:T rdfs:label "foo" .
+:T rdfs:subClassOf :TTT .
+
+:b rdf:type :X .
+
+:c :p :x .
+
+:c :p :b .
+
+:c :p :x1 .
+:c :pp :x2 .
+
+:d :q :z .
+
+:e :r :v .

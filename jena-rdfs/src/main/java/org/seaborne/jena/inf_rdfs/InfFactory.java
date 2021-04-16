@@ -56,7 +56,8 @@ public class InfFactory {
      * Create an RDFS inference dataset.
      */
     public static DatasetGraph datasetRDFS(DatasetGraph data, Graph vocab ) {
-        return new DatasetGraphRDFS(data, new SetupRDFS(vocab, true));
+        SetupRDFS setup = setupRDFS(vocab);
+        return new DatasetGraphRDFS(data, setup);
     }
 
     /** Create an {@link SetupRDFS} */

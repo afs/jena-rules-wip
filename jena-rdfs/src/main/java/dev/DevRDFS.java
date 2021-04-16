@@ -20,8 +20,11 @@ package dev;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
-import org.apache.jena.atlas.iterator.Iter;
+import org.apache.jena.atlas.lib.CollectionUtils;
+import org.apache.jena.atlas.lib.StreamOps;
 import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.graph.*;
 import org.apache.jena.query.*;
@@ -39,19 +42,19 @@ import org.apache.jena.sparql.core.assembler.AssemblerUtils;
 import org.apache.jena.sparql.engine.main.QC;
 import org.apache.jena.sparql.engine.main.QueryEngineMain;
 import org.apache.jena.sparql.engine.main.QueryEngineMainQuad;
+import org.apache.jena.sparql.engine.main.solver.OpExecutorQuads;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.sse.SSE;
 import org.apache.jena.sparql.util.QueryExecUtils;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.tdb.TDBFactory;
 import org.apache.jena.tdb2.DatabaseMgr;
-import org.apache.jena.util.iterator.ExtendedIterator;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.seaborne.jena.inf_rdfs.*;
 import org.seaborne.jena.inf_rdfs.assembler.VocabRDFS;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_TDB1;
 import org.seaborne.jena.inf_rdfs.setup.SetupRDFS_TDB2;
-import solver.OpExecutorQuads;
 
 public class DevRDFS {
     static {
@@ -73,24 +76,14 @@ public class DevRDFS {
     static Graph inf;
 
     public static void main(String...argv) throws IOException {
-        visible(); System.exit(0);
-
-
         //matchData();System.exit(0);
-
-        assembler();System.exit(0);
+        //assembler();System.exit(0);
+        //graphSetup();System.exit(0);
 
         sparql();
         System.exit(0);
 
         expand();
-    }
-
-    private static void visible() {
-        Graph g0 = SSE.parseGraph("(graph (:s rdf:type :T) (:T rdfs:subClassOf :T2))");
-        Graph graph =InfFactory.graphRDFS(g0);
-        ExtendedIterator<Triple> iter = graph.find(null, null, SSE.parseNode(":T2"));
-        Iter.print(iter);
     }
 
     private static void assembler() {
@@ -101,7 +94,51 @@ public class DevRDFS {
         RDFDataMgr.write(System.out, model, Lang.TTL);
     }
 
+    private static void graphSetup() {
+        String VOCAB_FILE = "vocab.ttl";
+        Graph vocab = RDFDataMgr.loadGraph(VOCAB_FILE);
 
+        SetupRDFS setup = InfFactory.setupRDFS(vocab);
+
+        MatchVocabRDFS g = new MatchVocabRDFS(setup);
+        Node s = SSE.parseNode(":T2");
+        Node p = Node.ANY;
+        Node o = Node.ANY;
+
+        Stream<Triple> stream = g.match(s,RDFS.Nodes.subClassOf,o);
+        StreamOps.print(stream);
+
+
+        if ( false ) {
+
+            // Subclass
+            Map<Node, Set<Node>> map1 = setup.getSubClassHierarchy();
+            CollectionUtils.forEach(map1,(k,v)->{
+                System.out.printf("%s rdfs:subClassOf %s .\n", k, v);
+            });
+
+            // Subproperty
+            System.out.println();
+            Map<Node, Set<Node>> map2 = setup.getSubPropertyHierarchy();
+            CollectionUtils.forEach(map2,(k,v)->{
+                System.out.printf("%s rdfs:subPropertyOf %s .\n", k, v);
+            });
+
+            // Range
+            System.out.println();
+            Map<Node, Set<Node>> map3 = setup.getPropertyRanges();
+            CollectionUtils.forEach(map3,(k,v)->{
+                System.out.printf("%s rdfs:range %s .\n", k, v);
+            });
+
+            // Domain
+            System.out.println();
+            Map<Node, Set<Node>> map4 = setup.getPropertyDomains();
+            CollectionUtils.forEach(map4,(k,v)->{
+                System.out.printf("%s rdfs:domain %s .\n", k, v);
+            });
+        }
+    }
 
     private static void sparql() {
         Node gn = NodeFactory.createURI("http://example/g");
