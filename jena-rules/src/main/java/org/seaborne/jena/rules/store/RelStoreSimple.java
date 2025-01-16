@@ -24,16 +24,16 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections4.MultiMapUtils;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap ;
-import org.apache.jena.ext.com.google.common.collect.HashMultimap;
-import org.apache.jena.ext.com.google.common.collect.Multimap ;
 import org.seaborne.jena.rules.Rel ;
 import org.seaborne.jena.rules.RelStore ;
 import org.seaborne.jena.rules.RelStoreBuilder;
 
 /**
- * Simple {@link RelStore}, uses a Multimap of atom name to index.
+ * Simple {@link RelStore}, uses a MultiValuedMap of atom name to index.
  * Useful as an independent implementation for testing.
  */
 public class RelStoreSimple extends RelStoreBase {
@@ -43,8 +43,8 @@ public class RelStoreSimple extends RelStoreBase {
     }
 
     static class Builder implements RelStoreBuilder {
-        //private Multimap<String,Rel> store = ArrayListMultimap.create();
-        private Multimap<String,Rel> store = HashMultimap.create();
+        //private MultiValuedMap<String,Rel> store = ArrayListMultiValuedMap.create();
+        private MultiValuedMap<String,Rel> store = MultiMapUtils.newListValuedHashMap();
 
         @Override
         public Builder add(Rel rel) {
@@ -56,23 +56,23 @@ public class RelStoreSimple extends RelStoreBase {
         @Override
         public Builder delete(Rel rel) {
             //checkUpdatable(()->"delete("+rel+")") ;
-            store.remove(rel.getName(), rel);
+            store.removeMapping(rel.getName(), rel);
             return this;
         }
 
         @Override
         public RelStore build() {
             // Isolate.
-            Multimap<String,Rel> store2 = ArrayListMultimap.create(store);
+            MultiValuedMap<String,Rel> store2 = new ArrayListValuedHashMap<>(store);
             RelStore result = new RelStoreSimple(store2);
             return result;
         }
     }
 
-    private final Multimap<String,Rel> store;
+    private final MultiValuedMap<String,Rel> store;
 
-    private RelStoreSimple(Multimap<String,Rel> store) {
-        this.store = ArrayListMultimap.create(store);
+    private RelStoreSimple(MultiValuedMap<String,Rel> store) {
+        this.store = new ArrayListValuedHashMap<>(store);
     }
 
     @Override

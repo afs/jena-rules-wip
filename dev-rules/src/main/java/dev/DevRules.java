@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.apache.jena.atlas.lib.StreamOps;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFParser;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.sse.SSE;
@@ -88,7 +88,38 @@ public class DevRules {
 
     public static void main(String...a) {
         //rules.main("rules.txt");
-        main0();
+        //main0();
+        mainGraphAndRules();
+    }
+
+    public static void mainGraphAndRules(String...a) {
+        Graph graph = RDFParser.source("/home/afs/tmp/RDFS/small.ttl").toGraph();
+        RelStore baseData = RelStoreFactory.create(graph);
+
+//        -> table(rdfs:subClassOf).
+//        [ (?a rdfs:subClassOf ?c) <- (?a rdfs:subClassOf ?b), (?b rdfs:subClassOf ?c)]
+//        ##[ (?a rdf:type ?y) <- (?x rdfs:subClassOf ?y), (?a rdf:type ?x) ]
+//        #<http://example.com/condition0>
+//        [ (<http://example.com/condition0> rdf:type ?y) <-  (<http://example.com/condition0> rdf:type ?x) , (?x rdfs:subClassOf ?y) ]
+
+
+        String rulesString = """
+                PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+                (?a rdfs:subClassOf ?c) <- (?a rdfs:subClassOf ?b) (?b rdfs:subClassOf ?c) .
+               (?a rdf:type ?y) <- (?x rdfs:subClassOf ?y) (?a rdf:type ?x) .
+              """;
+
+
+        RuleSet ruleSet = RulesParser.parseRuleSet(rulesString);
+
+
+        String queryStr = "(<http://example.com/condition0> rdf:type ?y)";
+        Rel queryRel = RulesParser.parseAtom(queryStr);
+        RulesEngine engine = RulesGraphBuilder.create(EngineType.BKD_NON_RECURSIVE_SLD, ruleSet, baseData);
+        Stream<Binding> x = engine.solve(queryRel);
+        x.forEach(System.out::println);
+
+
     }
 
     public static void main0(String...a) {
@@ -159,13 +190,12 @@ public class DevRules {
         RulesEngine engine = RulesGraphBuilder.create(EngineType.BKD_NON_RECURSIVE_SLD, ruleSet, baseData);
         Stream<Binding> results = engine.solve(queryRel);
 
-        List<Binding> resultsList = StreamOps.toList(results);
+        List<Binding> resultsList = results.toList();
         System.out.println(resultsList);
         results = resultsList.stream();
 
         //engine.stream(queryRel);
-        Stream<Rel> results2 = results.map(b->Sub.substitute(b, queryRel));
-        List<Rel> x = StreamOps.toList(results2);
+        List<Rel> x = results.map(b->Sub.substitute(b, queryRel)).toList();
         //-
         Rel answer = RulesParser.parseRel("(:X :P :Z)");
         assertTrue("Rel", x.contains(answer));
@@ -183,7 +213,7 @@ public class DevRules {
         RelStore expected = RulesParser.data(result);
         RuleExecCxt.global.TRACE = true ;
         RulesEngine engine = RulesGraphBuilder.create(EngineType.BKD_NON_RECURSIVE_SLD, ruleSet, data);
-        List<Binding> x = StreamOps.toList(engine.solve(query));
+        List<Binding> x = engine.solve(query).toList();
         System.out.println("--");
         System.out.println(x); // ?x = ?v, not ?v = 1
 
@@ -237,9 +267,7 @@ public class DevRules {
         Stream<Binding> results = engine.solve(query);
 
         // Map query to result rels.
-        Stream<Rel> results2 = results.map(b->Sub.substitute(b, query));
-
-        List<Rel> x = StreamOps.toList(results2);
+        List<Rel> x = results.map(b->Sub.substitute(b, query)).toList();
         if ( verbose ) {
             System.out.println();
             System.out.println("Result: "+x);

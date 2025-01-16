@@ -25,29 +25,26 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections4.MultiMapUtils;
+import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.jena.atlas.iterator.Iter;
-import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap ;
-import org.apache.jena.ext.com.google.common.collect.Multimap ;
 import org.seaborne.jena.rules.Rel ;
 import org.seaborne.jena.rules.RelStore ;
 
 /**
- * Simple mutable {@link RelStore}, uses a Multimap of rule name to
+ * Simple mutable {@link RelStore}, uses a MultiValuedMap of rule name to
  * Useful as an independent implementation for testing.
  */
 public class RelStoreAccSimple extends RelStoreBase implements RelStoreAcc {
 
-    private Multimap<String,Rel> store;
+    private MultiValuedMap<String,Rel> store;
 
     public RelStoreAccSimple() {
-        store = ArrayListMultimap.create();
-    }
-
-    private RelStoreAccSimple(Multimap<String,Rel> store) {
-        store = ArrayListMultimap.create(store);
+        store = MultiMapUtils.newListValuedHashMap();
     }
 
     private boolean readOnly = false;
+
     @Override
     public void setWritable(boolean allowUpdate) {
         this.readOnly = !allowUpdate;
@@ -110,7 +107,7 @@ public class RelStoreAccSimple extends RelStoreBase implements RelStoreAcc {
     @Override
     public void delete(Rel rel) {
         //checkUpdatable(()->"delete("+rel+")") ;
-        store.remove(rel.getName(), rel);
+        store.removeMapping(rel.getName(), rel);
     }
 
     @Override

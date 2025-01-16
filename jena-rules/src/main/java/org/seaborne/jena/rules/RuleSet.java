@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.jena.atlas.lib.CollectionUtils;
-import org.apache.jena.atlas.lib.StreamOps;
 import org.apache.jena.riot.system.PrefixMap;
 import org.seaborne.jena.rules.exec.Renamer;
 import org.seaborne.jena.rules.exec.RuleOps;
@@ -133,7 +132,7 @@ public class RuleSet implements Iterable<Rule>{
 
     public Collection<Rule> provides(Rel rel) {
         Stream<Rule> providers = stream().filter(rule -> RuleOps.provides(rel, rule.getHead()));
-        return StreamOps.toList(providers);
+        return providers.toList();
     }
 
     public List<Rel> getHeads() {

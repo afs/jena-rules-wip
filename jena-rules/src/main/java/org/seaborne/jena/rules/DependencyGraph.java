@@ -22,8 +22,8 @@ import java.io.PrintStream;
 import java.util.*;
 import java.util.function.Consumer;
 
-import org.apache.jena.ext.com.google.common.collect.ArrayListMultimap;
-import org.apache.jena.ext.com.google.common.collect.Multimap;
+import org.apache.commons.collections4.MultiMapUtils;
+import org.apache.commons.collections4.MultiValuedMap;
 import org.seaborne.jena.rules.exec.RuleOps;
 
 /**
@@ -41,11 +41,11 @@ public class DependencyGraph {
     // Rule -> other rules it needs
     // This is not the body - a Rel in the body may have more than one rule it depends on
 
-    private Multimap<Rule, Rule> direct = ArrayListMultimap.create();
-    // Rule -> predicates without rules (so mush be in the data)
+    private MultiValuedMap<Rule, Rule> direct = MultiMapUtils.newListValuedHashMap();
+    // Rule -> predicates without rules (so must be in the data)
 
-    private Multimap<Rule, Rel> data = ArrayListMultimap.create();
-//    private Multimap<Rel, Rule> rules = ArrayListMultimap.create();
+    private MultiValuedMap<Rule, Rel> data = MultiMapUtils.newListValuedHashMap();
+//    private MultiValuedMap<Rel, Rule> rules = MultiMapUtils.newListValuedHashMap();
     private final RuleSet ruleSet;
 
     public DependencyGraph(RuleSet ruleSet) {

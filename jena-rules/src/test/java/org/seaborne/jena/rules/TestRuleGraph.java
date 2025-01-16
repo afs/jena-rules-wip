@@ -25,15 +25,15 @@ import static org.junit.Assert.assertTrue;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.apache.jena.atlas.lib.StreamOps;
-import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.sparql.engine.binding.Binding;
-import org.apache.jena.sparql.sse.SSE;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.sse.SSE;
 import org.seaborne.jena.rules.lang.RulesParser;
 
 /**
@@ -157,9 +157,7 @@ public class TestRuleGraph {
         RulesEngine engine = RulesGraphBuilder.create(underTest, ruleSet, baseData);
         Stream<Binding> results = engine.solve(queryRel);
         //engine.stream(queryRel);
-        Stream<Rel> results2 = results.map(b->Sub.substitute(b, queryRel));
-        List<Rel> x = StreamOps.toList(results2);
-        //-
+        List<Rel> x = results.map(b->Sub.substitute(b, queryRel)).toList();
         Rel answer = RulesParser.parseRel("(:X :P :Z)");
         assertTrue("Rel", x.contains(answer));
     }

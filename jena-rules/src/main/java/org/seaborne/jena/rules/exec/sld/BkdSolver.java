@@ -160,7 +160,7 @@ public class BkdSolver {
             return null;
         Rel pattern2 = MGU.applyMGU(mgu, pattern1);
 
-        Iterator<Binding> chain = Iter.singleton(BindingFactory.root());
+        Iterator<Binding> chain = Iter.singletonIterator(BindingFactory.root());
 
         for ( Rel relBody_ : rule.getBody() ) {
             Rel relBody = Sub.substitute(mgu, relBody_);

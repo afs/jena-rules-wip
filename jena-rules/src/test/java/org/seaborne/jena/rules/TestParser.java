@@ -53,7 +53,7 @@ public class TestParser {
     }
 
     @Test public void rule_rel_4() {
-        Rel r = parseAtom("rel(:a <b> '3')");
+        Rel r = parseAtom("rel(:a <x:b> '3')");
         assertEquals(3, r.getTuple().len());
         assertEquals("rel", r.getName());
     }
@@ -87,12 +87,12 @@ public class TestParser {
     }
 
     @Test public void rule_fact_4() {
-        Rule r = parseRule("(<s> <p> <o>) .");
+        Rule r = parseRule("(<x:s> <x:p> <x:o>) .");
         assertTrue(r.isFact());
     }
 
     @Test public void rule_fact_5() {
-        Rule r = parseRule("(<s> <p> <o>)");
+        Rule r = parseRule("(<x:s> <x:p> <x:o>)");
         assertTrue(r.isFact());
     }
 

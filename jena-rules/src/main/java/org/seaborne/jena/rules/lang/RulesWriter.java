@@ -24,6 +24,7 @@ import org.apache.jena.riot.out.NodeFormatter;
 import org.apache.jena.riot.out.NodeFormatterTTL;
 import org.apache.jena.riot.system.PrefixMap;
 import org.apache.jena.riot.system.RiotLib;
+import org.apache.jena.riot.writer.DirectiveStyle;
 import org.seaborne.jena.rules.Rel;
 import org.seaborne.jena.rules.Rule;
 import org.seaborne.jena.rules.RuleSet;
@@ -33,7 +34,7 @@ public class RulesWriter {
     public static void write(IndentedWriter out, RuleSet ruleSet) {
         //RiotLib.writeBase(out, base, true);
         PrefixMap prefixMap = ruleSet.getPrefixMap();
-        RiotLib.writePrefixes(out, prefixMap, true);
+        RiotLib.writePrefixes(out, prefixMap, DirectiveStyle.KEYWORD);
         if ( ! prefixMap.isEmpty() )
             out.println();
         NodeFormatter fmt = new NodeFormatterTTL(null, prefixMap);

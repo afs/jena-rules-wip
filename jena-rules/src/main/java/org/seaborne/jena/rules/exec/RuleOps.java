@@ -32,7 +32,6 @@ import org.apache.jena.atlas.lib.tuple.TupleFactory;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.query.ARQ;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.ExecutionContext;
@@ -65,7 +64,7 @@ public class RuleOps {
             emit(rCxt, acc, rule.getHead(), data);
             return;
         }
-        Iterator<Binding> chain = Iter.singleton(BindingFactory.root());
+        Iterator<Binding> chain = Iter.singletonIterator(BindingFactory.root());
         for(Rel rel: body) {
             chain = step(data, rel, chain);
         }
@@ -217,11 +216,11 @@ public class RuleOps {
 
     /** Evaluate a BGP : encapsulate for a better/different version */
     private static QueryIterator match(Graph source, BasicPattern pattern) {
-        ExecutionContext execContext = new ExecutionContext(ARQ.getContext(), source, null, null) ;
+        ExecutionContext execContext =  ExecutionContext.createForGraph(source);
         // Create a chain of triple iterators.
         QueryIterator chain = QueryIterSingleton.create(org.apache.jena.sparql.engine.binding.BindingFactory.root(), execContext) ;
         for (Triple triple : pattern)
-            chain = QC.execute(chain, triple, execContext) ;
+            chain = QC.executeFlat(chain, triple, execContext) ;
         return chain ;
     }
 
