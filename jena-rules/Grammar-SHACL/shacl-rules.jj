@@ -84,14 +84,52 @@ void ByteOrderMark() : {}
 
 void Rule() : {  TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ; }
 {
-   <RULE>
+   Rule1() | Rule2() | Rule3()
+//    <RULE>
+//    { startRule(); }
+//    <LBRACE>
+//    TriplesTemplate(acc)
+//    <RBRACE>
+//    <WHERE>
+//    body = BodyPattern()
+//    { finishRule(acc, body); }
+}
+
+void Rule1() : { TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ; }
+{
    { startRule(); }
-   <LBRACE>
-   TriplesTemplate(acc)
-   <RBRACE>
+   <RULE>
+   acc = TriplesTemplateBlock()
    <WHERE>
    body = BodyPattern()
    { finishRule(acc, body); }
+}
+
+void Rule2() : { TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ; }
+{
+   { startRule(); }
+   <IF>
+   body = BodyPattern()
+   <THEN>
+   acc = TriplesTemplateBlock()
+   { finishRule(acc, body); }
+}
+
+void Rule3() : { TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ; }
+{
+   { startRule(); }
+   acc = TriplesTemplateBlock()
+   <RULE_INFER>
+   body = BodyPattern()
+   { finishRule(acc, body); }
+}
+
+TripleCollector TriplesTemplateBlock() : { TripleCollector acc = new TripleCollectorBGP(); }
+{
+   <LBRACE>
+   TriplesTemplate(acc)
+   <RBRACE>
+   { return acc; }
 }
 
 void Prologue() : {}
@@ -1790,7 +1828,9 @@ TOKEN : { <KW_A:  "a" > }
 // SHACL
 TOKEN [IGNORE_CASE] :
 {
-  < RULE:         "rule" >
+   < RULE:         "rule" >
+|  < THEN:         "then" >
+|  < RULE_INFER:   ":-" >
 }
 
 TOKEN [IGNORE_CASE] :

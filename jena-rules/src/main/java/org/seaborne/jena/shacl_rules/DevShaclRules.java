@@ -48,37 +48,45 @@ public class DevShaclRules {
     // Execution : No rule checking.
     // Triple generation and parse triples.
 
+    // Grammar
+    // [x] TriplesTemplateBlock -- "{" TriplesTemplate(acc) "}"
+
     public static void main(String[] args) {
+
+        String PREFIXES = """
+                PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                PREFIX sh:   <http://www.w3.org/ns/shacl#>
+                PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+                PREFIX :     <http://example/>
+                """;
 
         // Parser to triples.
 
-        String dataStr1 = """
-                PREFIX : <http://example/>
+        String dataStr1 = PREFIXES+"""
                 :s1 :p 123 .
                 :s2 :p 456 .
-
+                :s3 :q 'abc'.
                 """;
 
-        String ruleSet1 = """
-                PREFIX : <http://example/>
+        String ruleSet1 = PREFIXES+"""
                 RULE { ?s :xq ?o } WHERE { ?s :p ?o FILTER (?o < 400 ) }
                 RULE { ?s :xxxx ?o } WHERE { ?s :xq ?o }
+
+                ## RULE { << ?s :q ?o >> } WHERE { ?s :q ?o }
+                ## IF { ?s :xq ?o } THEN { ?s :xxxx ?o }
+                ## { ?s :xxxx ?o } :- { ?s :xq ?o }
                 """;
 
         execute(ruleSet1, dataStr1);
         System.exit(0);
 
-        String ruleSet2 = """
-                PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+        String ruleSet2 = PREFIXES+"""
                 RULE { ?x rdfs:subClassOf ?y } WHERE { ?x rdfs:subClassOf ?Z . ?Z rdfs:subClassOf ?y }
                 RULE { ?x rdf:type ?T } WHERE { ?x rdf:type ?Z . ?Z rdfs:subClassOf ?T }
                 """;
 
-        String dataStr2 = """
-                PREFIX :      <http://example/>
-                PREFIX rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX rdfs:  <http://www.w3.org/2000/01/rdf-schema#>
+        String dataStr2 = PREFIXES+"""
                 :T rdfs:subClassOf :C1 .
                 :C1 rdfs:subClassOf :TOP .
                 ##:C2 rdfs:subClassOf :TOP .
