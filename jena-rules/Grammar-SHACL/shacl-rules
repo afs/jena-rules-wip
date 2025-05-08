@@ -17,7 +17,7 @@
 
 # Parser builder
 
-DIR="../src/main/java/org/seaborne/jena/shacl_rules/lang"
+DIR="../src/main/java/org/seaborne/jena/shacl_rules/lang/parser"
 FILE="shacl-rules.jj"
 CLASS="ShaclRulesParser"
 

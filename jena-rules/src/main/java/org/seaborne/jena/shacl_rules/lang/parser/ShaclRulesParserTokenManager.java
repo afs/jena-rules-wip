@@ -18,13 +18,13 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules.lang;
+package org.seaborne.jena.shacl_rules.lang.parser;
 import org.apache.jena.graph.* ;
 import org.apache.jena.sparql.core.Var ;
 import org.apache.jena.sparql.syntax.* ;
 import org.apache.jena.sparql.expr.* ;
 import org.apache.jena.sparql.path.* ;
-import org.seaborne.jena.shacl_rules.*;
+import org.seaborne.jena.shacl_rules.lang.*;
 
 /** Token Manager. */
 @SuppressWarnings ("unused")

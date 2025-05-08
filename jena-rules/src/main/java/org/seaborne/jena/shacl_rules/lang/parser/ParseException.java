@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules.lang;
+package org.seaborne.jena.shacl_rules.lang.parser;
 
 /**
  * This exception is thrown when parse errors are encountered.
@@ -210,4 +210,4 @@ public class ParseException extends Exception {
    }
 
 }
-/* JavaCC - OriginalChecksum=c9c9f741cb8c7721ac95771d5e1703ae (do not edit this line) */
+/* JavaCC - OriginalChecksum=49c43e108dd8b322ac2b1e7134395456 (do not edit this line) */

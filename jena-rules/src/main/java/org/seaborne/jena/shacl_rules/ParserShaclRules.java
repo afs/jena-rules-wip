@@ -20,17 +20,19 @@ package org.seaborne.jena.shacl_rules;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.List;
 
 import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.shared.JenaException;
 import org.apache.jena.sparql.core.Prologue;
-import org.seaborne.jena.shacl_rules.lang.ShaclRulesParser;
+import org.seaborne.jena.shacl_rules.lang.ElementRule;
+import org.seaborne.jena.shacl_rules.lang.parser.ShaclRulesParser;
 
 public class ParserShaclRules {
 
-    public static void parse(String string) {
+    public static RuleSet parse(String string) {
         Reader in = new StringReader(string);
         ShaclRulesParser parser = new ShaclRulesParser(in);
         // XXX Change to prefix map.
@@ -39,7 +41,10 @@ public class ParserShaclRules {
 
         try {
             parser.RulesUnit();
-        } catch (org.seaborne.jena.shacl_rules.lang.ParseException ex) {
+            List<ElementRule> rules = parser.getRules();
+            RuleSet ruleSet = new RuleSet(prologue, rules);
+            return ruleSet;
+        } catch (org.seaborne.jena.shacl_rules.lang.parser.ParseException ex) {
             throw new QueryParseException(ex.getMessage(), ex.currentToken.beginLine, ex.currentToken.beginColumn);
         } catch (org.apache.jena.sparql.lang.sparql_12.TokenMgrError tErr) {
             // Last valid token : not the same as token error message - but this

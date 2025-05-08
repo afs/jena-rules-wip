@@ -51,7 +51,7 @@ PARSER_BEGIN(ShaclRulesParser)
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules.lang;
+package org.seaborne.jena.shacl_rules.lang.parser;
 
 import org.apache.jena.graph.* ;
 import org.apache.jena.sparql.core.Var ;
@@ -59,7 +59,7 @@ import org.apache.jena.sparql.syntax.* ;
 import org.apache.jena.sparql.expr.* ;
 import org.apache.jena.sparql.path.* ;
 
-import org.seaborne.jena.shacl_rules.*;
+import org.seaborne.jena.shacl_rules.lang.*;
 
 public class ShaclRulesParser extends ShaclRulesParserBase
 {}
@@ -82,14 +82,16 @@ void ByteOrderMark() : {}
    (<BOM>)?
 }
 
-void Rule() : {  TripleCollector acc = new TripleCollectorBGP() ; }
+void Rule() : {  TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ; }
 {
    <RULE>
+   { startRule(); }
    <LBRACE>
    TriplesTemplate(acc)
    <RBRACE>
    <WHERE>
-   BodyPattern()
+   body = BodyPattern()
+   { finishRule(acc, body); }
 }
 
 void Prologue() : {}
@@ -154,21 +156,30 @@ void TriplesTemplate(TripleCollector acc) : { }
 // #endif
 }
 
-// ---- General Graph Pattern 
+// ---- Rule body.
 
-Element BodyPattern() : { Element el = null ; Token t ; }
+ElementGroup BodyPattern() : { Token t ; }
 {
   t = <LBRACE>
   { int beginLine = t.beginLine; int beginColumn = t.beginColumn; t = null; }
+  { ElementGroup elg = new ElementGroup() ; }
+  BodyPattern1(elg)
+  <RBRACE>
+  { return elg; }
+ }
 
+void BodyPattern1(ElementGroup elg) : { Element el = null ; }
+{
   // XXX Needs work
+  // Currently : BGP FILTER*
   (
      el = BodyPatternSub()
-     (el = Filter())*
+     { elg.addElement(el);}
+     ( el = Filter() { elg.addElement(el); }
+       // After a filter, mor of the same.
+       (BodyPattern1(elg))?
+     )?
   )
-
-<RBRACE>
-    { return el ; }
 }
 
 Element BodyPatternSub() : { Element el = null ; }
