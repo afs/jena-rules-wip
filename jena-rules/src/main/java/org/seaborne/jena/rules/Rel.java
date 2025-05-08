@@ -68,13 +68,11 @@ public class Rel  {
     }
 
     public Rel(String name, Node...nodes) {
-        this.name = name;
-        this.tuple = TupleFactory.tuple(nodes);
+        this(name, TupleFactory.tuple(nodes));
     }
 
-    public Rel(String name, List<Node> list) {
-        this.name = name;
-        this.tuple = TupleFactory.create(list);
+    public Rel(String name, List<Node> nodes) {
+        this(name, TupleFactory.create(nodes));
     }
 
     public String getName() {

@@ -16,29 +16,29 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+package org.seaborne.jena.shacl_rules;
 
+import org.apache.jena.atlas.logging.LogCtl;
+import org.apache.jena.sys.JenaSystem;
 
-// Algorithm: Jacobi
-//   Do each pass with respect to the previous round.
-// Algorithm: Gauss-Seidel
-public enum EngineType {
-    // Default naive (used for tests).
-    FWD_NAIVE("Naive")
-    , FWD_NAIVE_JACOBI("Naive (Jacobi)")
-    , FWD_NAIVE_GUEASS_SEIDEL("Naive (GUASS_SEIDEL)")
-    , FWD_SEMINAIVE("Seminaive")
-    , BKD_NON_RECURSIVE_SLD("SLD (Non-recursive)")
-    , BKD_QSQR("QSQR")
-    , BKD_QSQI("QSQI")
-//  , MAGIC("MagicSet")
-    ;
+public class DevShaclRules {
 
-    private final String displayName;
+    static { JenaSystem.init(); LogCtl.setLogging(); }
 
-    private EngineType(String string) { this.displayName = string; }
+    public static void main(String[] args) {
 
-    public String displayName() {
-        return displayName;
+        // Can't BGP-FILTER-BGP-...
+        String x = """
+                PREFIX : <http://example/>
+                RULE { ?S :p :o }
+                WHERE {
+                    ?S :p ?o
+                    FILTER (?o < 2 )
+                    FILTER (?o < 2 )
+                }
+                """;
+        ParserShaclRules.parse(x);
+        System.out.println("DONE");
     }
+
 }

@@ -27,7 +27,7 @@ import org.seaborne.jena.rules.RelStore;
 
 /**
  * Read-only view of 2 RelStores.
- * Changes made directly on the underlying RelStores will be reglected in this view.
+ * Changes made directly on the underlying RelStores will be reflected in this view.
  */
 public class RelStore2 implements RelStore {
 

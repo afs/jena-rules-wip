@@ -41,6 +41,8 @@ import org.seaborne.jena.rules.store.RelStoreGraph;
 import org.seaborne.jena.rules.store.RelStoreSimple;
 
 public class DevRules {
+    // Grammar update/rewrite
+
     // [ ] DOCUMENT CODE
     // [ ] TESTS
     //     RuleEngine interface.
@@ -93,7 +95,7 @@ public class DevRules {
     }
 
     public static void mainGraphAndRules(String...a) {
-        Graph graph = RDFParser.source("/home/afs/tmp/RDFS/small.ttl").toGraph();
+        Graph graph = RDFParser.source("data.ttl").toGraph();
         RelStore baseData = RelStoreFactory.create(graph);
 
 //        -> table(rdfs:subClassOf).
@@ -102,7 +104,7 @@ public class DevRules {
 //        #<http://example.com/condition0>
 //        [ (<http://example.com/condition0> rdf:type ?y) <-  (<http://example.com/condition0> rdf:type ?x) , (?x rdfs:subClassOf ?y) ]
 
-
+        // Recursion.
         String rulesString = """
                 PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
                 (?a rdfs:subClassOf ?c) <- (?a rdfs:subClassOf ?b) (?b rdfs:subClassOf ?c) .
@@ -113,13 +115,11 @@ public class DevRules {
         RuleSet ruleSet = RulesParser.parseRuleSet(rulesString);
 
 
-        String queryStr = "(<http://example.com/condition0> rdf:type ?y)";
+        String queryStr = "(<http://example.com/s> rdf:type ?y)";
         Rel queryRel = RulesParser.parseAtom(queryStr);
         RulesEngine engine = RulesGraphBuilder.create(EngineType.BKD_NON_RECURSIVE_SLD, ruleSet, baseData);
         Stream<Binding> x = engine.solve(queryRel);
         x.forEach(System.out::println);
-
-
     }
 
     public static void main0(String...a) {
@@ -135,7 +135,7 @@ public class DevRules {
             RuleSet ruleSet = RulesParser.rules(
                 "(?s1 :r ?o1) <- (?s1 :q ?o1)",
                 "(?s2 :r ?o2) <- (?s2 :p ?o2)",
-                "(:X :P :Z) <- (?s3 :r ?x) (?x :r ?o3)");
+                "(:X :P :Z)   <- (?s3 :r ?x) (?x :r ?o3)");
             String queryStr = "(:X :P :Z)";
             //String queryStr = "(?a ?b ?c)";
 

@@ -18,7 +18,6 @@
 
 package org.seaborne.jena.rules.store;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +31,7 @@ import org.seaborne.jena.rules.Rel ;
 import org.seaborne.jena.rules.RelStore ;
 
 /**
- * Simple mutable {@link RelStore}, uses a MultiValuedMap of rule name to
+ * Simple mutable {@link RelStore}, uses a MultiValuedMap of rule name to rules.
  * Useful as an independent implementation for testing.
  */
 public class RelStoreAccSimple extends RelStoreBase implements RelStoreAcc {
@@ -73,12 +72,8 @@ public class RelStoreAccSimple extends RelStoreBase implements RelStoreAcc {
         // Materializing for simplicity
         if ( !store.containsKey(rel.getName()))
             return Iter.nullIterator();
-        List<Rel> result = new ArrayList<>();
         Collection<Rel> x = store.get(rel.getName());
-        for(Rel r : x) {
-            if ( match(r,rel) )
-                result.add(r);
-        }
+        List<Rel> result = x.stream().filter(r -> match(r,rel)).toList();
         return result.iterator();
     }
 
@@ -91,7 +86,6 @@ public class RelStoreAccSimple extends RelStoreBase implements RelStoreAcc {
     public long size() {
         return store.size();
     }
-
 
     @Override
     public void add(Rel rel) {

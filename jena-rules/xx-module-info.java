@@ -16,29 +16,14 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.rules;
+module org.seaborne.jena.rules {
+    exports org.seaborne.jena.rules;
+    exports migrate.binding;
 
+    requires transitive org.apache.jena.arq;
+    requires transitive org.apache.jena.shacl;
+    requires org.slf4j;
 
-// Algorithm: Jacobi
-//   Do each pass with respect to the previous round.
-// Algorithm: Gauss-Seidel
-public enum EngineType {
-    // Default naive (used for tests).
-    FWD_NAIVE("Naive")
-    , FWD_NAIVE_JACOBI("Naive (Jacobi)")
-    , FWD_NAIVE_GUEASS_SEIDEL("Naive (GUASS_SEIDEL)")
-    , FWD_SEMINAIVE("Seminaive")
-    , BKD_NON_RECURSIVE_SLD("SLD (Non-recursive)")
-    , BKD_QSQR("QSQR")
-    , BKD_QSQI("QSQI")
-//  , MAGIC("MagicSet")
-    ;
+    provides org.apache.jena.sys.JenaSubsystemLifecycle with org.seaborne.jena.rules.InitRules;
 
-    private final String displayName;
-
-    private EngineType(String string) { this.displayName = string; }
-
-    public String displayName() {
-        return displayName;
-    }
 }

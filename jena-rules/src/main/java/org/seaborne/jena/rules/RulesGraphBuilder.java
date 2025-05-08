@@ -90,7 +90,7 @@ public class RulesGraphBuilder {
                 break;
             case BKD_QSQI :
             case BKD_QSQR :
-
+                break;
             case FWD_NAIVE :
                 factory = RuleEngineNaive.factory;
                 break;

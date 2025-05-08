@@ -478,7 +478,7 @@ int beginLine = t.beginLine; int beginColumn = t.beginColumn; t = null;
     o = TermOrVar();
     jj_consume_token(GT2);
 checkTripleTerm(s, p, o, beginLine, beginColumn);
-    Node n = createQuotedTriple(s, p, o, beginLine, beginColumn);
+    Node n = createTripleTerm(s, p, o, beginLine, beginColumn);
     {if ("" != null) return n;}
     throw new Error("Missing return statement in function");
 }

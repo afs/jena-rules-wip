@@ -63,7 +63,7 @@ private int jjMoveStringLiteralDfa0_0(){
          return jjMoveNfa_0(0, 0);
       case 41:
          jjmatchedKind = 36;
-         return jjMoveNfa_0(0, 0);
+         return jjMoveStringLiteralDfa1_0(0x400000000000L);
       case 43:
          jjmatchedKind = 18;
          return jjMoveNfa_0(0, 0);
@@ -83,8 +83,6 @@ private int jjMoveStringLiteralDfa0_0(){
          return jjMoveNfa_0(0, 0);
       case 60:
          return jjMoveStringLiteralDfa1_0(0x4200000000000L);
-      case 62:
-         return jjMoveStringLiteralDfa1_0(0x400000000000L);
       case 64:
          jjmatchedKind = 53;
          return jjMoveNfa_0(0, 0);
@@ -153,24 +151,14 @@ private int jjMoveStringLiteralDfa1_0(long active0){
          }
          break;
       case 60:
-         if ((active0 & 0x200000000000L) != 0L)
-         {
-            jjmatchedKind = 45;
-            jjmatchedPos = 1;
-         }
-         break;
+         return jjMoveStringLiteralDfa2_0(active0, 0x200000000000L);
       case 62:
-         if ((active0 & 0x400000000000L) != 0L)
-         {
-            jjmatchedKind = 46;
-            jjmatchedPos = 1;
-         }
-         else if ((active0 & 0x8000000000000L) != 0L)
+         if ((active0 & 0x8000000000000L) != 0L)
          {
             jjmatchedKind = 51;
             jjmatchedPos = 1;
          }
-         break;
+         return jjMoveStringLiteralDfa2_0(active0, 0x400000000000L);
       case 65:
          return jjMoveStringLiteralDfa2_0(active0, 0x1200L);
       case 82:
@@ -214,6 +202,20 @@ private int jjMoveStringLiteralDfa2_0(long old0, long active0){
    }
    switch(curChar)
    {
+      case 40:
+         if ((active0 & 0x200000000000L) != 0L)
+         {
+            jjmatchedKind = 45;
+            jjmatchedPos = 2;
+         }
+         break;
+      case 62:
+         if ((active0 & 0x400000000000L) != 0L)
+         {
+            jjmatchedKind = 46;
+            jjmatchedPos = 2;
+         }
+         break;
       case 69:
          return jjMoveStringLiteralDfa3_0(active0, 0x400L);
       case 76:
@@ -1884,9 +1886,10 @@ public static final String[] jjstrLiteralImages = {
 "", null, null, null, null, null, null, null, "\141", null, null, null, null, 
 null, "\ufeff", "\137", null, null, "\53", "\55", null, null, null, null, null, null, 
 null, null, null, null, null, null, null, null, null, "\50", "\51", "\173", "\175", 
-"\133", "\135", null, "\73", "\54", "\56", "\74\74", "\76\76", "\173\174", "\174\175", 
-"\72\55", "\74\55", "\55\76", "\136\136", "\100", null, null, null, null, null, null, 
-null, null, null, null, null, null, null, null, null, null, null, null, null, null, };
+"\133", "\135", null, "\73", "\54", "\56", "\74\74\50", "\51\76\76", "\173\174", 
+"\174\175", "\72\55", "\74\55", "\55\76", "\136\136", "\100", null, null, null, null, null, 
+null, null, null, null, null, null, null, null, null, null, null, null, null, null, 
+null, };
 protected Token jjFillToken()
 {
    final Token t;

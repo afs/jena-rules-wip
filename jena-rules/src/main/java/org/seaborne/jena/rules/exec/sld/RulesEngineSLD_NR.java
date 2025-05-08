@@ -60,4 +60,3 @@ public class RulesEngineSLD_NR extends RulesEngineBkd {
         return Iter.asStream(iter);
     }
 }
-

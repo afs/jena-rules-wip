@@ -3,9 +3,6 @@ PREFIX ns: <http://example/ns#>
 
 PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
-## (:a :b :c ) .
-## (?s ns:p ?o ) <- ( ?s ?p  ?o )  ( ?s ?p  ?o ) .
-## (:s ns:p 123 ) <- .
 
-( ?a rdf:type ?y) <-  (?a rdf:type ?x) , (?x rdfs:subClassOf ?y) .
-(?a rdfs:subClassOf ?c) <- (?a rdfs:subClassOf ?b), (?b rdfs:subClassOf ?c)
+## ( ?a rdf:type ?y) <-  (?a rdf:type ?x) , (?x rdfs:subClassOf ?y) .
+## (?a rdfs:subClassOf ?c) <- (?a rdfs:subClassOf ?b), (?b rdfs:subClassOf ?c)

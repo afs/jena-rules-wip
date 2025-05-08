@@ -37,7 +37,6 @@ public class RulesParserBase extends LangParserBase {
     }
 
     protected void checkTripleTerm(Node s, Node p, Node o, int line, int column) {
-        // Check valid term types.
     }
 
     // ---- RuleSet
