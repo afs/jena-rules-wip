@@ -18,16 +18,28 @@
 
 package org.seaborne.jena.shacl_rules;
 
-import org.apache.jena.sys.JenaSubsystemLifecycle;
 
-public class InitShaclRules  implements JenaSubsystemLifecycle {
+// Algorithm: Jacobi
+//   Do each pass with respect to the previous round.
+// Algorithm: Gauss-Seidel
+//   Do each pass with growing inferred graph
+public enum EngineType {
+    // Default naive (used for tests).
+    FWD_NAIVE("Naive")
+    , FWD_NAIVE_JACOBI("Naive (Jacobi)")
+    , FWD_NAIVE_GUEASS_SEIDEL("Naive (GUASS_SEIDEL)")
+    , FWD_SEMINAIVE("Seminaive")
+    , BKD_NON_RECURSIVE_SLD("SLD (Non-recursive)")
+    , BKD_QSQR("QSQR")
+    , BKD_QSQI("QSQI")
+//  , MAGIC("MagicSet")
+    ;
 
-    @Override
-    public void start() {}
+    private final String displayName;
 
-    @Override
-    public void stop() {}
+    private EngineType(String string) { this.displayName = string; }
 
-    @Override
-    public int level() { return 5000 ; }
+    public String displayName() {
+        return displayName;
+    }
 }

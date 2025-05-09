@@ -18,31 +18,6 @@
 
 package org.seaborne.jena.shacl_rules;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.jena.sparql.core.Prologue;
-
-public class RuleSet {
-
-    private List<Rule> rules = new ArrayList<>();
-    private Prologue proglogue;
-
-    public RuleSet(Prologue prologue, List<Rule> rules) {
-        this.proglogue = prologue;
-        this.rules = rules;
-    }
-
-    public Prologue getPrologue() {
-        return proglogue;
-    }
-
-    public List<Rule> getRules() {
-        return rules;
-    }
-
-    @Override
-    public String toString() {
-        return rules.toString();
-    }
+public class Rules {
+    //public static execute
 }

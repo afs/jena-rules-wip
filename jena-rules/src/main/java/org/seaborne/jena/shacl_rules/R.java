@@ -18,31 +18,23 @@
 
 package org.seaborne.jena.shacl_rules;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.GraphUtil;
+import org.apache.jena.sparql.graph.GraphFactory;
 
-import org.apache.jena.sparql.core.Prologue;
+/**
+ * Misc utilities
+ */
+public class R {
+    // -> G
 
-public class RuleSet {
-
-    private List<Rule> rules = new ArrayList<>();
-    private Prologue proglogue;
-
-    public RuleSet(Prologue prologue, List<Rule> rules) {
-        this.proglogue = prologue;
-        this.rules = rules;
-    }
-
-    public Prologue getPrologue() {
-        return proglogue;
-    }
-
-    public List<Rule> getRules() {
-        return rules;
-    }
-
-    @Override
-    public String toString() {
-        return rules.toString();
+    /**
+     * Clone a graph - includes the prefixes.
+     */
+    public static Graph cloneGraph(Graph graph) {
+        Graph copyGraph = GraphFactory.createGraphMem();
+        GraphUtil.addInto(copyGraph, graph);
+        copyGraph.getPrefixMapping().setNsPrefixes(graph.getPrefixMapping());
+        return copyGraph;
     }
 }

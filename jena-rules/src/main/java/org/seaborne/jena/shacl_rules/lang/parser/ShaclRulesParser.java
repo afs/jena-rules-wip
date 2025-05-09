@@ -259,11 +259,25 @@ void TriplesTemplate(TripleCollector acc) throws ParseException {
 
 // ---- Rule body.
   final public 
-ElementGroup BodyPattern() throws ParseException {Token t ;
+ElementGroup BodyPattern() throws ParseException {Token t ; Element el = null;
     t = jj_consume_token(LBRACE);
 int beginLine = t.beginLine; int beginColumn = t.beginColumn; t = null;
 ElementGroup elg = new ElementGroup() ;
     BodyPattern1(elg);
+    label_3:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case LET:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[8] = jj_gen;
+        break label_3;
+      }
+      el = Assignment();
+elg.addElement(el);
+    }
     jj_consume_token(RBRACE);
 {if ("" != null) return elg;}
     throw new Error("Missing return statement in function");
@@ -308,13 +322,13 @@ elg.addElement(el);
         break;
         }
       default:
-        jj_la1[8] = jj_gen;
+        jj_la1[9] = jj_gen;
         ;
       }
       break;
       }
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[10] = jj_gen;
       ;
     }
 }
@@ -366,13 +380,13 @@ if ( acc == null )
         break;
         }
       default:
-        jj_la1[10] = jj_gen;
+        jj_la1[11] = jj_gen;
         ;
       }
       break;
       }
     default:
-      jj_la1[11] = jj_gen;
+      jj_la1[12] = jj_gen;
       ;
     }
 {if ("" != null) return acc ;}
@@ -390,6 +404,35 @@ if ( acc == null )
     reifId = ReifiedTriple(acc);
     PropertyListPath(reifId, acc);
 {if ("" != null) return reifId ;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public Element Assignment() throws ParseException {Element el = null ;
+    //  el = Bind()
+      el = Let();
+{if ("" != null) return el;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public Element Bind() throws ParseException {Var v ; Expr expr ;
+    jj_consume_token(BIND);
+    jj_consume_token(LPAREN);
+    expr = Expression();
+    jj_consume_token(AS);
+    v = Var();
+    jj_consume_token(RPAREN);
+{if ("" != null) return new ElementBind(v, expr) ;}
+    throw new Error("Missing return statement in function");
+}
+
+  final public Element Let() throws ParseException {Var v ; Expr expr ;
+    jj_consume_token(LET);
+    jj_consume_token(LPAREN);
+    v = Var();
+    jj_consume_token(ASSIGN);
+    expr = Expression();
+    jj_consume_token(RPAREN);
+{if ("" != null) return new ElementAssign(v, expr) ;}
     throw new Error("Missing return statement in function");
 }
 
@@ -576,7 +619,7 @@ Node Reifier() throws ParseException {Token tok = null ; Node reifId = null ;
       break;
       }
     default:
-      jj_la1[12] = jj_gen;
+      jj_la1[13] = jj_gen;
       ;
     }
 {if ("" != null) return reifId;}
@@ -605,7 +648,7 @@ Node Reifier() throws ParseException {Token tok = null ; Node reifId = null ;
       break;
       }
     default:
-      jj_la1[13] = jj_gen;
+      jj_la1[14] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -731,7 +774,7 @@ Element Filter() throws ParseException {Expr c ;
       break;
       }
     default:
-      jj_la1[14] = jj_gen;
+      jj_la1[15] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -756,7 +799,7 @@ Element Filter() throws ParseException {Expr c ;
       jj_consume_token(LPAREN);
       expr = Expression();
 args.add(expr) ;
-      label_3:
+      label_4:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case COMMA:{
@@ -764,8 +807,8 @@ args.add(expr) ;
           break;
           }
         default:
-          jj_la1[15] = jj_gen;
-          break label_3;
+          jj_la1[16] = jj_gen;
+          break label_4;
         }
         jj_consume_token(COMMA);
         expr = Expression();
@@ -775,7 +818,7 @@ args.add(expr) ;
       break;
       }
     default:
-      jj_la1[16] = jj_gen;
+      jj_la1[17] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -793,7 +836,7 @@ args.add(expr) ;
       jj_consume_token(LPAREN);
       expr = Expression();
 exprList.add(expr) ;
-      label_4:
+      label_5:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
         case COMMA:{
@@ -801,8 +844,8 @@ exprList.add(expr) ;
           break;
           }
         default:
-          jj_la1[17] = jj_gen;
-          break label_4;
+          jj_la1[18] = jj_gen;
+          break label_5;
         }
         jj_consume_token(COMMA);
         expr = Expression();
@@ -812,7 +855,7 @@ exprList.add(expr) ;
       break;
       }
     default:
-      jj_la1[18] = jj_gen;
+      jj_la1[19] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -907,7 +950,7 @@ insert(acc, tempAcc) ;
       break;
       }
     default:
-      jj_la1[19] = jj_gen;
+      jj_la1[20] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -925,7 +968,7 @@ insert(acc, tempAcc) ;
       break;
       }
     default:
-      jj_la1[20] = jj_gen;
+      jj_la1[21] = jj_gen;
       ;
     }
 }
@@ -933,7 +976,7 @@ insert(acc, tempAcc) ;
   final public void PropertyListNotEmpty(Node s, TripleCollector acc) throws ParseException {Node p = null ;
     p = Verb();
     ObjectList(s, p, null, acc);
-    label_5:
+    label_6:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case SEMICOLON:{
@@ -941,8 +984,8 @@ insert(acc, tempAcc) ;
         break;
         }
       default:
-        jj_la1[21] = jj_gen;
-        break label_5;
+        jj_la1[22] = jj_gen;
+        break label_6;
       }
       jj_consume_token(SEMICOLON);
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -958,7 +1001,7 @@ insert(acc, tempAcc) ;
         break;
         }
       default:
-        jj_la1[22] = jj_gen;
+        jj_la1[23] = jj_gen;
         ;
       }
     }
@@ -980,7 +1023,7 @@ p = nRDFtype ;
       break;
       }
     default:
-      jj_la1[23] = jj_gen;
+      jj_la1[24] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -990,7 +1033,7 @@ p = nRDFtype ;
 
   final public void ObjectList(Node s,  Node p, Path path, TripleCollector acc) throws ParseException {Node o ;
     Object(s, p, path, acc);
-    label_6:
+    label_7:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case COMMA:{
@@ -998,8 +1041,8 @@ p = nRDFtype ;
         break;
         }
       default:
-        jj_la1[24] = jj_gen;
-        break label_6;
+        jj_la1[25] = jj_gen;
+        break label_7;
       }
       jj_consume_token(COMMA);
       Object(s, p, path, acc);
@@ -1059,7 +1102,7 @@ insert(acc, tempAcc) ;
       break;
       }
     default:
-      jj_la1[25] = jj_gen;
+      jj_la1[26] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1080,7 +1123,7 @@ insert(acc, tempAcc) ;
       break;
       }
     default:
-      jj_la1[26] = jj_gen;
+      jj_la1[27] = jj_gen;
       ;
     }
 }
@@ -1103,12 +1146,12 @@ insert(acc, tempAcc) ;
       break;
       }
     default:
-      jj_la1[27] = jj_gen;
+      jj_la1[28] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
     ObjectListPath(s, p, path, acc);
-    label_7:
+    label_8:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case SEMICOLON:{
@@ -1116,8 +1159,8 @@ insert(acc, tempAcc) ;
         break;
         }
       default:
-        jj_la1[28] = jj_gen;
-        break label_7;
+        jj_la1[29] = jj_gen;
+        break label_8;
       }
       jj_consume_token(SEMICOLON);
 path = null ; p = null ;
@@ -1148,7 +1191,7 @@ path = null ; p = null ;
           break;
           }
         default:
-          jj_la1[29] = jj_gen;
+          jj_la1[30] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
@@ -1156,7 +1199,7 @@ path = null ; p = null ;
         break;
         }
       default:
-        jj_la1[30] = jj_gen;
+        jj_la1[31] = jj_gen;
         ;
       }
     }
@@ -1178,7 +1221,7 @@ path = null ; p = null ;
 
   final public void ObjectListPath(Node s, Node p, Path path, TripleCollector acc) throws ParseException {Node o ;
     ObjectPath(s, p, path, acc);
-    label_8:
+    label_9:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case COMMA:{
@@ -1186,8 +1229,8 @@ path = null ; p = null ;
         break;
         }
       default:
-        jj_la1[31] = jj_gen;
-        break label_8;
+        jj_la1[32] = jj_gen;
+        break label_9;
       }
       jj_consume_token(COMMA);
       ObjectPath(s, p, path, acc);
@@ -1224,7 +1267,7 @@ insert(tempAcc, mark, s, p, path, o) ;  insert(acc, tempAcc) ;
 
   final public Path PathAlternative() throws ParseException {Path p1 , p2 ;
     p1 = PathSequence();
-    label_9:
+    label_10:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case VBAR:{
@@ -1232,8 +1275,8 @@ insert(tempAcc, mark, s, p, path, o) ;  insert(acc, tempAcc) ;
         break;
         }
       default:
-        jj_la1[32] = jj_gen;
-        break label_9;
+        jj_la1[33] = jj_gen;
+        break label_10;
       }
       jj_consume_token(VBAR);
       p2 = PathSequence();
@@ -1245,7 +1288,7 @@ p1 = PathFactory.pathAlt(p1, p2) ;
 
   final public Path PathSequence() throws ParseException {Path p1 , p2 ;
     p1 = PathEltOrInverse();
-    label_10:
+    label_11:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case SLASH:{
@@ -1253,8 +1296,8 @@ p1 = PathFactory.pathAlt(p1, p2) ;
         break;
         }
       default:
-        jj_la1[33] = jj_gen;
-        break label_10;
+        jj_la1[34] = jj_gen;
+        break label_11;
       }
       jj_consume_token(SLASH);
       p2 = PathEltOrInverse();
@@ -1275,7 +1318,7 @@ p1 = PathFactory.pathSeq(p1, p2) ;
       break;
       }
     default:
-      jj_la1[34] = jj_gen;
+      jj_la1[35] = jj_gen;
       ;
     }
 {if ("" != null) return p ;}
@@ -1301,7 +1344,7 @@ p = PathFactory.pathInverse(p) ;
       break;
       }
     default:
-      jj_la1[35] = jj_gen;
+      jj_la1[36] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1327,7 +1370,7 @@ p = PathFactory.pathInverse(p) ;
       break;
       }
     default:
-      jj_la1[36] = jj_gen;
+      jj_la1[37] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1370,7 +1413,7 @@ p = PathFactory.pathLink(nRDFtype) ;
       break;
       }
     default:
-      jj_la1[37] = jj_gen;
+      jj_la1[38] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1400,7 +1443,7 @@ pNegSet.add(p) ;
       case CARAT:{
         p = PathOneInPropertySet();
 pNegSet.add(p) ;
-        label_11:
+        label_12:
         while (true) {
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case VBAR:{
@@ -1408,8 +1451,8 @@ pNegSet.add(p) ;
             break;
             }
           default:
-            jj_la1[38] = jj_gen;
-            break label_11;
+            jj_la1[39] = jj_gen;
+            break label_12;
           }
           jj_consume_token(VBAR);
           p = PathOneInPropertySet();
@@ -1418,14 +1461,14 @@ pNegSet.add(p) ;
         break;
         }
       default:
-        jj_la1[39] = jj_gen;
+        jj_la1[40] = jj_gen;
         ;
       }
       jj_consume_token(RPAREN);
       break;
       }
     default:
-      jj_la1[40] = jj_gen;
+      jj_la1[41] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1463,14 +1506,14 @@ n = createNode(str) ; {if ("" != null) return new P_ReverseLink(n) ;}
         break;
         }
       default:
-        jj_la1[41] = jj_gen;
+        jj_la1[42] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
       }
     default:
-      jj_la1[42] = jj_gen;
+      jj_la1[43] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1495,7 +1538,7 @@ Node TriplesNode(TripleCollectorMark acc) throws ParseException {Node n ;
       break;
       }
     default:
-      jj_la1[43] = jj_gen;
+      jj_la1[44] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1524,7 +1567,7 @@ Node n = createBNode( t.beginLine, t.beginColumn) ;
       break;
       }
     default:
-      jj_la1[44] = jj_gen;
+      jj_la1[45] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1545,63 +1588,6 @@ Node n = createBNode( t.beginLine, t.beginColumn) ;
 Node Collection(TripleCollectorMark acc) throws ParseException {Node listHead = nRDFnil ; Node lastCell = null ; int mark ; Node n ; Token t ;
     t = jj_consume_token(LPAREN);
 int beginLine = t.beginLine; int beginColumn = t.beginColumn; t = null;
-    label_12:
-    while (true) {
-Node cell = createListNode( beginLine, beginColumn) ;
-      if ( listHead == nRDFnil )
-         listHead = cell ;
-      if ( lastCell != null )
-        insert(acc, lastCell, nRDFrest,  cell) ;
-      mark = acc.mark() ;
-      n = GraphNode(acc);
-insert(acc, mark, cell, nRDFfirst, n) ;
-      lastCell = cell ;
-      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
-      case IRIref:
-      case PNAME_NS:
-      case PNAME_LN:
-      case BLANK_NODE_LABEL:
-      case VAR1:
-      case VAR2:
-      case TRUE:
-      case FALSE:
-      case INTEGER:
-      case DECIMAL:
-      case DOUBLE:
-      case INTEGER_POSITIVE:
-      case DECIMAL_POSITIVE:
-      case DOUBLE_POSITIVE:
-      case INTEGER_NEGATIVE:
-      case DECIMAL_NEGATIVE:
-      case DOUBLE_NEGATIVE:
-      case STRING_LITERAL1:
-      case STRING_LITERAL2:
-      case STRING_LITERAL_LONG1:
-      case STRING_LITERAL_LONG2:
-      case LPAREN:
-      case NIL:
-      case LBRACKET:
-      case ANON:
-      case L_TRIPLE:
-      case LT2:{
-        ;
-        break;
-        }
-      default:
-        jj_la1[45] = jj_gen;
-        break label_12;
-      }
-    }
-    jj_consume_token(RPAREN);
-if ( lastCell != null )
-       insert(acc, lastCell, nRDFrest,  nRDFnil) ;
-     {if ("" != null) return listHead ;}
-    throw new Error("Missing return statement in function");
-}
-
-  final public Node CollectionPath(TripleCollectorMark acc) throws ParseException {Node listHead = nRDFnil ; Node lastCell = null ; int mark ; Node n ; Token t ;
-    t = jj_consume_token(LPAREN);
-int beginLine = t.beginLine; int beginColumn = t.beginColumn; t = null;
     label_13:
     while (true) {
 Node cell = createListNode( beginLine, beginColumn) ;
@@ -1610,7 +1596,7 @@ Node cell = createListNode( beginLine, beginColumn) ;
       if ( lastCell != null )
         insert(acc, lastCell, nRDFrest,  cell) ;
       mark = acc.mark() ;
-      n = GraphNodePath(acc);
+      n = GraphNode(acc);
 insert(acc, mark, cell, nRDFfirst, n) ;
       lastCell = cell ;
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
@@ -1656,10 +1642,67 @@ if ( lastCell != null )
     throw new Error("Missing return statement in function");
 }
 
+  final public Node CollectionPath(TripleCollectorMark acc) throws ParseException {Node listHead = nRDFnil ; Node lastCell = null ; int mark ; Node n ; Token t ;
+    t = jj_consume_token(LPAREN);
+int beginLine = t.beginLine; int beginColumn = t.beginColumn; t = null;
+    label_14:
+    while (true) {
+Node cell = createListNode( beginLine, beginColumn) ;
+      if ( listHead == nRDFnil )
+         listHead = cell ;
+      if ( lastCell != null )
+        insert(acc, lastCell, nRDFrest,  cell) ;
+      mark = acc.mark() ;
+      n = GraphNodePath(acc);
+insert(acc, mark, cell, nRDFfirst, n) ;
+      lastCell = cell ;
+      switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
+      case IRIref:
+      case PNAME_NS:
+      case PNAME_LN:
+      case BLANK_NODE_LABEL:
+      case VAR1:
+      case VAR2:
+      case TRUE:
+      case FALSE:
+      case INTEGER:
+      case DECIMAL:
+      case DOUBLE:
+      case INTEGER_POSITIVE:
+      case DECIMAL_POSITIVE:
+      case DOUBLE_POSITIVE:
+      case INTEGER_NEGATIVE:
+      case DECIMAL_NEGATIVE:
+      case DOUBLE_NEGATIVE:
+      case STRING_LITERAL1:
+      case STRING_LITERAL2:
+      case STRING_LITERAL_LONG1:
+      case STRING_LITERAL_LONG2:
+      case LPAREN:
+      case NIL:
+      case LBRACKET:
+      case ANON:
+      case L_TRIPLE:
+      case LT2:{
+        ;
+        break;
+        }
+      default:
+        jj_la1[47] = jj_gen;
+        break label_14;
+      }
+    }
+    jj_consume_token(RPAREN);
+if ( lastCell != null )
+       insert(acc, lastCell, nRDFrest,  nRDFnil) ;
+     {if ("" != null) return listHead ;}
+    throw new Error("Missing return statement in function");
+}
+
 // ---- RDF-star Annotation Syntax
 // Allow paths. Query graph patterns.
   final public void AnnotationPath(TripleCollector acc, Node s, Node p, Path path, Node o) throws ParseException {Node reifId = null ;
-    label_14:
+    label_15:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case L_ANN:
@@ -1668,8 +1711,8 @@ if ( lastCell != null )
         break;
         }
       default:
-        jj_la1[47] = jj_gen;
-        break label_14;
+        jj_la1[48] = jj_gen;
+        break label_15;
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case TILDE:{
@@ -1687,7 +1730,7 @@ clearReifierId();
         break;
         }
       default:
-        jj_la1[48] = jj_gen;
+        jj_la1[49] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1704,7 +1747,7 @@ clearReifierId();
 // ---- RDF-star Annotation Syntax
 // No paths. Construct templates.
   final public void Annotation(TripleCollector acc, Node s, Node p, Path path, Node o) throws ParseException {Node reifId = null ;
-    label_15:
+    label_16:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case L_ANN:
@@ -1713,8 +1756,8 @@ clearReifierId();
         break;
         }
       default:
-        jj_la1[49] = jj_gen;
-        break label_15;
+        jj_la1[50] = jj_gen;
+        break label_16;
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case TILDE:{
@@ -1732,7 +1775,7 @@ clearReifierId();
         break;
         }
       default:
-        jj_la1[50] = jj_gen;
+        jj_la1[51] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -1791,7 +1834,7 @@ clearReifierId();
       break;
       }
     default:
-      jj_la1[51] = jj_gen;
+      jj_la1[52] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1841,7 +1884,7 @@ clearReifierId();
       break;
       }
     default:
-      jj_la1[52] = jj_gen;
+      jj_la1[53] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1902,7 +1945,7 @@ clearReifierId();
       break;
       }
     default:
-      jj_la1[53] = jj_gen;
+      jj_la1[54] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -1921,7 +1964,7 @@ clearReifierId();
       break;
       }
     default:
-      jj_la1[54] = jj_gen;
+      jj_la1[55] = jj_gen;
       ;
     }
 reifId = insertTripleReifier(acc, reifId, s, p, o, tok.beginLine, tok.beginColumn) ;
@@ -1978,7 +2021,7 @@ s = createNode(iri) ;
       break;
       }
     default:
-      jj_la1[55] = jj_gen;
+      jj_la1[56] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2038,7 +2081,7 @@ o = createNode(iri) ;
       break;
       }
     default:
-      jj_la1[56] = jj_gen;
+      jj_la1[57] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2102,7 +2145,7 @@ n = createNode(iri) ;
       break;
       }
     default:
-      jj_la1[57] = jj_gen;
+      jj_la1[58] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2159,7 +2202,7 @@ n = createNode(iri) ;
       break;
       }
     default:
-      jj_la1[58] = jj_gen;
+      jj_la1[59] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2185,7 +2228,7 @@ p = nRDFtype ;
       break;
       }
     default:
-      jj_la1[59] = jj_gen;
+      jj_la1[60] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2230,7 +2273,7 @@ n = createNode(iri) ;
       break;
       }
     default:
-      jj_la1[60] = jj_gen;
+      jj_la1[61] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2276,7 +2319,7 @@ n = createNode(iri) ;
       break;
       }
     default:
-      jj_la1[61] = jj_gen;
+      jj_la1[62] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2311,7 +2354,7 @@ n = createNode(iri) ;
       break;
       }
     default:
-      jj_la1[62] = jj_gen;
+      jj_la1[63] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2339,7 +2382,7 @@ Var Var() throws ParseException {Token t ;
       break;
       }
     default:
-      jj_la1[63] = jj_gen;
+      jj_la1[64] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2357,7 +2400,7 @@ Expr Expression() throws ParseException {Expr expr ;
 
   final public Expr ConditionalOrExpression() throws ParseException {Expr expr1, expr2 ;
     expr1 = ConditionalAndExpression();
-    label_16:
+    label_17:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case SC_OR:{
@@ -2365,8 +2408,8 @@ Expr Expression() throws ParseException {Expr expr ;
         break;
         }
       default:
-        jj_la1[64] = jj_gen;
-        break label_16;
+        jj_la1[65] = jj_gen;
+        break label_17;
       }
       jj_consume_token(SC_OR);
       expr2 = ConditionalAndExpression();
@@ -2378,7 +2421,7 @@ expr1 = new E_LogicalOr(expr1, expr2) ;
 
   final public Expr ConditionalAndExpression() throws ParseException {Expr expr1, expr2 ;
     expr1 = ValueLogical();
-    label_17:
+    label_18:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case SC_AND:{
@@ -2386,8 +2429,8 @@ expr1 = new E_LogicalOr(expr1, expr2) ;
         break;
         }
       default:
-        jj_la1[65] = jj_gen;
-        break label_17;
+        jj_la1[66] = jj_gen;
+        break label_18;
       }
       jj_consume_token(SC_AND);
       expr2 = ValueLogical();
@@ -2465,14 +2508,14 @@ expr1 = new E_NotOneOf(expr1, a) ;
         break;
         }
       default:
-        jj_la1[66] = jj_gen;
+        jj_la1[67] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
       }
     default:
-      jj_la1[67] = jj_gen;
+      jj_la1[68] = jj_gen;
       ;
     }
 {if ("" != null) return expr1 ;}
@@ -2487,7 +2530,7 @@ expr1 = new E_NotOneOf(expr1, a) ;
 
   final public Expr AdditiveExpression() throws ParseException {Expr expr1, expr2, expr3 ; boolean addition ; Node n ;
     expr1 = MultiplicativeExpression();
-    label_18:
+    label_19:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case INTEGER_POSITIVE:
@@ -2502,8 +2545,8 @@ expr1 = new E_NotOneOf(expr1, a) ;
         break;
         }
       default:
-        jj_la1[68] = jj_gen;
-        break label_18;
+        jj_la1[69] = jj_gen;
+        break label_19;
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case PLUS:{
@@ -2544,11 +2587,11 @@ n = stripSign(n) ;
           break;
           }
         default:
-          jj_la1[69] = jj_gen;
+          jj_la1[70] = jj_gen;
           jj_consume_token(-1);
           throw new ParseException();
         }
-        label_19:
+        label_20:
         while (true) {
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case STAR:
@@ -2557,8 +2600,8 @@ n = stripSign(n) ;
             break;
             }
           default:
-            jj_la1[70] = jj_gen;
-            break label_19;
+            jj_la1[71] = jj_gen;
+            break label_20;
           }
           switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
           case STAR:{
@@ -2574,7 +2617,7 @@ expr2 = new E_Divide(expr2, expr3) ;
             break;
             }
           default:
-            jj_la1[71] = jj_gen;
+            jj_la1[72] = jj_gen;
             jj_consume_token(-1);
             throw new ParseException();
           }
@@ -2586,7 +2629,7 @@ if ( addition )
         break;
         }
       default:
-        jj_la1[72] = jj_gen;
+        jj_la1[73] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -2597,7 +2640,7 @@ if ( addition )
 
   final public Expr MultiplicativeExpression() throws ParseException {Expr expr1, expr2 ;
     expr1 = UnaryExpression();
-    label_20:
+    label_21:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case STAR:
@@ -2606,8 +2649,8 @@ if ( addition )
         break;
         }
       default:
-        jj_la1[73] = jj_gen;
-        break label_20;
+        jj_la1[74] = jj_gen;
+        break label_21;
       }
       switch ((jj_ntk==-1)?jj_ntk_f():jj_ntk) {
       case STAR:{
@@ -2623,7 +2666,7 @@ expr1 = new E_Divide(expr1, expr2) ;
         break;
         }
       default:
-        jj_la1[74] = jj_gen;
+        jj_la1[75] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -2740,7 +2783,7 @@ expr1 = new E_Divide(expr1, expr2) ;
       break;
       }
     default:
-      jj_la1[75] = jj_gen;
+      jj_la1[76] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2865,7 +2908,7 @@ expr1 = new E_Divide(expr1, expr2) ;
       break;
       }
     default:
-      jj_la1[76] = jj_gen;
+      jj_la1[77] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2934,7 +2977,7 @@ n = createNode(iri);
       break;
       }
     default:
-      jj_la1[77] = jj_gen;
+      jj_la1[78] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -2985,7 +3028,7 @@ n = createNode(iri);
       break;
       }
     default:
-      jj_la1[78] = jj_gen;
+      jj_la1[79] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3087,7 +3130,7 @@ n = createNode(iri);
         break;
         }
       default:
-        jj_la1[79] = jj_gen;
+        jj_la1[80] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -3518,7 +3561,7 @@ n = createNode(iri);
       break;
       }
     default:
-      jj_la1[80] = jj_gen;
+      jj_la1[81] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3538,7 +3581,7 @@ n = createNode(iri);
       break;
       }
     default:
-      jj_la1[81] = jj_gen;
+      jj_la1[82] = jj_gen;
       ;
     }
     jj_consume_token(RPAREN);
@@ -3559,7 +3602,7 @@ n = createNode(iri);
       break;
       }
     default:
-      jj_la1[82] = jj_gen;
+      jj_la1[83] = jj_gen;
       ;
     }
     jj_consume_token(RPAREN);
@@ -3582,7 +3625,7 @@ n = createNode(iri);
       break;
       }
     default:
-      jj_la1[83] = jj_gen;
+      jj_la1[84] = jj_gen;
       ;
     }
     jj_consume_token(RPAREN);
@@ -3603,7 +3646,7 @@ Expr iriOrFunction() throws ParseException {String iri ; ExprList a = null ;
       break;
       }
     default:
-      jj_la1[84] = jj_gen;
+      jj_la1[85] = jj_gen;
       ;
     }
 if ( a == null )
@@ -3645,14 +3688,14 @@ Node RDFLiteral() throws ParseException {Token t ; String lex = null ; String ur
         break;
         }
       default:
-        jj_la1[85] = jj_gen;
+        jj_la1[86] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
       break;
       }
     default:
-      jj_la1[86] = jj_gen;
+      jj_la1[87] = jj_gen;
       ;
     }
 {if ("" != null) return createLiteralString(lex, token.beginLine, token.beginColumn) ;}
@@ -3680,7 +3723,7 @@ Node RDFLiteral() throws ParseException {Token t ; String lex = null ; String ur
       break;
       }
     default:
-      jj_la1[87] = jj_gen;
+      jj_la1[88] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3706,7 +3749,7 @@ Node RDFLiteral() throws ParseException {Token t ; String lex = null ; String ur
       break;
       }
     default:
-      jj_la1[88] = jj_gen;
+      jj_la1[89] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3731,7 +3774,7 @@ Node RDFLiteral() throws ParseException {Token t ; String lex = null ; String ur
       break;
       }
     default:
-      jj_la1[89] = jj_gen;
+      jj_la1[90] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3756,7 +3799,7 @@ Node RDFLiteral() throws ParseException {Token t ; String lex = null ; String ur
       break;
       }
     default:
-      jj_la1[90] = jj_gen;
+      jj_la1[91] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3776,7 +3819,7 @@ Node RDFLiteral() throws ParseException {Token t ; String lex = null ; String ur
       break;
       }
     default:
-      jj_la1[91] = jj_gen;
+      jj_la1[92] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3806,7 +3849,7 @@ lex = stripQuotes3(t.image) ;
       break;
       }
     default:
-      jj_la1[92] = jj_gen;
+      jj_la1[93] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3830,7 +3873,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
       break;
       }
     default:
-      jj_la1[93] = jj_gen;
+      jj_la1[94] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3850,7 +3893,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
       break;
       }
     default:
-      jj_la1[94] = jj_gen;
+      jj_la1[95] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3871,7 +3914,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
       break;
       }
     default:
-      jj_la1[95] = jj_gen;
+      jj_la1[96] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -3893,7 +3936,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
   public Token jj_nt;
   private int jj_ntk;
   private int jj_gen;
-  final private int[] jj_la1 = new int[96];
+  final private int[] jj_la1 = new int[97];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static private int[] jj_la1_2;
@@ -3909,22 +3952,22 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
 	   jj_la1_init_5();
 	}
 	private static void jj_la1_init_0() {
-	   jj_la1_0 = new int[] {0x3900000,0x200,0x100000,0x3800000,0x3800000,0x0,0xfc00,0x0,0xfc00,0x0,0xfc00,0x0,0xfc00,0xfc00,0xf8001c00,0x0,0x0,0x0,0x0,0xfc00,0x8dc00,0x0,0x8dc00,0x8dc00,0x0,0xfc00,0x8dc00,0x8dc00,0x0,0x8dc00,0x8dc00,0x0,0x0,0x0,0x0,0x81c00,0x0,0x81c00,0x0,0x81c00,0x81c00,0x81c00,0x81c00,0x0,0x0,0xfc00,0xfc00,0x0,0x0,0x0,0x0,0xfc00,0xfc00,0xfc00,0x0,0xfc00,0xfc00,0xfc00,0xfc00,0x81c00,0x1c00,0x1c00,0xdc00,0xc000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xf800dc00,0xf800dc00,0xdc00,0xdc00,0x0,0xf8000000,0x0,0x0,0x0,0x0,0x10000,0x10000,0x0,0x0,0x0,0x0,0x0,0x0,0x1c00,0x1800,0x2000,};
+	   jj_la1_0 = new int[] {0x3900000,0x200,0x100000,0x3800000,0x3800000,0x0,0xfc00,0x0,0x20000000,0xfc00,0x0,0xfc00,0x0,0xfc00,0xfc00,0x80001c00,0x0,0x0,0x0,0x0,0xfc00,0x8dc00,0x0,0x8dc00,0x8dc00,0x0,0xfc00,0x8dc00,0x8dc00,0x0,0x8dc00,0x8dc00,0x0,0x0,0x0,0x0,0x81c00,0x0,0x81c00,0x0,0x81c00,0x81c00,0x81c00,0x81c00,0x0,0x0,0xfc00,0xfc00,0x0,0x0,0x0,0x0,0xfc00,0xfc00,0xfc00,0x0,0xfc00,0xfc00,0xfc00,0xfc00,0x81c00,0x1c00,0x1c00,0xdc00,0xc000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000dc00,0x8000dc00,0xdc00,0xdc00,0x0,0x80000000,0x0,0x0,0x0,0x0,0x10000,0x10000,0x0,0x0,0x0,0x0,0x0,0x0,0x1c00,0x1800,0x2000,};
 	}
 	private static void jj_la1_init_1() {
-	   jj_la1_1 = new int[] {0x20,0x0,0x20,0x0,0x0,0x0,0x0,0x0,0x0,0x2,0x0,0x0,0x0,0x0,0xfbffffec,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x11,0x11,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfbffffec,0xfbffffec,0x0,0x0,0x0,0xfbffffec,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_1 = new int[] {0x200,0x0,0x200,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x20,0x0,0x0,0x0,0x0,0xbffffecf,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x110,0x110,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xbffffecf,0xbffffecf,0x0,0x0,0x0,0xbffffecf,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 	private static void jj_la1_init_2() {
-	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x60000000,0x0,0x60000000,0x0,0x60000000,0x0,0x0,0x0,0x1dffffff,0x0,0x0,0x0,0x0,0x60000000,0x0,0x0,0x0,0x0,0x0,0x60000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x60000000,0x60000000,0x0,0x0,0x0,0x0,0x60000000,0x60000000,0x60000000,0x0,0x60000000,0x60000000,0x60000000,0x60000000,0x0,0x60000000,0x60000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7dffffff,0x7dffffff,0x60000000,0x60000000,0x0,0x1dffffff,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x60000000,0x0,0x0,0x0,0x0,};
+	   jj_la1_2 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xdfffffff,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xdfffffff,0xdfffffff,0x0,0x0,0x0,0xdfffffff,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 	private static void jj_la1_init_3() {
-	   jj_la1_3 = new int[] {0x800000,0x0,0x800000,0x0,0x0,0x30000,0xa5f01ff,0x40000000,0xa5f01ff,0x0,0xa5f01ff,0x40000000,0x8000000,0x8000000,0x100000,0x20000000,0x500000,0x20000000,0x500000,0xa5f01ff,0x0,0x10000000,0x0,0x0,0x20000000,0xa5f01ff,0x100000,0x100000,0x10000000,0x100000,0x100000,0x20000000,0x0,0x0,0x0,0x100000,0x0,0x100000,0x0,0x0,0x100000,0x0,0x0,0x2100000,0x2100000,0xa5f01ff,0xa5f01ff,0x0,0x0,0x0,0x0,0xa5f01ff,0xa5f01ff,0x84f01ff,0x0,0x80f01ff,0x80f01ff,0x80f01ff,0x80f01ff,0x0,0xf01ff,0xf01ff,0x0,0x0,0x0,0x0,0x80000000,0x80000000,0x1f8,0x1f8,0x0,0x0,0x1f8,0x0,0x0,0x1f01ff,0x1f01ff,0xf01ff,0xf01ff,0x500000,0x0,0x20000000,0x20000000,0x20000000,0x500000,0x0,0x0,0x1ff,0x7,0x38,0x1c0,0x0,0xf0000,0x0,0x0,0x8000000,};
+	   jj_la1_3 = new int[] {0x8000000,0x0,0x8000000,0x0,0x0,0x300000,0xa5f01ff6,0x0,0x0,0xa5f01ff6,0x0,0xa5f01ff6,0x0,0x80000000,0x80000000,0x1000001,0x0,0x5000000,0x0,0x5000000,0xa5f01ff6,0x0,0x0,0x0,0x0,0x0,0xa5f01ff6,0x1000000,0x1000000,0x0,0x1000000,0x1000000,0x0,0x0,0x0,0x0,0x1000000,0x0,0x1000000,0x0,0x0,0x1000000,0x0,0x0,0x21000000,0x21000000,0xa5f01ff6,0xa5f01ff6,0x0,0x0,0x0,0x0,0xa5f01ff6,0xa5f01ff6,0x84f01ff6,0x0,0x80f01ff6,0x80f01ff6,0x80f01ff6,0x80f01ff6,0x0,0xf01ff6,0xf01ff6,0x0,0x0,0x0,0x0,0x0,0x0,0x1f80,0x1f80,0x0,0x0,0x1f80,0x0,0x0,0x1f01ff7,0x1f01ff7,0xf01ff6,0xf01ff6,0x5000000,0x1,0x0,0x0,0x0,0x5000000,0x0,0x0,0x1ff0,0x70,0x380,0x1c00,0x6,0xf00000,0x0,0x0,0x80000000,};
 	}
 	private static void jj_la1_init_4() {
-	   jj_la1_4 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0xa0,0x0,0xa0,0x0,0xa0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xa0,0x0,0x0,0x0,0x0,0x0,0xa0,0x801000,0x801000,0x0,0x801000,0x801000,0x0,0x400000,0x80000,0x4050000,0x801000,0x4050000,0x1000,0x400000,0x800000,0x800000,0x0,0x800000,0x0,0x0,0xa0,0xa0,0xa00,0xa00,0xa00,0xa00,0xa0,0xa0,0x20,0x800,0x80,0xa0,0x0,0x20,0x0,0x0,0x20,0x0,0x0,0x4000,0x8000,0x1f,0x1f,0x30000,0x0,0xc0000,0xc0000,0x30000,0xc0000,0xc0000,0x31020,0x20,0x0,0x20,0x0,0x0,0x0,0x0,0x0,0x0,0x100000,0x100000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_4 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0xa00,0x4,0x0,0xa00,0x0,0xa00,0x4,0x0,0x0,0x0,0x2,0x0,0x2,0x0,0xa00,0x0,0x1,0x0,0x0,0x2,0xa00,0x8010000,0x8010000,0x1,0x8010000,0x8010000,0x2,0x4000000,0x800000,0x40500000,0x8010000,0x40500000,0x10000,0x4000000,0x8000000,0x8000000,0x0,0x8000000,0x0,0x0,0xa00,0xa00,0xa000,0xa000,0xa000,0xa000,0xa00,0xa00,0x200,0x8000,0x800,0xa00,0x0,0x200,0x0,0x0,0x200,0x0,0x0,0x40000,0x80000,0x1f8,0x1f8,0x300000,0x0,0xc00000,0xc00000,0x300000,0xc00000,0xc00000,0x310200,0x200,0x0,0x200,0x0,0x0,0x2,0x2,0x2,0x0,0x1000000,0x1000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 	private static void jj_la1_init_5() {
-	   jj_la1_5 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+	   jj_la1_5 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
 	}
 
   /** Constructor with InputStream. */
@@ -3938,7 +3981,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 96; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 97; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -3952,7 +3995,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 96; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 97; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -3962,7 +4005,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 96; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 97; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -3980,7 +4023,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 96; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 97; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -3989,7 +4032,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 96; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 97; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -3998,7 +4041,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
 	 token = new Token();
 	 jj_ntk = -1;
 	 jj_gen = 0;
-	 for (int i = 0; i < 96; i++) jj_la1[i] = -1;
+	 for (int i = 0; i < 97; i++) jj_la1[i] = -1;
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -4049,12 +4092,12 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
   /** Generate ParseException. */
   public ParseException generateParseException() {
 	 jj_expentries.clear();
-	 boolean[] la1tokens = new boolean[166];
+	 boolean[] la1tokens = new boolean[170];
 	 if (jj_kind >= 0) {
 	   la1tokens[jj_kind] = true;
 	   jj_kind = -1;
 	 }
-	 for (int i = 0; i < 96; i++) {
+	 for (int i = 0; i < 97; i++) {
 	   if (jj_la1[i] == jj_gen) {
 		 for (int j = 0; j < 32; j++) {
 		   if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -4078,7 +4121,7 @@ lex = unescapeStr(lex, t.beginLine, t.beginColumn) ;
 		 }
 	   }
 	 }
-	 for (int i = 0; i < 166; i++) {
+	 for (int i = 0; i < 170; i++) {
 	   if (la1tokens[i]) {
 		 jj_expentry = new int[1];
 		 jj_expentry[0] = i;

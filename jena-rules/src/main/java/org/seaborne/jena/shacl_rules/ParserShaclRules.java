@@ -69,7 +69,9 @@ public class ParserShaclRules {
 
         try {
             parser.RulesUnit();
-            List<ElementRule> rules = parser.getRules();
+            List<ElementRule> rulesParser = parser.getRules();
+            // Translate to the abstract rulke structure.
+            List<Rule> rules = rulesParser.stream().map(elt->new Rule(elt.getHead().getList(), elt.getBody())).toList();
             RuleSet ruleSet = new RuleSet(prologue, rules);
             return ruleSet;
         } catch (org.seaborne.jena.shacl_rules.lang.parser.ParseException ex) {

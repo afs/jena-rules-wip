@@ -24,18 +24,15 @@ import java.util.List;
 import org.apache.jena.sparql.lang.SPARQLParserBase;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.TripleCollector;
-import org.seaborne.jena.shacl_rules.RuleSet;
 
 public class ShaclRulesParserBase extends SPARQLParserBase {
 
     private List<ElementRule> rules = new ArrayList<>();
 
     public void startRules() {}
-    public void finishRules() {
-        new RuleSet(super.getPrologue(), rules);
-    }
+    public void finishRules() {}
 
-    private ElementRule currentShaclRule;
+    //private ElementRule currentShaclRule;
 
     public void startRule() {}
     public void finishRule(TripleCollector head, ElementGroup body) {

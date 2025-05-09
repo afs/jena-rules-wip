@@ -27,6 +27,7 @@ import org.apache.jena.sparql.syntax.TripleCollectorBGP;
  * Parser structure.
  */
 public class ElementRule {
+    // May be unnecessary and instead directly create the Rule object
 
     private final BasicPattern head;
     private final ElementGroup body;

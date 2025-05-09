@@ -16,33 +16,18 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules;
+package org.seaborne.jena.shacl_rules.sys;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.apache.jena.sys.JenaSubsystemLifecycle;
 
-import org.apache.jena.sparql.core.Prologue;
-
-public class RuleSet {
-
-    private List<Rule> rules = new ArrayList<>();
-    private Prologue proglogue;
-
-    public RuleSet(Prologue prologue, List<Rule> rules) {
-        this.proglogue = prologue;
-        this.rules = rules;
-    }
-
-    public Prologue getPrologue() {
-        return proglogue;
-    }
-
-    public List<Rule> getRules() {
-        return rules;
-    }
+public class InitShaclRules  implements JenaSubsystemLifecycle {
 
     @Override
-    public String toString() {
-        return rules.toString();
-    }
+    public void start() {}
+
+    @Override
+    public void stop() {}
+
+    @Override
+    public int level() { return 5000 ; }
 }

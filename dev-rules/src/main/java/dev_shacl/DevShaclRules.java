@@ -18,36 +18,39 @@
 
 package dev_shacl;
 
+import static dev_shacl.DevShaclRules.Setup.dataStr1;
+import static dev_shacl.DevShaclRules.Setup.ruleSet1;
+import static dev_shacl.RulesDev.node;
+
+import java.util.List;
+
 import org.apache.jena.atlas.logging.LogCtl;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.GraphUtil;
-import org.apache.jena.query.Query;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.riot.RDFWriter;
-import org.apache.jena.sparql.core.BasicPattern;
-import org.apache.jena.sparql.core.Prologue;
-import org.apache.jena.sparql.core.Substitute;
-import org.apache.jena.sparql.exec.QueryExec;
-import org.apache.jena.sparql.exec.RowSet;
-import org.apache.jena.sparql.exec.RowSetOps;
-import org.apache.jena.sparql.exec.RowSetRewindable;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.graph.GraphReadOnly;
-import org.apache.jena.sparql.syntax.ElementGroup;
-import org.apache.jena.sparql.util.IsoMatcher;
 import org.apache.jena.sys.JenaSystem;
-import org.apache.jena.system.buffering.BufferingGraph;
 import org.seaborne.jena.shacl_rules.ParserShaclRules;
 import org.seaborne.jena.shacl_rules.RuleSet;
-import org.seaborne.jena.shacl_rules.lang.ElementRule;
+import org.seaborne.jena.shacl_rules.RulesEngine;
+import org.seaborne.jena.shacl_rules.exec.RulesEngine1;
 
 public class DevShaclRules {
 
     static { JenaSystem.init(); LogCtl.setLogging(); }
 
+    // Architecture
+    //  Own datastructure for "template-head", body : triples block, filters[, bind]
+
     // Execution : No rule checking.
+
+
     // Triple generation and parse triples.
     // Split project? Same repo
     //   Common POM parent?
@@ -59,66 +62,31 @@ public class DevShaclRules {
     // [x] TriplesTemplateBlock -- "{" TriplesTemplate(acc) "}"
 
     public static void main(String[] args) {
+        String rulesStr = ruleSet1;
+        String dataStr = dataStr1;
 
-        String PREFIXES = """
-                PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-                PREFIX sh:   <http://www.w3.org/ns/shacl#>
-                PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
-                PREFIX :     <http://example/>
-                """;
+        if ( true ) {
+            RuleSet rules = ParserShaclRules.parseString(rulesStr);
+            RulesDev.print(rules);
+            System.out.println();
+        }
 
-        // Parser to triples.
+        execute(rulesStr, dataStr);
+        enrich(rulesStr, dataStr, null, null, null);
 
-        String dataStr1 = PREFIXES+"""
-                :s1 :p 123 .
-                :s2 :p 456 .
-                :s3 :q 'abc'.
-                """;
-
-        String ruleSet1 = PREFIXES+"""
-                RULE { ?s :xq ?o } WHERE { ?s :p ?o FILTER (?o < 400 ) }
-                RULE { ?s :xxxx ?o } WHERE { ?s :xq ?o }
-
-                ## RULE { << ?s :q ?o >> } WHERE { ?s :q ?o }
-                ## IF { ?s :xq ?o } THEN { ?s :xxxx ?o }
-                ## { ?s :xxxx ?o } :- { ?s :xq ?o }
-                """;
-
-        execute(ruleSet1, dataStr1);
-        System.exit(0);
-
-        String ruleSet2 = PREFIXES+"""
-                RULE { ?x rdfs:subClassOf ?y } WHERE { ?x rdfs:subClassOf ?Z . ?Z rdfs:subClassOf ?y }
-                RULE { ?x rdf:type ?T } WHERE { ?x rdf:type ?Z . ?Z rdfs:subClassOf ?T }
-                """;
-
-        String dataStr2 = PREFIXES+"""
-                :T rdfs:subClassOf :C1 .
-                :C1 rdfs:subClassOf :TOP .
-                ##:C2 rdfs:subClassOf :TOP .
-
-                ##:C8 rdfs:subClassOf :C9 .
-                ##:C9 rdfs:subClassOf :C8 .
-
-                :x rdf:type :T .
-                """;
-
-        execute(ruleSet2, dataStr2);
+//        execute(ruleSet3, dataStr3);
+//        enrich(ruleSet3, dataStr3, ":x", null, null);
     }
 
     private static void execute(String rulesStr, String baseGraphStr) {
         Graph baseGraph = RDFParser.fromString(baseGraphStr, Lang.TURTLE).toGraph();
         baseGraph = new GraphReadOnly(baseGraph);
-
         RuleSet rules = ParserShaclRules.parseString(rulesStr);
-        rules.getRules().forEach(r->{
-            System.out.println(r);
-        });
-
         execute(rules, baseGraph);
-    }
 
+        // OLD
+        //DevVersion0.execute0(rules, baseGraph);
+    }
 
     private static void execute(RuleSet rules, Graph baseGraph) {
         // Evaluate.
@@ -126,59 +94,22 @@ public class DevShaclRules {
         //   Inferred graph
         //   Modified data graph (updated each round)
 
-        Graph graph = GraphFactory.createGraphMem();
-        GraphUtil.addInto(graph, baseGraph);
-
-        int round = 0;
-        boolean verbose = false;
-        BufferingGraph graph1 = new BufferingGraph(graph);
-        // Accumulator graph
-        Graph accGraph = GraphFactory.createGraphMem();
-        accGraph.getPrefixMapping().setNsPrefixes(graph.getPrefixMapping());
-
-        while(true) {
-            round++;
-
-            int sizeAtRoundStart =  graph1.getAdded().size();
-
-            System.out.println("Round: "+round);
-
-            for (ElementRule rule : rules.getRules() ) {
-                if ( verbose )
-                    System.out.println("Rule: "+rule);
-                // graph1 vs graph
-                RowSetRewindable rowset = evalRule(graph1, rules.getPrologue(), rule).rewindable();
-
-                if ( verbose ) {
-                    RowSetOps.out(rowset);
-                    rowset.reset();
-                }
-
-                BasicPattern bgp = rule.getHead();
-                rowset.forEach(row->{
-                    BasicPattern bgp2 = Substitute.substitute(bgp, row);
-                    bgp2.forEach(t->graph1.add(t));
-                });
-                if ( verbose )
-                    System.out.println("Accumulator: "+graph1.getAdded().size());
-            }
-
-            int sizeAtRoundEnd = graph1.getAdded().size();
-            if ( sizeAtRoundStart == sizeAtRoundEnd )
-                //if ( graph1.getAdded().isEmpty())
-                break;
-
-            // END of round.
-
-            // Record inferred.
-            GraphUtil.addInto(accGraph, graph1.getAdded());
-            // Write to working data graph.
-            graph1.flush();
-
-            if ( verbose )
-                System.out.println();
-            // Whether to write base graph and clear while running.
+        Graph accGraph;
+        if ( false ) {
+            RulesEngine rulesEngine = RulesEngine1.build(rules);
+            accGraph = rulesEngine.infer(baseGraph);
+        } else {
+            boolean verboseExecution = false;
+            RulesEngine1.Evaluation e = ((RulesEngine1)RulesEngine1.build(rules)).eval(baseGraph, verboseExecution);
+            accGraph = e.inferredTriples();
+            System.out.println("## Rounds: "+e.rounds());
         }
+
+        Graph totalGraph = GraphFactory.createGraphMem();
+        totalGraph.getPrefixMapping().setNsPrefixes(baseGraph.getPrefixMapping());
+        GraphUtil.addInto(totalGraph, baseGraph);
+        GraphUtil.addInto(totalGraph, accGraph);
+
         System.out.println();
 
         if ( true ) {
@@ -194,44 +125,87 @@ public class DevShaclRules {
         }
 
         if ( true ) {
-            // Graph by baseGraph + accGraph
-            Graph totalGraph = GraphFactory.createGraphMem();
-            totalGraph.getPrefixMapping().setNsPrefixes(graph.getPrefixMapping());
-            GraphUtil.addInto(totalGraph, baseGraph);
-            GraphUtil.addInto(totalGraph, accGraph);
             System.out.println("## Total graph");
             RDFWriter.source(totalGraph).format(RDFFormat.TURTLE_FLAT).output(System.out);
             System.out.println();
-
-            if ( ! IsoMatcher.isomorphic(totalGraph, graph) ) {
-                System.out.println("**** Total graph not the same as the final graph");
-            }
         }
-
-        System.out.println("## Final graph [rounds="+round+"]");
-        RDFWriter.source(graph).format(RDFFormat.TURTLE_FLAT).output(System.out);
-        System.out.println();
-        System.out.println("------------------");
     }
 
-    private static RowSet evalRule(Graph graph, Prologue prologue, ElementRule rule) {
-        ElementGroup eltGroup = rule.getBody();
-        Query query = asQuery(prologue, eltGroup);
-        BasicPattern bgp = rule.getHead();
-        RowSet rowset = QueryExec.graph(graph).query(query).select();
-        return rowset;
+    private static void enrich(String rulesStr, String dataStr, String subject, String predicate, String object) {
+        Graph baseGraph = RDFParser.fromString(dataStr, Lang.TURTLE).toGraph();
+        baseGraph = new GraphReadOnly(baseGraph);
+        RuleSet rules = ParserShaclRules.parseString(rulesStr);
+        Node s = node(subject);
+        Node p = node(predicate);
+        Node o = node(object);
+        enrich(rules, baseGraph, s, p, o);
     }
 
-    private static Query asQuery(Prologue prologue, ElementGroup eltGroup) {
-        Query query = new Query(prologue);
-        query.setQuerySelectType();
-        query.setQueryResultStar(true);
-        query.setQueryPattern(eltGroup);
-        return query;
+    private static void enrich(RuleSet ruleSet, Graph graph, Node s, Node p, Node o) {
+        RulesEngine rulesEngine = RulesEngine1.build(ruleSet);
+
+        List<Triple> triples = rulesEngine.find(graph, s, p, o).toList();
+
+        Graph answerGraph = GraphFactory.createGraphMem();
+        answerGraph.getPrefixMapping().setNsPrefixes(graph.getPrefixMapping());
+        GraphUtil.add(answerGraph, triples.iterator());
+        System.out.println("=-=-=-=-=-=-=-=");
+        RulesDev.print(answerGraph);
     }
 
-    private static void print(RuleSet ruleSet) {
+    public static class Setup {
 
+        public static String PREFIXES1 = """
+                PREFIX :     <http://example/>
+                """;
+
+        public static String PREFIXES = PREFIXES1+"""
+                PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+                PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+                ##PREFIX sh:   <http://www.w3.org/ns/shacl#>
+                ##PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
+                """;
+
+        // Parser to triples.
+
+        public static String dataStr1 = PREFIXES1+"""
+                :s1 :p 123 .
+                :s2 :p 456 .
+                :s3 :q 'abc'.
+                """;
+
+        public static String ruleSet1 = PREFIXES1+"""
+                RULE { ?s :xq ?o } WHERE { ?s :p ?o FILTER (?o < 400 ) }
+                RULE { ?s :xxxx ?o } WHERE { ?s :xq ?o }
+
+                ## RULE { << ?s :q ?o >> } WHERE { ?s :q ?o }
+                ## IF { ?s :xq ?o } THEN { ?s :xxxx ?o }
+                ## { ?s :xxxx ?o } :- { ?s :xq ?o }
+                """;
+
+        public static String ruleSet2 = PREFIXES+"""
+                RULE { ?x rdfs:subClassOf ?y } WHERE { ?x rdfs:subClassOf ?Z . ?Z rdfs:subClassOf ?y }
+                RULE { ?x rdf:type ?T } WHERE { ?x rdf:type ?Z . ?Z rdfs:subClassOf ?T }
+                """;
+
+        public static String dataStr2 = PREFIXES+"""
+                :T rdfs:subClassOf :C1 .
+                :C1 rdfs:subClassOf :TOP .
+                ##:C2 rdfs:subClassOf :TOP .
+
+                ##:C8 rdfs:subClassOf :C9 .
+                ##:C9 rdfs:subClassOf :C8 .
+
+                :x rdf:type :T .
+                """;
+
+        public static String ruleSet3 = PREFIXES1+"""
+                RULE { ?x :sum ?z } WHERE { ?x :p ?v1 . ?x :q ?v2 . LET ( ?z := ?v1 + ?v2 ) }
+                """;
+
+        public static String dataStr3 = PREFIXES1+"""
+                :x :p 1 .
+                :x :q 2 .
+                """;
     }
-
 }

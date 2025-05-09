@@ -196,15 +196,17 @@ void TriplesTemplate(TripleCollector acc) : { }
 
 // ---- Rule body.
 
-ElementGroup BodyPattern() : { Token t ; }
+ElementGroup BodyPattern() : { Token t ; Element el = null; }
 {
   t = <LBRACE>
   { int beginLine = t.beginLine; int beginColumn = t.beginColumn; t = null; }
   { ElementGroup elg = new ElementGroup() ; }
   BodyPattern1(elg)
+  // And finally ...
+  ( el = Assignment() { elg.addElement(el); } ) *
   <RBRACE>
   { return elg; }
- }
+}
 
 void BodyPattern1(ElementGroup elg) : { Element el = null ; }
 {
@@ -214,7 +216,7 @@ void BodyPattern1(ElementGroup elg) : { Element el = null ; }
      el = BodyPatternSub()
      { elg.addElement(el);}
      ( el = Filter() { elg.addElement(el); }
-       // After a filter, mor of the same.
+       // After a filter, more of the same.
        (BodyPattern1(elg))?
      )?
   )
@@ -250,6 +252,35 @@ Node ReifiedTripleBlockPath(TripleCollector acc) : { Node reifId ; }
   reifId = ReifiedTriple(acc)
   PropertyListPath(reifId, acc)   // Maybe empty
   { return reifId ; }
+}
+
+Element Assignment() : { Element el = null ; }
+{
+//  el = Bind()
+  el = Let()
+  { return el; }
+}
+
+Element Bind() : {  Var v ; Expr expr ; }
+{
+  <BIND>
+  <LPAREN>
+  expr = Expression()
+  <AS>
+  v = Var()
+  <RPAREN>
+  { return new ElementBind(v, expr) ; }
+}
+
+Element Let() : { Var v ; Expr expr ; }
+{
+  <LET>  
+  <LPAREN>
+  v = Var()
+  <ASSIGN> 
+  expr = Expression()
+  <RPAREN>
+  { return new ElementAssign(v, expr) ; }
 }
 
 // // -----
@@ -1798,8 +1829,6 @@ TOKEN: {
   <BOM:    "\uFEFF">
 }
 
-// Main tokens */
-
 TOKEN:
 {
    // Includes # for relative URIs
@@ -1842,6 +1871,11 @@ TOKEN [IGNORE_CASE] :
 
 // Graph pattern operators 
 |  < WHERE:       "where" >
+|  < BIND:        "bind" >
+|  < AS:          "as" >
+
+|  < LET:         "let" >
+|  < ASSIGN:      ":=" >
 
 |  < TRIPLE:      "TRIPLE" >
 |  < IS_TRIPLE:   "isTRIPLE" >

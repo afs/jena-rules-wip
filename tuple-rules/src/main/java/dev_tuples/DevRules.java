@@ -18,27 +18,19 @@
 
 package dev_tuples;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.jena.graph.Graph;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
-import org.apache.jena.sparql.sse.SSE;
 import org.seaborne.rules.*;
 import org.seaborne.rules.exec.MGU;
 import org.seaborne.rules.exec.Renamer;
 import org.seaborne.rules.lang.RulesParser;
-import org.seaborne.rules.store.RelStoreGraph;
-import org.seaborne.rules.store.RelStoreSimple;
 
 public class DevRules {
     // Grammar update/rewrite
@@ -120,159 +112,6 @@ public class DevRules {
         RulesEngine engine = RulesGraphBuilder.create(EngineType.BKD_NON_RECURSIVE_SLD, ruleSet, baseData);
         Stream<Binding> x = engine.solve(queryRel);
         x.forEach(System.out::println);
-    }
-
-    public static void main0(String...a) {
-
-        if ( true )
-        {
-            // Materialize/stream
-            String relStoreStr = "(:s :p :x) (:x :q :o)";
-            RelStore baseData = RulesParser.parseData(relStoreStr);
-            System.out.println("DATA");
-            baseData.stream().forEach(System.out::println);
-
-            RuleSet ruleSet = RulesParser.rules(
-                "(?s1 :r ?o1) <- (?s1 :q ?o1)",
-                "(?s2 :r ?o2) <- (?s2 :p ?o2)",
-                "(:X :P :Z)   <- (?s3 :r ?x) (?x :r ?o3)");
-            String queryStr = "(:X :P :Z)";
-            //String queryStr = "(?a ?b ?c)";
-
-            Rel queryRel = RulesParser.parseAtom(queryStr);
-
-//            //RuleExecCxt.global.TRACE = true ;
-//            execAsQuery(relStoreStr, ruleSetStr, EngineType.FWD_NAIVE, queryStr);
-            //RuleExecCxt.global.TRACE = true ;
-            RulesEngine engine = RulesGraphBuilder.create(EngineType.BKD_NON_RECURSIVE_SLD, ruleSet, baseData);
-            System.out.println("STREAM");
-            engine.stream().forEach(System.out::println);
-            System.out.println("MATERIALIZE");
-            RelStore m = engine.materialize();
-            m.stream().forEach(System.out::println);
-            System.out.println("DONE");
-            //System.exit(0);
-            System.out.println();
-        }
-
-        // execAsGraph
-        if ( true )
-        {
-            Graph baseGraph = SSE.parseGraph("(graph (:s :p :x) (:x :q :o))");
-            //Graph baseGraph = SSE.parseGraph("(graph)");
-            RuleSet ruleSet = RulesParser.rules("(:X :P :Z) <-");
-
-            String queryTripleStr = "(:X :P ?A)";
-            Triple queryTriple = SSE.parseTriple(queryTripleStr);
-            //RuleExecCxt.global.DEBUG = true ;
-            execAsGraph(baseGraph, ruleSet, EngineType.BKD_NON_RECURSIVE_SLD, queryTriple);
-
-            System.out.println("DONE");
-            System.exit(0);
-        }
-
-        System.out.println("** NOTHING **");
-        System.exit(0);
-    }
-
-    // ----
-    // TestRuleGraph.testTwoRulesDirect
-
-
-    private static void testTwoRulesDirect(String pathRuleBody) {
-        RelStore baseData = RulesParser.parseData("(:s :p :x) (:x :q :o)");
-        RuleSet ruleSet = RulesParser.rules("(?s :r ?o) <- (?s :q ?o)",
-                                            "(?s :r ?o) <- (?s :p ?o)",
-                                            "(:X :P :Z) <- "+pathRuleBody);
-        Rel queryRel = RulesParser.parseAtom("(:X :P :Z)");
-        //-- Add to Rules builder?
-        RuleExecCxt.global.TRACE = true ;
-        RulesEngine engine = RulesGraphBuilder.create(EngineType.BKD_NON_RECURSIVE_SLD, ruleSet, baseData);
-        Stream<Binding> results = engine.solve(queryRel);
-
-        List<Binding> resultsList = results.toList();
-        System.out.println(resultsList);
-        results = resultsList.stream();
-
-        //engine.stream(queryRel);
-        List<Rel> x = results.map(b->Sub.substitute(b, queryRel)).toList();
-        //-
-        Rel answer = RulesParser.parseRel("(:X :P :Z)");
-        assertTrue("Rel", x.contains(answer));
-    }
-
-
-    // ----
-    // This is TestRuleSolve
-    private static void testRuleSolve(String dataStr, String rulesStr, String queryStr, String result) {
-        RelStore data = RulesParser.parseData(dataStr);
-        RuleSet ruleSet = RulesParser.parseRuleSet(rulesStr);
-
-        Rel query = RulesParser.parseAtom(queryStr);
-
-        RelStore expected = RulesParser.data(result);
-        RuleExecCxt.global.TRACE = true ;
-        RulesEngine engine = RulesGraphBuilder.create(EngineType.BKD_NON_RECURSIVE_SLD, ruleSet, data);
-        List<Binding> x = engine.solve(query).toList();
-        System.out.println("--");
-        System.out.println(x); // ?x = ?v, not ?v = 1
-
-        RelStoreBuilder storeBuilder = RelStoreSimple.create();
-        x.stream().map(b->Sub.substitute(b, query)).forEach(r->storeBuilder.add(r));
-        RelStore results = storeBuilder.build();
-        System.out.println("--");
-        System.out.println(results); // ?x = ?v, not ?v = 1
-        System.out.println("--");
-
-//        RelStore actual = Rules.eval(data, ruleSet, , query);
-//        System.out.println(actual);
-    }
-
-    // ---- Exec functions
-
-    public static void execAsGraph(Graph baseGraph, RuleSet ruleSet, EngineType type, Triple query) {
-        Graph graph = Rules.create().baseGraph(baseGraph).rules(ruleSet).system(type).build();
-        // Try it out.
-        System.out.println("---");
-        RDFDataMgr.write(System.out, graph, Lang.NT);
-        System.out.println("---");
-        assertTrue("Triple1", graph.contains(query));
-    }
-
-    public static void execAsQuery(String relStoreStr, String ruleSetStr, EngineType type, String queryStr) {
-        RelStore baseData = RulesParser.parseData(relStoreStr);
-        RuleSet ruleSet = RulesParser.parseRuleSet(ruleSetStr);
-        Rel queryRel = RulesParser.parseAtom(queryStr);
-        //RuleExecCxt.global.DEBUG = true ;
-        execAsQuery(baseData, ruleSet, type, queryRel);
-    }
-
-    public static void execAsQuery(Graph baseGraph, RuleSet ruleSet, EngineType type, Rel query) {
-        RelStore baseData = new RelStoreGraph(baseGraph);
-        execAsQuery(baseData, ruleSet, type, query);
-    }
-
-    public static void execAsQuery(RelStore baseData, RuleSet ruleSet, EngineType type, Rel query) {
-        boolean verbose = true;
-        if ( verbose ) {
-            System.out.println("Query: "+query);
-            System.out.println("Data:");
-            System.out.println(RelStore.toMultiLineString(baseData));
-            System.out.println("Rules:");
-            System.out.println(ruleSet.toMultilineString());
-            System.out.println();
-        }
-        RulesEngine engine = RulesGraphBuilder.create(type, ruleSet, baseData);
-
-        Stream<Binding> results = engine.solve(query);
-
-        // Map query to result rels.
-        List<Rel> x = results.map(b->Sub.substitute(b, query)).toList();
-        if ( verbose ) {
-            System.out.println();
-            System.out.println("Result: "+x);
-            System.out.println();
-        }
     }
 
     public static void mainRename() {

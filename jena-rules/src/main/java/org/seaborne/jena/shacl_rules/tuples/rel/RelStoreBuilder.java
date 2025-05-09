@@ -16,33 +16,26 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules;
+package org.seaborne.jena.shacl_rules.tuples.rel;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
-import org.apache.jena.sparql.core.Prologue;
+public interface RelStoreBuilder {
 
-public class RuleSet {
-
-    private List<Rule> rules = new ArrayList<>();
-    private Prologue proglogue;
-
-    public RuleSet(Prologue prologue, List<Rule> rules) {
-        this.proglogue = prologue;
-        this.rules = rules;
+    public default RelStoreBuilder add(RelStore relStore) {
+        relStore.stream().forEach(this::add);
+        return this;
     }
 
-    public Prologue getPrologue() {
-        return proglogue;
+    public default RelStoreBuilder add(Collection<Rel> rels) {
+        rels.forEach(r->this.add(r));
+        return this;
     }
 
-    public List<Rule> getRules() {
-        return rules;
-    }
+    public RelStoreBuilder add(Rel rel);
 
-    @Override
-    public String toString() {
-        return rules.toString();
-    }
+    public RelStoreBuilder delete(Rel rel);
+
+    public RelStore build();
+
 }
