@@ -23,6 +23,9 @@ import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.TripleCollector;
 import org.apache.jena.sparql.syntax.TripleCollectorBGP;
 
+/**
+ * Parser structure.
+ */
 public class ElementRule {
 
     private final BasicPattern head;

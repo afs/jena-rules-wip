@@ -3,4 +3,6 @@
 CP="$(jena CP)"
 CP="target/classes:target/test-classes:$CP"
 
-exec java -cp "$CP" org.seaborne.jena.rules.cmds.rules "$@"
+echo "Unfinished" 1>&2
+
+exec java -cp "$CP" org.seaborne.jena.shacl_rules.cmds.rules "$@"

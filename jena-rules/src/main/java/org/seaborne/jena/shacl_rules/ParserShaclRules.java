@@ -18,25 +18,53 @@
 
 package org.seaborne.jena.shacl_rules;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.List;
 
+import org.apache.jena.atlas.io.IO;
+import org.apache.jena.atlas.io.IOX;
 import org.apache.jena.atlas.logging.Log;
+import org.apache.jena.irix.IRIs;
+import org.apache.jena.irix.IRIxResolver;
 import org.apache.jena.query.QueryException;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.shared.JenaException;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Prologue;
 import org.seaborne.jena.shacl_rules.lang.ElementRule;
 import org.seaborne.jena.shacl_rules.lang.parser.ShaclRulesParser;
 
 public class ParserShaclRules {
 
-    public static RuleSet parse(String string) {
+    public static RuleSet parseString(String string) {
         Reader in = new StringReader(string);
         ShaclRulesParser parser = new ShaclRulesParser(in);
+        return parse(parser, null);
+    }
+
+    public static RuleSet parseFile(String filename, String baseURI) {
+        try (InputStream in = IO.openFileBuffered(filename)) {
+            return parse(in, baseURI);
+        } catch (IOException ex) {
+            throw IOX.exception(ex);
+        }
+    }
+
+    public static RuleSet parse(InputStream in , String baseURI) {
+        ShaclRulesParser parser = new ShaclRulesParser(in);
+        return  parse(parser, baseURI);
+    }
+
+    private static RuleSet parse(ShaclRulesParser parser, String baseURI) {
+
         // XXX Change to prefix map.
-        Prologue prologue = new Prologue();
+        IRIxResolver resolver =
+                (baseURI == null) ? IRIs.stdResolver().clone() : IRIs.resolver(baseURI);
+        Prologue prologue = new Prologue(new PrefixMappingImpl(),resolver);
+
         parser.setPrologue(prologue);
 
         try {
