@@ -21,13 +21,16 @@ package org.seaborne.jena.shacl_rules.lang;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.lang.SPARQLParserBase;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.TripleCollector;
+import org.apache.jena.sparql.syntax.TripleCollectorBGP;
 
 public class ShaclRulesParserBase extends SPARQLParserBase {
 
     private List<ElementRule> rules = new ArrayList<>();
+    private List<Triple> data = new ArrayList<>();
 
     public void startRules() {}
     public void finishRules() {}
@@ -35,10 +38,21 @@ public class ShaclRulesParserBase extends SPARQLParserBase {
     //private ElementRule currentShaclRule;
 
     public void startRule() {}
-    public void finishRule(TripleCollector head, ElementGroup body) {
+    public void finishRule(TripleCollector head, ElementGroup body, int line, int column) {
         ElementRule rule = new ElementRule(head, body);
         rules.add(rule);
     }
 
     public List<ElementRule> getRules() { return rules; }
+
+    public void startData() {}
+    public void finishData(TripleCollectorBGP triples, int line, int column) {
+        triples.getBGP().getList().forEach(triple->{
+            if ( ! triple.isConcrete() )
+                throw new ShaclParseException("Triple conaints variables", line, column);
+            data.add(triple);
+        });
+    }
+
+    public List<Triple> getData() { return data; }
 }

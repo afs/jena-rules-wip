@@ -71,7 +71,7 @@ void RulesUnit(): { }
   { startRules() ; }
   (
      Prologue()
-     Rule()
+     ( Rule() | Data() )
   )*
   <EOF>
   { finishRules() ; }
@@ -95,36 +95,45 @@ void Rule() : {  TripleCollector acc = new TripleCollectorBGP() ; ElementGroup b
 //    { finishRule(acc, body); }
 }
 
-void Rule1() : { TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ; }
+void Rule1() : { TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ;  Token t; }
 {
    { startRule(); }
-   <RULE>
+   t = <RULE>
    acc = TriplesTemplateBlock()
    <WHERE>
    body = BodyPattern()
-   { finishRule(acc, body); }
+   { finishRule(acc, body, t.beginLine, t.beginColumn); }
 }
 
-void Rule2() : { TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ; }
+void Rule2() : { TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ; Token t; }
 {
    { startRule(); }
-   <IF>
+   t = <IF>
    body = BodyPattern()
    <THEN>
    acc = TriplesTemplateBlock()
-   { finishRule(acc, body); }
+   { finishRule(acc, body, t.beginLine, t.beginColumn); }
 }
 
-void Rule3() : { TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ; }
+void Rule3() : { TripleCollector acc = new TripleCollectorBGP() ; ElementGroup body = null ; Token t; }
 {
    { startRule(); }
    acc = TriplesTemplateBlock()
-   <RULE_INFER>
+   t = <RULE_INFER>
    body = BodyPattern()
-   { finishRule(acc, body); }
+   { finishRule(acc, body, t.beginLine, t.beginColumn); }
 }
 
-TripleCollector TriplesTemplateBlock() : { TripleCollector acc = new TripleCollectorBGP(); }
+void Data() : { TripleCollectorBGP acc = new TripleCollectorBGP(); Token t; }
+{
+    t = <DATA>
+    { startData(); }
+    // Data only
+    acc = TriplesTemplateBlock()
+    { finishData(acc, t.beginLine, t.beginColumn); }
+}
+
+TripleCollectorBGP TriplesTemplateBlock() : { TripleCollectorBGP acc = new TripleCollectorBGP(); }
 {
    <LBRACE>
    TriplesTemplate(acc)
@@ -1860,6 +1869,7 @@ TOKEN [IGNORE_CASE] :
    < RULE:         "rule" >
 |  < THEN:         "then" >
 |  < RULE_INFER:   ":-" >
+|  < DATA:         "data" >
 }
 
 TOKEN [IGNORE_CASE] :

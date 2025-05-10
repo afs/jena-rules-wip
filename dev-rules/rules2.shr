@@ -4,6 +4,9 @@ PREFIX ns: <http://example/ns#>
 PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
 
+DATA {
+  :x :p 1;
+     :q 2 .
+}
 
-## ( ?a rdf:type ?y) <-  (?a rdf:type ?x) , (?x rdfs:subClassOf ?y) .
-## (?a rdfs:subClassOf ?c) <- (?a rdfs:subClassOf ?b), (?b rdfs:subClassOf ?c)
+RULE { ?x :sum ?z } WHERE { ?x :p ?v1 . ?x :q ?v2 . LET ( ?z := ?v1 + ?v2 ) }

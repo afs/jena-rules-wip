@@ -1,0 +1,14 @@
+PREFIX : <http://example/>
+PREFIX ns: <http://example/ns#>
+
+PREFIX rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+
+RULE { ?a rdf:type ?y } WHERE { ?a rdf:type ?x . ?x rdfs:subClassOf ?y }
+
+RULE { ?a rdfs:subClassOf ?c } WHERE { ?a rdfs:subClassOf ?b . ?b rdfs:subClassOf ?c }
+
+RULE { ?a rdfs:subPropertyOf ?c } WHERE { ?a rdfs:subPropertyOf ?b . ?b rdfs:subPropertyOf ?c }
+
+RULE { ?a rdf:type ?y } WHERE { ?a ?p ?o . ?p rdfs:domain ?y }
+RULE { ?a rdf:type ?y } WHERE { ?s ?p ?a . ?p rdfs:range ?y }

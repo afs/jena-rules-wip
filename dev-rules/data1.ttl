@@ -7,7 +7,12 @@ PREFIX xsd:     <http://www.w3.org/2001/XMLSchema#>
 
 :s rdf:type :T .
 
+:p rdfs:domain :T1 .
+:p rdfs:range :T2 .
+:s :p :o .
 
-:T rdfs:subClassOf :S1 .
-:S1 rdfs:subClassOf :S2 .
-:S2 rdfs:subClassOf :S3 .
+:T1 rdfs:subClassOf :S1 .
+
+## :T rdfs:subClassOf :S1 .
+## :S1 rdfs:subClassOf :S2 .
+## :S2 rdfs:subClassOf :S3 .

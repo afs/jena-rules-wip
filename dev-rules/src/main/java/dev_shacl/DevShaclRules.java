@@ -47,6 +47,22 @@ public class DevShaclRules {
     static { JenaSystem.init(); LogCtl.setLogging(); }
 
     public static void main(String[] args) {
+        if ( false ) {
+            String ruleStr = """
+                    PREFIX :     <http://example/>
+                    DATA { :x :p 1 }
+                    DATA { :x :q 2 }
+                    RULE { ?x :sum ?z } WHERE { ?x :p ?v1 . ?x :q ?v2 . LET ( ?z := ?v1 + ?v2 ) }
+                    """;
+            RuleSet rules = ParserShaclRules.parseString(ruleStr);
+            RulesDev.print(rules.getData());
+            System.out.println("## DONE");
+
+            ShaclRulesWriter.print(rules);
+
+            System.exit(0);
+        }
+
         String rulesStr = ruleSet1;
         String dataStr = dataStr1;
 

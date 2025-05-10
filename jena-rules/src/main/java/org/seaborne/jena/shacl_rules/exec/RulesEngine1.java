@@ -38,10 +38,12 @@ import org.apache.jena.system.buffering.BufferingGraph;
 import org.seaborne.jena.shacl_rules.*;
 
 public class RulesEngine1 implements RulesEngine {
+    public static boolean verbose = false;
+
     interface Factory { RulesEngine1 build(/*RelStore data, */RuleSet ruleSet); }
 
     public static RulesEngine build(RuleSet ruleSet) {
-            return new RulesEngine1(ruleSet);
+        return new RulesEngine1(ruleSet);
     }
 
     private final RuleSet ruleSet;
@@ -56,8 +58,6 @@ public class RulesEngine1 implements RulesEngine {
     public EngineType engineType() {
         return EngineType.FWD_NAIVE;
     }
-
-    public static boolean verbose = false;
 
     // This function calculates by all methods (accumulator graph (new triples), updates base graph (maybe copy-isolated), retain buffering graph)
     // Specialise later.
@@ -81,7 +81,6 @@ public class RulesEngine1 implements RulesEngine {
 
     public record Evaluation(Graph originalGraph, Graph inferredTriples, Graph outputGraph, int rounds) {}
 
-
     // Algorithm for development - captures more than is needed.
 
     public Evaluation eval(Graph baseGraph) {
@@ -102,12 +101,25 @@ public class RulesEngine1 implements RulesEngine {
 
         // Accumulator graph. New triples.
         Graph accGraph = GraphFactory.createGraphMem();
+
         accGraph.getPrefixMapping().setNsPrefixes(dataGraph.getPrefixMapping());
 
         // True - write back each round.
         // False - accumulate new triples.
         boolean flushAfterEachRound = true;
 
+        // == Data.
+        Graph data = ruleSet.getData() ;
+        if ( data != null ) {
+            GraphUtil.addInto(graph1, data);
+            GraphUtil.addInto(graph1, data);
+            if ( flushAfterEachRound ) {
+                GraphUtil.addInto(accGraph, graph1.getAdded());
+                graph1.flush();
+            }
+        }
+
+        // == Rules
         while(true) {
             round++;
             int sizeAtRoundStart =  graph1.getAdded().size();
@@ -136,9 +148,11 @@ public class RulesEngine1 implements RulesEngine {
             }
 
             int sizeAtRoundEnd = graph1.getAdded().size();
-            if ( sizeAtRoundStart == sizeAtRoundEnd )
-                //if ( graph1.getAdded().isEmpty())
+            if ( sizeAtRoundStart == sizeAtRoundEnd ) {
+                // No new triples this round.
+                --round;
                 break;
+            }
 
             // END of round.
 

@@ -38,6 +38,12 @@ public class NotesShaclRules {
 
     // Grammar
     // [x] TriplesTemplateBlock -- "{" TriplesTemplate(acc) "}"
+    // [ ] Reverse the name of ParserShaclRules and ShaclRulesParser
+    //     or ShaclRules.parser
 
+
+    // [ ] IMPORT
+    // [x] DATA
+    // [ ] TRANSITIVE, SYMMETRIC, INVERSE_OF
 
 }

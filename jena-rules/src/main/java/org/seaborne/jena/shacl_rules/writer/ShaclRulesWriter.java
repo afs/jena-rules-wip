@@ -110,6 +110,8 @@ public class ShaclRulesWriter {
         if ( ( base != null || !prefixMap.isEmpty() ) && !ruleSet.isEmpty() )
             out.println();
 
+        writeData(ruleSet);
+
         List<Rule> rules = ruleSet.getRules();
         boolean first = true;
 
@@ -125,33 +127,54 @@ public class ShaclRulesWriter {
         }
     }
 
+    private void writeData(RuleSet ruleSet) {
+        List<Triple> data = ruleSet.getDataTriples();
+        if ( data.isEmpty() )
+            return;
+
+        out.print("DATA {");
+        if ( style == Style.Flat || data.size() == 1 ) {
+            data.forEach(triple->{
+                out.print(" ");
+                writeTriple(triple);
+            });
+            out.println(" }");
+            return;
+        }
+        out.println();
+        out.incIndent();
+        data.forEach(triple->{
+            writeTriple(triple);
+            out.println();
+        });
+        out.decIndent();
+        out.println("}");
+        out.println();
+    }
+
     private void writeRule(Rule rule) {
-        int indentLevel = out.getAbsoluteIndent();
         out.print("RULE ");
         writeHead(rule);
-        if ( style == Style.MultiLine ) {
+        if ( style == Style.MultiLine )
             out.println();
-            out.print("WHERE ");
-            out.setAbsoluteIndent(out.getCol());
-        } else {
-            out.print(" WHERE ");
-        }
-
+        else
+            out.print(" ");
+        out.print("WHERE ");
         writeBody(rule);
-        out.setAbsoluteIndent(indentLevel);
     }
 
     private void writeHead(Rule rule) {
         BasicPattern head = rule.getHead();
         out.print("{");
         head.forEach(triple -> {
+            out.print(" ");
             writeTriple(triple);
         });
         out.print(" }");
     }
 
+    // Space then triple.
     private void writeTriple(Triple triple) {
-        out.print(" ");
         nodeFormatter.format(out, triple.getSubject());
         out.print(" ");
         nodeFormatter.format(out, triple.getPredicate());
@@ -161,21 +184,44 @@ public class ShaclRulesWriter {
     }
 
     private void writeBody(Rule rule) {
+        // The element block in indented. Later ...
+        int indent = 0 ;
 
-        if ( style == Style.Flat )
-            out.setFlatMode(true);
-        try {
-            IndentedLineBuffer outx = new IndentedLineBuffer();
-            FormatterElement.format(outx, sCxt, rule.getBody());
-            String x = outx.asString();
-//        var body = rule.getBody();
-//        String x = body.toString();
-//            x = x.replace("\n", " ");
-            if ( style == Style.Flat )
-                x = x.replaceAll("  +", " ");
-            out.print(x);
-        } finally { out.setFlatMode(false); }
+        switch(style) {
+            case Flat -> {
+                out.setFlatMode(true);
+                out.print("{");
+            }
+            case MultiLine -> {
+                out.print("{");
+                out.println();
+                //out.incIndent(indent);
+            }
+        }
+        // Without braces.
+        IndentedLineBuffer outx = new IndentedLineBuffer();
+        FormatterElement.format(outx, sCxt, rule.getBody());
+        String x = outx.asString();
+        // Remove outer {}s. Put back leading space.
+        x = " "+x.substring(1, x.length()-1);
+        if ( style == Style.Flat ) {
+            //x = x.replace("\n", " ");
+            x = x.replaceAll("  +", " ");
+        }
+
+        out.print(x);
+
+        switch(style) {
+            case Flat -> {
+                out.print(" }");
+                out.setFlatMode(false);
+            }
+            case MultiLine ->{
+                out.decIndent(indent);
+                out.println("}");
+            }
+        }
+        //Blank line
         out.println();
-
     }
 }

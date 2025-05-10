@@ -18,19 +18,31 @@
 
 package org.seaborne.jena.shacl_rules;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.GraphUtil;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.sparql.core.Prologue;
+import org.apache.jena.sparql.graph.GraphFactory;
 
 public class RuleSet {
 
-    private List<Rule> rules = new ArrayList<>();
-    private Prologue proglogue;
+    private final List<Rule> rules;
+    private final Prologue proglogue;
+    private final List<Triple> dataTriples;
+    private final Graph data;
 
-    public RuleSet(Prologue prologue, List<Rule> rules) {
+    public RuleSet(Prologue prologue, List<Rule> rules, List<Triple> dataTriples) {
         this.proglogue = prologue;
         this.rules = rules;
+        this.dataTriples = dataTriples;
+        Graph graph = null;
+        if ( dataTriples != null ) {
+            graph = GraphFactory.createDefaultGraph();
+            GraphUtil.add(graph, dataTriples);
+        }
+        this.data = graph;
     }
 
     public Prologue getPrologue() {
@@ -39,6 +51,14 @@ public class RuleSet {
 
     public List<Rule> getRules() {
         return rules;
+    }
+
+    public Graph getData() {
+        return data;
+    }
+
+    public List<Triple> getDataTriples() {
+        return dataTriples;
     }
 
     @Override
