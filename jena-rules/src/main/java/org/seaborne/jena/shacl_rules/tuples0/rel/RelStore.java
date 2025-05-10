@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules.tuples.rel;
+package org.seaborne.jena.shacl_rules.tuples0.rel;
 
 import java.io.PrintStream;
 import java.util.Iterator;

@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules.tuples.store;
+package org.seaborne.jena.shacl_rules.tuples0.store;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,9 +28,9 @@ import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.jena.atlas.iterator.Iter;
-import org.seaborne.jena.shacl_rules.tuples.rel.Rel;
-import org.seaborne.jena.shacl_rules.tuples.rel.RelStore;
-import org.seaborne.jena.shacl_rules.tuples.rel.RelStoreBuilder;
+import org.seaborne.jena.shacl_rules.tuples0.rel.Rel;
+import org.seaborne.jena.shacl_rules.tuples0.rel.RelStore;
+import org.seaborne.jena.shacl_rules.tuples0.rel.RelStoreBuilder;
 
 /**
  * Simple {@link RelStore}, uses a MultiValuedMap of atom name to index.

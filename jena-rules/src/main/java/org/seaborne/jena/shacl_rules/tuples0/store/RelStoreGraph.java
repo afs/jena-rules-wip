@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules.tuples.store;
+package org.seaborne.jena.shacl_rules.tuples0.store;
 
 import java.util.Iterator;
 import java.util.stream.Stream;
@@ -25,7 +25,7 @@ import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.util.iterator.ExtendedIterator;
-import org.seaborne.jena.shacl_rules.tuples.rel.Rel;
+import org.seaborne.jena.shacl_rules.tuples0.rel.Rel;
 
 /** A read-only {RelStore} of RDF Triples */
 public class RelStoreGraph extends RelStoreBase {

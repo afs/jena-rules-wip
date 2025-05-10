@@ -16,12 +16,12 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules.tuples.rel;
+package org.seaborne.jena.shacl_rules.tuples0.rel;
 
 import org.apache.jena.graph.Graph;
-import org.seaborne.jena.shacl_rules.tuples.store.RelStore2;
-import org.seaborne.jena.shacl_rules.tuples.store.RelStoreGraph;
-import org.seaborne.jena.shacl_rules.tuples.store.RelStoreSimple;
+import org.seaborne.jena.shacl_rules.tuples0.store.RelStore2;
+import org.seaborne.jena.shacl_rules.tuples0.store.RelStoreGraph;
+import org.seaborne.jena.shacl_rules.tuples0.store.RelStoreSimple;
 
 public class RelStoreFactory {
     private static RelStore EMPTY = RelStoreSimple.create().build();

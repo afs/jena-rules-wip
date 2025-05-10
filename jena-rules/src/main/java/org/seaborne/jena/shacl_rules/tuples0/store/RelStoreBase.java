@@ -16,15 +16,15 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules.tuples.store;
+package org.seaborne.jena.shacl_rules.tuples0.store;
 
 import java.util.StringJoiner;
 import java.util.stream.Stream;
 
 import org.apache.jena.atlas.lib.tuple.Tuple;
 import org.apache.jena.graph.Node;
-import org.seaborne.jena.shacl_rules.tuples.rel.Rel;
-import org.seaborne.jena.shacl_rules.tuples.rel.RelStore;
+import org.seaborne.jena.shacl_rules.tuples0.rel.Rel;
+import org.seaborne.jena.shacl_rules.tuples0.rel.RelStore;
 
 /**
  * Framework for writing a {@link RelStore}. Provide as many of the operations by building
