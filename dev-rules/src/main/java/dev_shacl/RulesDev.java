@@ -22,18 +22,14 @@ import org.apache.jena.atlas.io.AWriter;
 import org.apache.jena.atlas.io.IO;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.RDFWriter;
 import org.apache.jena.riot.out.NodeFormatter;
 import org.apache.jena.riot.out.NodeFormatterTTL;
-import org.apache.jena.riot.system.PrefixMapFactory;
+import org.apache.jena.riot.system.Prefixes;
 import org.apache.jena.sparql.sse.SSE;
-import org.seaborne.jena.shacl_rules.RuleSet;
 
 public class RulesDev {
-    public static void print(RuleSet ruleSet) {
-        ruleSet.getRules().forEach(r->{
-            System.out.println(r);
-        });
-    }
 
     public static Node node(String x) {
         return switch(x) {
@@ -43,11 +39,19 @@ public class RulesDev {
     }
 
     /**
-     * Print a triple in flat, abbreviated triples, but don't print the prefix map
+     * Write a graph in flat Turtle.
+     */
+    public static void write(Graph graph) {
+        RDFWriter.source(graph).format(RDFFormat.TURTLE_FLAT).output(System.out);
+    }
+
+    /**
+     * Print a graph in flat, abbreviated triples, but don't print the prefix map
      * Development use.
      */
     public static void print(Graph graph) {
-        NodeFormatter nt = new NodeFormatterTTL(null, PrefixMapFactory.create(graph.getPrefixMapping()));
+        NodeFormatter nt = new NodeFormatterTTL(null, Prefixes.adapt(graph));
+
         AWriter out = IO.wrapUTF8(System.out);
         graph.find().forEach(t->{
             nt.format(out, t.getSubject());

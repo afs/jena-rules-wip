@@ -22,6 +22,8 @@ import static dev_shacl.DevShaclRules.Setup.dataStr1;
 import static dev_shacl.DevShaclRules.Setup.ruleSet1;
 import static dev_shacl.RulesDev.node;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import org.apache.jena.atlas.logging.LogCtl;
@@ -30,9 +32,7 @@ import org.apache.jena.graph.GraphUtil;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFParser;
-import org.apache.jena.riot.RDFWriter;
 import org.apache.jena.sparql.graph.GraphFactory;
 import org.apache.jena.sparql.graph.GraphReadOnly;
 import org.apache.jena.sys.JenaSystem;
@@ -40,34 +40,33 @@ import org.seaborne.jena.shacl_rules.ParserShaclRules;
 import org.seaborne.jena.shacl_rules.RuleSet;
 import org.seaborne.jena.shacl_rules.RulesEngine;
 import org.seaborne.jena.shacl_rules.exec.RulesEngine1;
+import org.seaborne.jena.shacl_rules.writer.ShaclRulesWriter;
 
 public class DevShaclRules {
 
     static { JenaSystem.init(); LogCtl.setLogging(); }
 
-    // Architecture
-    //  Own datastructure for "template-head", body : triples block, filters[, bind]
-
-    // Execution : No rule checking.
-
-
-    // Triple generation and parse triples.
-    // Split project? Same repo
-    //   Common POM parent?
-    // Intermediate - GraphRelStore = graph and relstore
-
-    // "Rule" class - not parser.
-
-    // Grammar
-    // [x] TriplesTemplateBlock -- "{" TriplesTemplate(acc) "}"
-
     public static void main(String[] args) {
         String rulesStr = ruleSet1;
         String dataStr = dataStr1;
 
+        if ( false ) {
+            RuleSet rules = ParserShaclRules.parseString(rulesStr);
+            ShaclRulesWriter.printBasic(rules);
+            System.out.println("--------");
+
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            ShaclRulesWriter.print(bout, rules, false);
+            ByteArrayInputStream bin = new ByteArrayInputStream(bout.toByteArray());
+
+            RuleSet rules2 = ParserShaclRules.parse(bin, null);
+            ShaclRulesWriter.print(rules2);
+            System.exit(0);
+        }
+
         if ( true ) {
             RuleSet rules = ParserShaclRules.parseString(rulesStr);
-            RulesDev.print(rules);
+            ShaclRulesWriter.print(rules, true);
             System.out.println();
         }
 
@@ -114,19 +113,19 @@ public class DevShaclRules {
 
         if ( true ) {
             System.out.println("## Data graph");
-            RDFWriter.source(baseGraph).format(RDFFormat.TURTLE_FLAT).output(System.out);
+            RulesDev.write(baseGraph);
             System.out.println();
         }
 
         if ( true ) {
             System.out.println("## Inferred:");
-            RDFWriter.source(accGraph).format(RDFFormat.TURTLE_FLAT).output(System.out);
+            RulesDev.write(accGraph);
             System.out.println();
         }
 
         if ( true ) {
             System.out.println("## Total graph");
-            RDFWriter.source(totalGraph).format(RDFFormat.TURTLE_FLAT).output(System.out);
+            RulesDev.write(totalGraph);
             System.out.println();
         }
     }

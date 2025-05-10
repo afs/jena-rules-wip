@@ -16,37 +16,28 @@
  * limitations under the License.
  */
 
-package org.seaborne.jena.shacl_rules;
+package dev_shacl;
 
-import java.util.ArrayList;
-import java.util.List;
+public class NotesShaclRules {
+    // Architecture
+    //  Own datastructure for "template-head", body : triples block, filters[, bind]
 
-import org.apache.jena.sparql.core.Prologue;
+    // Execution : No rule checking.
 
-public class RuleSet {
+    // Rule parsing - use PrefixMap not Prologue
 
-    private List<Rule> rules = new ArrayList<>();
-    private Prologue proglogue;
+    // [x] Writer
+    // [ ] Improve writer.
 
-    public RuleSet(Prologue prologue, List<Rule> rules) {
-        this.proglogue = prologue;
-        this.rules = rules;
-    }
+    // Triple generation and parse triples.
+    // Split project? Same repo
+    //   Common POM parent?
+    // Intermediate - GraphRelStore = graph and relstore
 
-    public Prologue getPrologue() {
-        return proglogue;
-    }
+    // "Rule" class - not parser.
 
-    public List<Rule> getRules() {
-        return rules;
-    }
+    // Grammar
+    // [x] TriplesTemplateBlock -- "{" TriplesTemplate(acc) "}"
 
-    @Override
-    public String toString() {
-        return rules.toString();
-    }
 
-    public boolean isEmpty() {
-        return rules.isEmpty();
-    }
 }
